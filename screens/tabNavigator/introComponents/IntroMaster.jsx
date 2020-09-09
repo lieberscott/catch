@@ -119,15 +119,15 @@ const IntroMaster = ({ navigation }) => {
       gender,
       photo: photoUrl,
       sports: {
-        baseball: {
+        Baseball: {
           interested: baseball,
           skill_level: baseballText
         },
-        football: {
+        Football: {
           interested: football,
           skill_level: footballText
         },
-        frisbee: {
+        Frisbee: {
           interested: frisbee,
           skill_level: frisbeeText
         }
@@ -194,7 +194,7 @@ const IntroMaster = ({ navigation }) => {
 
         const downloadUrl = await uploadImage(blob, name);
         console.log("downloadUrl in IntroMaster second? : ", downloadUrl);
-        setPhotoUrl(manipResult.uri);
+        setPhotoUrl(downloadUrl);
         setPhoto(true);
       }
     }

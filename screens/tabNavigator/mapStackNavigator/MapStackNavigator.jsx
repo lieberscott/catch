@@ -10,7 +10,7 @@ const Stack = createStackNavigator();
 export default function MapStackNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Active Users" component={ Map } />
+      <Stack.Screen name="Map" component={ Map } />
       {/* <Stack.Screen name="UsersList" component={UsersList} />
       <Stack.Screen name="ProfileFull" component={ProfileFull} /> */}
     </Stack.Navigator>

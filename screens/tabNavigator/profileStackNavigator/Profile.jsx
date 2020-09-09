@@ -1,13 +1,14 @@
 // if drag touch starts in bottom half of card, angle should tilt upward instead of downward
-import React, { useState, useRef, useEffect } from 'react';
-import { Alert, Animated, Button, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { Fragment, useState, useRef, useEffect, useContext, InputAccessoryView } from 'react';
+import { Alert, Animated, Button, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
-// import { useNavigation } from '@react-navigation/native';
 
-// import useInterval from '../customHooks/useInterval';
+import { updateUser, uploadImage, signOut } from '../../../firebase.js';
+import { addPhoto } from '../../../utils.js';
 
-// import ProfileScrollViewPage from './ProfileScrollViewPage';
-// import ProgressBar from '../shared/ProgressBar';
+import { StoreContext } from '../../../contexts/storeContext.js';
+const mHorizontal = 20; // body margin
+const turquoise = "#4ECDC4";
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -17,22 +18,15 @@ const fullWidth = width * 4; // ScrollView width: width * number of pages
 
 const Profile = (props) => {
 
-  // const { user } = props;
-  const user = {
-    _id: "abc123",
-    device_token: "deviceToken",
-    images: [],
-    name: "Scott",
-    date_of_birth: new Date(),
-    city: "Chicago",
-    school: "Syracuse",
-    occupation: "Unemployed",
-    employer: "None"
-  }
+  const store = useContext(StoreContext);
+  const accessoryViewID = "accessoryViewID";
+
+  const user = store.user;
   const userId = user._id;
   const deviceToken = user.device_token;
-  const userPhoto = user.images.length ? user.images[0].url : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
+  const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
   const userName = user.name;
+
   {/* Get age */}
   const today = new Date();
   const userDOB = new Date(user.date_of_birth);
@@ -51,102 +45,62 @@ const Profile = (props) => {
   // const navigation = useNavigation();
 
   const [page, setPage] = useState(0);
+  const [bottomView, setBottomView] = useState(false);
+  const [scrollPos, setScrollPos] = useState(0);
   const scrollViewRef = useRef();
 
   const [settingsButton, setSettingsButton] = useState(new Animated.Value(1));
 
-  // Need to setInterval to null (disable interval) if not on page1, or else it'll interfere with panResponder
-  // useInterval(() => {
-  //   let p = (page + 1) % 4;
-  //   console.log("page : ", page);
-  //   console.log("p : ", p);
-  //   let xOff = (p * width);
-  //   console.log("xOff : ", xOff);
-  //   scrollViewRef.current.scrollTo({ x: xOff, animated: true });
-  //   setPage(p);
-  // }, props.page1 ? 3500 : null);
+  useEffect(() => {
+    if (bottomView) {
+      scrollViewRef.current.scrollTo({ y: scrollPos, animated: true });
+    }
+  });
 
-  const settingsPress = () => {
-    Animated.timing(settingsButton, {
-      toValue: 1.3,
-      duration: 250,
-      useNativeDriver: true
-    }).start(() => {
-      Animated.timing(settingsButton, {
-        toValue: 1,
-        duration: 250,
-        useNativeDriver: true
-      }).start();
-    });
-  }
-
-  const settingsRelease = () => {
-    console.log("settings release")
-    // Animated.timing(settingsButton, {
-    //   toValue: 1,
-    //   duration: 250,
-    //   useNativeDriver: true
-    // }).start(() => navigation.navigate("Settings", { user, userId, deviceToken, width }));
-  }
-
-  const availableTonightPopup = () => {
-    Alert.alert("Make yourself Available Tonight?", "You will be featured on the Available Tonight page for others to send you offers to take you out tonight.", [
-      { text: "Yes", onPress: () => availableTonight()},
-      { text: "Cancel" }
-    ]);
-  }
-
-  const availableTonight = () => {
-
-    // get hours offset and days for new Date object to put into Mongo so it expires at the right time
-    const hours_local = new Date().getHours(); // 10, 11, 12, 13, etc.
-    const hours_utc = new Date().getUTCHours();
-    const hours = hours_utc - hours_local;
-    const day = new Date().getDate() + 1;
-    const year = new Date().getFullYear();
-    const month = new Date().getMonth();
-    fetch("https://wise-pond-cricket.glitch.me/set_available_tonight", {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body: JSON.stringify({ id: userId, device_token: deviceToken, orientation, loc, year, month, day, hours })
-    })
-    .then((res) => res.json())
-    .then((json) => {
-      if (json.error === 2) {
-        Alert.alert("", "You do not have any Available Tonight tokens left. Purcahse some in the store to continue.");
+  const choosePhoto = async () => {
+    let arr;
+    let downloadUrl;
+    let result;
+    try {
+      arr = await addPhoto(userId);
+      if (arr) { // arr == [blob, name] || false
+        downloadUrl = await uploadImage(arr[0], arr[1], user.photo); // user.photo == prevUrl
       }
-      else if (json.error) {
-        Alert.alert("", "There was an error. Please try again.");
+      if (downloadUrl) {
+        const update = { photo: downloadUrl }
+        result = await updateUser(update, userId)
       }
-      else {
-        Alert.alert("", "You will be featured on the Available Tonight page until midnight tonight. Now sit back and wait for the offers to roll in.");
+      if (result) {
+        // update locally
+        store.setUser(prevState => ({...prevState, photo: downloadUrl}))
       }
-    })
-    .catch((err) => {
-      console.log("err : ", err);
-      
-    })
+    }
+    catch (e) {
+      console.log("choose Photo error : ", e);
+      Alert.alert("", "There was an error. Please try again.");
+    }
   }
 
-  const signout = () => {
-    firebase.auth().signOut();
+  const updateProfile = async (update, num) => {
+    const result = await updateUser(update, userId);
+    if (result) {
+      // update locally
+      const key = Object.keys(update);
+      store.setUser(prevState => ({...prevState, [key]: update[key] }))
+    }
+    if (num > 2) {
+      props.navigation.pop();
+    }
   }
-
-
+  
   return (
-    <View style={ styles.body }>
-      <TouchableOpacity onPress={ signout } style={ styles.availableTonightWrapper }>
-        <MaterialIcons name="add-circle-outline" color="gray" size={ 29 } style={ styles.imageIcon } />
-        <Text style={ styles.availableTonightText }>Sign Out</Text>
-      </TouchableOpacity>
+    <Fragment>
+    <ScrollView style={ styles.body }>
       <View style={ styles.top }>
         <View style={ styles.imageWrapper }>
           <Image source={{ uri: userPhoto }} style={ styles.image } />
-          <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => console.log("edit") }>
-            <MaterialIcons name="edit" color="gray" size={ 33 } style={ styles.imageIcon } />
+          <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
+            <MaterialIcons name="add-a-photo" color="gray" size={ 33 } style={ styles.imageIcon } />
           </AnimatedTouchableOpacity>
         </View>
         <Text style={ styles.nameAndAge }>{ userName }, { userAge }</Text>
@@ -156,51 +110,75 @@ const Profile = (props) => {
           <MaterialIcons name="location-on" color="red" onPress={ () => console.log("settings") } size={ 25 } style={ styles.imageIcon } />
           <Text style={ styles.location }>{ user.location }</Text>
         </View>
-        <View style={ styles.icons }>
-          <View style={ styles.buttonWrapper }>
-            <AnimatedTouchableOpacity activeOpacity={ 1 } onPressIn={ settingsPress } onPressOut={ settingsRelease } style={[ styles.button, { transform: [{ scale: settingsButton }]} ] }>
-              <MaterialIcons name="settings" color="gray" size={ 33 } style={ styles.settings } />
-            </AnimatedTouchableOpacity>
-            <Text style={ styles.subhead }>Settings</Text>
+      </View>
+      <View style={ styles.oneSection}>
+        <View style={ styles.buttonWrapper }>
+          <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
+            <Text>Profile Text</Text>
+            <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+          </TouchableOpacity>
+        </View>
+        </View>
+        <View style={ styles.oneSection}>
+          <View style={ styles.headerWrapper }>
+            <MaterialIcons name="person-outline" size={ 23 } color="gray" />
+            <Text style={ styles.header }>Personal</Text>
           </View>
-          <View style={ styles.buttonMediaWrapper }>
-            <View style={ styles.button }>
-              <MaterialIcons name="add-a-photo" color="red" onPress={ () => console.log("photo") } size={ 33 } style={ styles.media } />
-            </View>
-            <Text style={ styles.subhead }>Add Media</Text>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Name", { name: user.name, updateProfile })}>
+              <Text>{ user.occupation || "Name" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
-            <View style={ styles.button }>
-              <MaterialIcons name="edit" color="gray" onPress={ () => console.log("edit") } size={ 33 } style={ styles.edit } />
-            </View>
-            <Text style={ styles.subhead }>Edit</Text>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : user.date_of_birth, updateProfile })}>
+              <Text>{ user.company || "Age" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Gender", { gender: user.gender, updateProfile })}>
+              <Text>{ user.school || "Gender" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
           </View>
         </View>
-      </View>
-      <View style={ styles.scrollView }>
-        <ScrollView
-          ref={ scrollViewRef }
-          pagingEnabled
-          disableIntervalMomentum={ true }
-          horizontal
-          scrollEventThrottle={16}
-          scrollEnabled={ true }
-          showsHorizontalScrollIndicator={ false }
-          pinchGestureEnabled={ false }
-          overflow="scroll"
-          onScroll={ (evt, gestureState) => {
-            const p = Math.floor(evt.nativeEvent.contentOffset.x / width);
-            setPage(p);
-          }}
-        >
-          <View />
-
-        </ScrollView>
-        <TouchableOpacity style={ styles.setExtra } onPress={ () => console.log("get set extra")}>
-          <Text style={ styles.setExtraText }>Get Set Extra</Text>
+        <View style={ styles.oneSection}>
+          <View style={ styles.headerWrapper }>
+            <MaterialIcons name="card-travel" size={ 23 } color="gray" />
+            <Text style={ styles.header }>Basic Info</Text>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Sports", { sports: user.sports, updateProfile })}>
+              <Text>{ user.occupation || "Sports" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Notifications", { notifications: user.getsNotifications, updateProfile })}>
+              <Text>{ user.company || "Notifications" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={ styles.oneSection}>
+          <View style={ styles.headerWrapper }>
+            <MaterialIcons name="person-outline" size={ 23 } color="gray" />
+            <Text style={ styles.header }>Location</Text>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Map", { coordinates: user.coordinates, updateProfile })}>
+              <Text>{ user.gender_text || "Map" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity onPress={ () => signOut() } style={ styles.availableTonightWrapper }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.availableTonightText }>Sign Out</Text>
         </TouchableOpacity>
-      </View>
-    </View>
+    </ScrollView>
+  </Fragment>
   )
 }
 
@@ -211,19 +189,21 @@ const styles = StyleSheet.create({
   },
   availableTonightWrapper: {
     width: "95%",
-    backgroundColor: "pink",
+    backgroundColor: turquoise,
     borderRadius: 5,
     flexDirection: "row",
     alignItems: "center",
     padding: 4,
-    marginTop: 2
+    marginTop: 2,
+    alignSelf: "center",
+    marginBottom: 40
   },
   body: {
   	backgroundColor: "#fdfdfd",
     flexGrow: 1,
     width: width,
     marginTop: bodyMarginTop,
-    alignItems: "center"
+    // alignItems: "center"
   },
   button: {
   	backgroundColor: "#fff",
@@ -244,10 +224,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end"
   },
   buttonWrapper: {
-    alignSelf: "flex-start"
+    flexDirection: "row"
   },
   edit: {
     margin: 15
+  },
+  header: {
+    color: "gray",
+    marginLeft: 10
+  },
+  headerWrapper: {
+    flexDirection: "row",
+    alignItems: "center"
   },
   icons: {
     height: 130,
@@ -290,6 +278,10 @@ const styles = StyleSheet.create({
   nameAndAge: {
     fontSize: 28
   },
+  oneSection: {
+    marginHorizontal: mHorizontal,
+    marginVertical: 10
+  },
   school: {
     fontSize: 12,
     marginVertical: 1
@@ -322,11 +314,45 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: "center"
   },
+  textCount: {
+    position: "absolute",
+    bottom: 4,
+    right: 10,
+    color: "#bbb",
+    fontSize: 10
+  },
+  textInput: {
+    flex: 1,
+    color: "#444"
+  },
+  textInputWrapper: {
+    flexDirection: "row",
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 20,
+    height: 60,
+    padding: 10,
+    marginTop: 10,
+    color: "#444"
+  },
   top: {
     alignItems: "center",
     justifyContent: "center",
     flex: 7,
     width: "100%"
+  },
+  touchable: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 20,
+    padding: 10,
+    marginTop: 10,
+    color: "#444",
+    alignItems: "center"
   }
 });
 

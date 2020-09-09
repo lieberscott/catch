@@ -12,9 +12,9 @@ export default function MapStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Messages" component={ Messages } />
-      <Stack.Screen name="ProfileFull" component={ProfileFull} />
+      {/* <Stack.Screen name="ProfileFull" component={ProfileFull} />
       <Stack.Screen name="Conversation" component={Conversation} />
-      <Stack.Screen name="UsersList" component={UsersList} />
+      <Stack.Screen name="UsersList" component={UsersList} /> */}
     </Stack.Navigator>
   );
 }

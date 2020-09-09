@@ -14,7 +14,7 @@ const { width, height } = Dimensions.get("window");
 const imageMarginR = 16;
 const imageDimensions = 80;
 
-const MapPage = (props) => {
+const Map = (props) => {
 
   const store = useContext(StoreContext);
   const mapRef = useRef();
@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default MapPage;
+export default Map;

@@ -19,7 +19,7 @@ import { set } from 'react-native-reanimated';
 
 const Tab = createBottomTabNavigator();
 
-function MyTabs() {
+function MyStack() {
 
   console.log("signed in");
 
@@ -146,7 +146,19 @@ function MyTabs() {
       setUser
     }}>
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
-      : user.onboardingDone ? <TabNavigator />
+      : user.onboardingDone ? <Stack.Navigator>
+      <Stack.Screen name="TabNavigator" component={ TabNavigator } />
+      <Stack.Screen name="ProfileFull" component={ProfileFull} />
+      <Stack.Screen name="Conversation" component={Conversation} />
+      <Stack.Screen name="UsersList" component={UsersList} />
+      <Stack.Screen name="Name" component={Name} />
+      <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
+      <Stack.Screen name="Gender" component={Gender} />
+      <Stack.Screen name="Notifications" component={Notifications} />
+      <Stack.Screen name="Sports" component={Sports} />
+      <Stack.Screen name="Map" component={Map} />
+      <Stack.Screen name="ProfileText" component={ProfileText} />
+    </Stack.Navigator>
       : <IntroMaster /> }
     </StoreContext.Provider>
   );
@@ -156,7 +168,7 @@ function TabNavigator() {
   return (
       <Tab.Navigator>
         <Tab.Screen name="Profile" component={ Profile } />
-        <Tab.Screen name="Active Users" component={ MapStackNavigator } />
+        <Tab.Screen name="MapStackNavigator" component={ MapStackNavigator } />
         <Tab.Screen name="Messages" component={ Messages } />
       </Tab.Navigator>
   );
@@ -167,16 +179,18 @@ const Stack = createStackNavigator();
 import ProfileFull from './shared/ProfileFull';
 import Conversation from './messagesStackNavigator/Conversation';
 import UsersList from './shared/UsersList';
+import Name from './profileStackNavigator/Name';
+import DateOfBirth from './profileStackNavigator/DateOfBirth';
+import Gender from './profileStackNavigator/Gender';
+import Notifications from './profileStackNavigator/Notifications';
+import Sports from './profileStackNavigator/Sports';
+import Map from './profileStackNavigator/Map';
+import ProfileText from './profileStackNavigator/ProfileText';
 
 export default function StackNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="TabNavigator" component={ TabNavigator } />
-        <Stack.Screen name="ProfileFull" component={ProfileFull} />
-        <Stack.Screen name="Conversation" component={Conversation} />
-        <Stack.Screen name="UsersList" component={UsersList} />
-      </Stack.Navigator>
+      <MyStack />
     </NavigationContainer>
   );
 }

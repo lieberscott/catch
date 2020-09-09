@@ -36,7 +36,11 @@ export const getFullConversation = async (convoId) => {
   }
 }
 
-export const uploadImage = async (blob, name) => {
+export const signOut = () => {
+  firebase.auth().signOut();
+}
+
+export const uploadImage = async (blob, name, prevUrl) => {
   // get today's date to upload image to that folder
   const d = new Date();
   const year = d.getFullYear();
@@ -48,8 +52,16 @@ export const uploadImage = async (blob, name) => {
   try {
     const snap = await upload.put(blob);
     const downloadURL = await snap.ref.getDownloadURL();
-    return downloadURL;
+    console.log("downloadUrl : ", downloadURL);
 
+    // if replacing a photo, delete previous photo (only WON'T be used during initial onboarding)
+    if (prevUrl) {
+      console.log("prevUrl : ", prevUrl);
+      const deleteRef = firebase.storage().refFromURL(prevUrl);
+      await deleteRef.delete();
+    }
+
+    return downloadURL;
   }
   catch (e) {
     console.log("uploadImage error : ", e);
