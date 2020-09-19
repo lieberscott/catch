@@ -3,6 +3,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from "expo-image-manipulator";
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import * as Notifications from 'expo-notifications';
+import { Alert, Platform } from 'react-native';
 
 export const addPhoto = async (userId) => {
 
@@ -21,9 +23,7 @@ export const addPhoto = async (userId) => {
     });
     if (!result.cancelled) {
 
-      // const response = await fetch(result.uri);
-
-      // compress image - commenting out for now because, with aspect ratio control, image is already a controlled size?
+      // compress image
       const manipResult = await ImageManipulator.manipulateAsync(
         result.uri,
         [{ resize: { width: 300 } }],
@@ -60,4 +60,56 @@ export const getLocation = async () => {
     console.log("error : ", e);
     return false;
   }
+}
+
+
+export const registerForPushNotifications = async () => {
+  let token;
+  if (Constants.isDevice) {
+    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      Alert.alert('Failed to get push token for push notification!');
+      return false;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(token);
+  }
+  else {
+    Alert.alert('Must use physical device for Push Notifications');
+  }
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+  return token;
+}
+
+export const sendPushNotification = (pushToken, title, body, data) => {
+  const message = {
+    to: pushToken,
+    sound: 'default',
+    title,
+    body,
+    data: { data: 'goes here' }
+  };
+  
+  fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message),
+  });
 }

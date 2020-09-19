@@ -77,7 +77,7 @@ const DateOfBirth = (props) => {
           <Text style={ styles.pickDate }>Pick Date</Text>
         </TouchableOpacity> : [] }
         <View style={ styles.buttonsWrapper }>
-        <TouchableOpacity activeOpacity={ dateGood ? 0.7 : 1 } onPress={ dateGood ? () => props.route.params.updateProfile({ date_of_birth: date }, 3) : undefined } style={ dateGood ? styles.update : styles.updateDisabled }>
+        <TouchableOpacity activeOpacity={ dateGood ? 0.7 : 1 } onPress={ dateGood ? () => props.route.params.updateProfile({ dateOfBirth: date }, 3) : undefined } style={ dateGood ? styles.update : styles.updateDisabled }>
           <Text style={ dateGood ? styles.updateText : styles.updateTextDisabled }>Save</Text>
         </TouchableOpacity>
         </View>

@@ -1,9 +1,11 @@
-// if drag touch starts in bottom half of card, angle should tilt upward instead of downward
-import React, { Fragment, useState, useRef, useEffect, useContext, InputAccessoryView } from 'react';
-import { Alert, Animated, Button, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { Fragment, useState, useEffect, useContext } from 'react';
+import { Alert, Animated, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
+import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, signOut } from '../../../firebase.js';
+
+import { updateUser, uploadImage, signOut, createConvos, addTestCloudFunctionsData, testCloudFunctionsLocally } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
@@ -12,24 +14,45 @@ const turquoise = "#4ECDC4";
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const bodyMarginTop = 20;
-const fullWidth = width * 4; // ScrollView width: width * number of pages
 
 const Profile = (props) => {
 
   const store = useContext(StoreContext);
-  const accessoryViewID = "accessoryViewID";
+
+  useEffect(() => {
+    (async () => {
+      // Set global test device ID
+      await setTestDeviceIDAsync('EMULATOR');
+    })()
+  }, []);
 
   const user = store.user;
   const userId = user._id;
-  const deviceToken = user.device_token;
   const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
   const userName = user.name;
 
-  {/* Get age */}
+  {/* Get active status */}
+  const active0 = user.active;
+  const timeOfActivation0 = user.timeOfActivation || new Date();
+  const timeOfActivation = timeOfActivation0.seconds ? new Date(timeOfActivation0.seconds) : new Date(timeOfActivation0);
   const today = new Date();
-  const userDOB = new Date(user.date_of_birth);
+  const milliseconds0 = Math.abs(today - timeOfActivation);
+  const hours = milliseconds0 / 36e5;
+
+  const a = active0 && hours < 6 ? true : false;
+
+  const [active, setActive] = useState(a);
+
+  const updateActive = (bool) => {
+    setActive(bool);
+    updateProfile({ active: bool, timeOfActivation: new Date() }, 1)
+  }
+
+  {/* Get age */}
+  // const today = new Date(); // today is declared above
+  const userDOB = user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : new Date(user.date_of_birth);
   const milliseconds = userDOB.getTime();
   const birthday = new Date(milliseconds);
   let userAge = today.getFullYear() - birthday.getFullYear();
@@ -37,25 +60,8 @@ const Profile = (props) => {
   today.getMonth() == birthday.getMonth() && today.getDate() < birthday.getDate()) {
     userAge--;
   }
-  const location = user.city;
-  const school = user.school;
-  const occupation = user.occupation;
-  const employer = user.employer;
-
-  // const navigation = useNavigation();
-
-  const [page, setPage] = useState(0);
-  const [bottomView, setBottomView] = useState(false);
-  const [scrollPos, setScrollPos] = useState(0);
-  const scrollViewRef = useRef();
 
   const [settingsButton, setSettingsButton] = useState(new Animated.Value(1));
-
-  useEffect(() => {
-    if (bottomView) {
-      scrollViewRef.current.scrollTo({ y: scrollPos, animated: true });
-    }
-  });
 
   const choosePhoto = async () => {
     let arr;
@@ -92,32 +98,85 @@ const Profile = (props) => {
       props.navigation.pop();
     }
   }
-  
+
   return (
-    <Fragment>
-    <ScrollView style={ styles.body }>
-      <View style={ styles.top }>
-        <View style={ styles.imageWrapper }>
-          <Image source={{ uri: userPhoto }} style={ styles.image } />
-          <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
-            <MaterialIcons name="add-a-photo" color="gray" size={ 33 } style={ styles.imageIcon } />
-          </AnimatedTouchableOpacity>
+    <View style={{ alignItems: "center", backgroundColor: "#fdfdfd" }}>
+      <SafeAreaView style={ styles.flexZero } />
+      <AdMobBanner
+        bannerSize="banner"
+        adUnitID={ Platform.OS === 'ios' ? "ca-app-pub-8262004996000143/8383797064" : "ca-app-pub-8262004996000143/6607680969" } // Test ID, Replace with your-admob-unit-id
+        servePersonalizedAds // true or false
+        onDidFailToReceiveAdWithError={(err) => console.log("error : ", err)}
+      />
+      <ScrollView style={ styles.body }>
+        <View style={ styles.top }>
+          <View>
+            <TouchableOpacity style={ styles.imageWrapper }>
+              <Image source={{ uri: userPhoto }} style={ styles.image } />
+            </TouchableOpacity>
+            <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
+              <MaterialIcons name="add-a-photo" color="gray" size={ 33 } style={ styles.imageIcon } />
+            </AnimatedTouchableOpacity>
+          </View>
+          <Text style={ styles.nameAndAge }>{ userName }, { userAge }</Text>
+          <View style={ styles.locationWrapper }>
+            <Text style={ styles.location }>{ user.location }</Text>
+          </View>
         </View>
-        <Text style={ styles.nameAndAge }>{ userName }, { userAge }</Text>
-        { occupation ? employer ? <Text style={ styles.school }>{ occupation } at { employer }</Text> : [] : [] }
-        { school ? <Text style={ styles.school }>{ school }</Text> : [] }
-        <View style={ styles.locationWrapper }>
-          <MaterialIcons name="location-on" color="red" onPress={ () => console.log("settings") } size={ 25 } style={ styles.imageIcon } />
-          <Text style={ styles.location }>{ user.location }</Text>
+        <View style={ styles.oneSection}>
+          <View style={ styles.buttonWrapper }>
+            <View style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
+              <Text>Active</Text>
+              <Switch
+                trackColor={{ false: "#e4e4e4", true: "green" }}
+                thumbColor="white"
+                ios_backgroundColor="#efefef"
+                onValueChange={ (bool) => updateActive(bool) }
+                value={ active }
+              />
+            </View>
+          </View>
         </View>
-      </View>
-      <View style={ styles.oneSection}>
-        <View style={ styles.buttonWrapper }>
-          <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
-            <Text>Profile Text</Text>
-            <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
-          </TouchableOpacity>
+        <View style={ styles.oneSection}>
+          <View style={ styles.headerWrapper }>
+            <MaterialIcons name="person-outline" size={ 23 } color="gray" />
+            <Text style={ styles.header }>Location</Text>
+          </View>
+          <View style={ styles.mapContainer }>
+            <MapView
+              style={ styles.mapStyle }
+              // showsUserLocation={ true }
+              // followsUserLocation={ true }
+              initialRegion={{ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
+              // maxZoomLevel={ 17 }
+              // minZoomLevel={ 6 }
+              provider={PROVIDER_GOOGLE}
+              zoomEnabled={ false }
+              scrollEnabled={ false }
+              // onUserLocationChange={() => changeLocation() }
+            />
+            <View style={ styles.imageWrapper2 }>
+              <Image
+                source={require('../../../assets/pin.png')}
+                style={ styles.image }
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Map", { coordinates: user.coordinates, updateProfile })}>
+              <Text>Change Location</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
         </View>
+        <View style={ styles.oneSection}>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
+              <Text>Profile Text</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={ styles.oneSection}>
           <View style={ styles.headerWrapper }>
@@ -126,19 +185,19 @@ const Profile = (props) => {
           </View>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Name", { name: user.name, updateProfile })}>
-              <Text>{ user.occupation || "Name" }</Text>
+              <Text>{ user.name || "Name" }</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : user.date_of_birth, updateProfile })}>
-              <Text>{ user.company || "Age" }</Text>
+              <Text>{ userAge || "Age" }</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Gender", { gender: user.gender, updateProfile })}>
-              <Text>{ user.school || "Gender" }</Text>
+              <Text>{ user.gender ? "Female" : "Male" }</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
@@ -161,73 +220,40 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={ styles.oneSection}>
-          <View style={ styles.headerWrapper }>
-            <MaterialIcons name="person-outline" size={ 23 } color="gray" />
-            <Text style={ styles.header }>Location</Text>
-          </View>
-          <View style={ styles.buttonWrapper }>
-            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Map", { coordinates: user.coordinates, updateProfile })}>
-              <Text>{ user.gender_text || "Map" }</Text>
-              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity onPress={ () => signOut() } style={ styles.availableTonightWrapper }>
+        <TouchableOpacity onPress={ () => signOut() } style={ styles.signoutWrapper }>
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.availableTonightText }>Sign Out</Text>
+          <Text style={ styles.signoutText }>Sign Out</Text>
         </TouchableOpacity>
-    </ScrollView>
-  </Fragment>
+        <TouchableOpacity onPress={ () => createConvos() } style={[ styles.signoutWrapper, { backgroundColor: "orange" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Create Convos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ () => addTestCloudFunctionsData() } style={[ styles.signoutWrapper, { backgroundColor: "blue" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Add data for Cloud function testing</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ () => testCloudFunctionsLocally() } style={[ styles.signoutWrapper, { backgroundColor: "green" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Run cloud functions locally to test</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  availableTonightText: {
-    flexWrap: "wrap",
-    flex: 1
-  },
-  availableTonightWrapper: {
-    width: "95%",
-    backgroundColor: turquoise,
-    borderRadius: 5,
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 4,
-    marginTop: 2,
-    alignSelf: "center",
-    marginBottom: 40
-  },
   body: {
   	backgroundColor: "#fdfdfd",
     flexGrow: 1,
     width: width,
-    marginTop: bodyMarginTop,
+    marginTop: bodyMarginTop
     // alignItems: "center"
-  },
-  button: {
-  	backgroundColor: "#fff",
-    shadowColor: '#001414',
-    elevation: 1,
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-  	// flexDirection: "row",
-  	// justifyContent: "center",
-  	// alignItems: "center",
-  	borderRadius: 70,
-    alignSelf: "center"
-    // padding: 15,
-  	// margin: 15
-  },
-  buttonMediaWrapper: {
-    alignSelf: "flex-end"
   },
   buttonWrapper: {
     flexDirection: "row"
   },
-  edit: {
-    margin: 15
+  flexZero: {
+    flex: 0
   },
   header: {
     color: "gray",
@@ -237,16 +263,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center"
   },
-  icons: {
-    height: 130,
-    width: "85%",
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
   image: {
+    height: null,
+    width: null,
+    flex: 1,
+    borderRadius: 90
+  },
+  imageWrapper: {
     height: 150,
     width: 150,
     borderRadius: 90
+  },
+  imageWrapper2: {
+    position: "absolute",
+    left: "49%",
+    bottom: "50%",
+    height: 30,
+    width: 30 
   },
   imageIcon: {
     alignSelf: "center",
@@ -272,8 +305,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center"
   },
-  media: {
-    margin: 15
+  mapContainer: {
+    height: 300,
+    width: "100%",
+    borderRadius: 20,
+    alignSelf: "center"
+  },
+  mapStyle: {
+    flex: 1,
+    overflow: "hidden",
+    borderRadius: 20
   },
   nameAndAge: {
     fontSize: 28
@@ -282,59 +323,20 @@ const styles = StyleSheet.create({
     marginHorizontal: mHorizontal,
     marginVertical: 10
   },
-  school: {
-    fontSize: 12,
-    marginVertical: 1
+  signoutText: {
+    flexWrap: "wrap",
+    flex: 1
   },
-  scrollView: {
-    backgroundColor: "#fafafa",
-    // backgroundColor: "red",
-    flex: 3,
-    width: width,
-    alignItems: "center",
-    paddingBottom: 20
-  },
-  setExtra: {
-    backgroundColor: "white",
-    marginTop: 20,
-    borderRadius: 30,
-    padding: 10,
-    width: "80%",
-    alignItems: "center",
-    borderColor: "gray",
-    borderWidth: 1
-  },
-  setExtraText: {
-    color: "green"
-  },
-  settings: {
-    margin: 15
-  },
-  subhead: {
-    marginTop: 5,
-    textAlign: "center"
-  },
-  textCount: {
-    position: "absolute",
-    bottom: 4,
-    right: 10,
-    color: "#bbb",
-    fontSize: 10
-  },
-  textInput: {
-    flex: 1,
-    color: "#444"
-  },
-  textInputWrapper: {
+  signoutWrapper: {
+    width: "95%",
+    backgroundColor: turquoise,
+    borderRadius: 5,
     flexDirection: "row",
-    flex: 1,
-    borderWidth: 0.5,
-    borderColor: "gray",
-    borderRadius: 20,
-    height: 60,
-    padding: 10,
-    marginTop: 10,
-    color: "#444"
+    alignItems: "center",
+    padding: 4,
+    marginTop: 2,
+    alignSelf: "center",
+    marginBottom: 40
   },
   top: {
     alignItems: "center",

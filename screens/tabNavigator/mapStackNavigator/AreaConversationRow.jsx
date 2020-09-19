@@ -13,7 +13,7 @@ const AreaConversationRow = ({ users }) => {
   const navigation = useNavigation();
 
   return (
-      <TouchableOpacity style={ styles.body } onPress={() => navigation.navigate("UsersList", { users, requestAllowed: true })}>
+      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users, requestAllowed: true })}>
         <Image style={ styles.image } source={{ uri: users[0].photo }} />
         { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
 
@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
   },
   body: {
     flexDirection: "row",
-    marginVertical: 8
+    paddingVertical: 8,
+    backgroundColor: "white"
   },
   groupChatAvatar: {
     backgroundColor: "#eee",

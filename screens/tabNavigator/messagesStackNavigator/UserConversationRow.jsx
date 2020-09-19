@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Image, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -10,12 +10,6 @@ const imageDimensions = 80;
 
 const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
 
-  // console.log("convo.usersArray : ", convo.usersArray);
-  // console.log("typeof convo.usersArray : ", typeof convo.usersArray);
-  // console.log("Object.keys(convo.usersArray) : ", Object.keys(convo.usersArray));
-  // console.log("convo.usersArray.length : ", convo.usersArray.length);
-
-  // console.log("convo : ", convo);
   const usersObj = convo.usersArr;
   let usersArr = [];
   Object.keys(usersObj).forEach((key) => {
@@ -25,7 +19,6 @@ const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
   // first user in conversation other than the current user
   const usersLen = usersArr.length; // if more than 2, then you have a group chat
   const firstOtherUserIndex = usersArr.findIndex((item, i) => item.userId !== userId);
-  console.log("firstOtherUserIndex in UserConversationRow : ", firstOtherUserIndex);
   const [width, setWidth] = useState(0);
   const navigation = useNavigation();
 

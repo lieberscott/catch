@@ -3,21 +3,20 @@
 import React, { Fragment, useLayoutEffect, useState, useEffect, useRef, useContext } from 'react';
 import { Alert, Animated, Dimensions, Easing, Image, Keyboard, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GiftedChat, Actions, Avatar, Bubble, Composer, Constant, InputToolbar, Message, Send } from 'react-native-gifted-chat'
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-// import BottomSheet from 'reanimated-bottom-sheet';
 import ReportModal from './ReportModal';
 
 import * as firebase from 'firebase';
 import firestore from 'firebase/firestore';
 
 import { StoreContext } from '../../../contexts/storeContext';
-// import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
+import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
 
 const turquoise = "#4ECDC4";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 import ConversationHeader from './ConversationHeader';
+import { sendMessage } from '../../../firebase.js';
 
 const Conversation = (props) => {
 
@@ -57,7 +56,6 @@ const Conversation = (props) => {
     unsubscribe = firebase.firestore().collection("conversations").doc(chatId)
     .onSnapshot((snapshot) => {
       const d = snapshot.data();
-      console.log("d : ", d);
       let messages0 = d.messages;
       messages0.reverse();
       setUsersArr(d.userObjects);
@@ -124,63 +122,47 @@ const Conversation = (props) => {
   }
 
 
-  const onSend = (msg) => {
-    const text = msg[0].text;
-    let messageId;
+  const onSend = async (msg) => {
 
-    let message = {
+    // Step 0: Compose message object
+    const text = msg[0].text;
+    const chatId = convo.chatId;
+
+    const message = {
+      _id: "k" + Date.now() + Math.random(),
       text: text,
       createdAt: Date.now(),
       user: {
         _id: userId,
         name: userName,
         avatar: userAvatar
-      },
-      _id: "k" + Date.now() + Math.random()
+      }
     }
-    
-    // `m0` is added to GiftedChat on front end, `message` is added to Firebase
-    let m0 = {...message};
-    m0.sending = true;
-    m0._id = "k" + Math.random();
 
-    setComposerText("");
-    setMessages(previousArr => GiftedChat.append(previousArr, [m0]));
-    
-    {/* Add the message to the Firestore Database */}
-    firebase.firestore().collection("conversations")
-    .doc(convo.chatId)
-    .update({ messages: firebase.firestore.FieldValue.arrayUnion(message) })
-    .then(() => {
-      messageId = Date.now();
-      {/* Remove and re-add the message to the GiftedChat interface with updated data using object returned from Firebase */}
-      let m = [message];
-      m[0]._id = messageId;
-      m[0].delivered = true;
-      setMessages(previousArr => {
+    // Step 0.1: Compose userChat update object
+    const userChatUpdate = {
+      lastMessageCreatedAt: new Date(),
+      lastMessageFromId: userId,
+      lastMessageFromName: userName,
+      lastMessageText: text,
+      readByReceiver: false
+    }
 
-        let arr = [...previousArr];
-        arr.shift();
-        delete arr[0].delivered;
-
-        return GiftedChat.append(arr, m);
-      });
-      sendPushNotification(userId, userName, otherPersonIdsArray, "You have receivec a new message");
-      registerForPushNotifications();
-    })
-    .catch((err) => {
-      
-      {/* Remove and re-add the message to the GiftedChat interface with updated data, but using the original object you constructed since Firebase had an error */}
-      delete m0.sending;
-      m0._id = "k" + Math.random().toString();
-      m0.failed = true;
-      setMessages(previousArr => {
-        let arr = previousArr;
-        arr.shift();
-        return GiftedChat.append(previousArr, [m0])
-      });
-      console.log("Err : ", err);
-    });
+    try {
+      const res = await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
+      if (res) {
+        setMessages(GiftedChat.append(arr, [message]));
+        setComposerText("");
+        sendPushNotification(userId, userName, otherPersonIdsArray, "You have received a new message");
+        registerForPushNotifications();
+      }
+      else {
+        Alert.alert("", "There was an error. Please try again.");
+      }
+    }
+    catch (e) {
+      Alert.alert("", "There was an error. Please try again.");
+    }
   }
 
 

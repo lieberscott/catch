@@ -17,7 +17,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "userInterfaceStyle": "light",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717"
+      }
+    },
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "useNextNotificationsApi": true,
+      "userInterfaceStyle": "dark",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~3139209246"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

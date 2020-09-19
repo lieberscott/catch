@@ -3,6 +3,8 @@ import { Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 
+import { registerForPushNotifications } from '../../../utils.js';
+
 const { width, height } = Dimensions.get("window");
 
 const Map = (props) => {
@@ -10,7 +12,6 @@ const Map = (props) => {
   const c = props.route.params.coordinates;
   const l1 = c.latitude;
   const l2 = c.longitude;
-  console.log("c : ", c);
   const mapViewRef = useRef();
 
   const [coords, setCoords] = useState([l1, l2]);

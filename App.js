@@ -1,15 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+// import * as Notifications from 'expo-notifications';
 import * as firebase from 'firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { StoreContext } from './contexts/storeContext.js';
 
 import LoginStackNavigator from './screens/loginNavigator/loginStackNavigator.jsx';
-import StackNavigator from './screens/tabNavigator/TabNavigator';
+import StackNavigator from './screens/StackNavigator';
 import LoadingScreen from './screens/LoadingScreen';
+
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
 
 const firebaseConfig = {
   apiKey: "AIzaSyDPRr5eNoIoOD4zEIS0UWksdrW1S3prgXU",
@@ -37,23 +46,30 @@ const AppContainer = createAppContainer(MyNavigator);
 
 export default function App() {
 
-  useEffect(() => {
+  // const notificationListener = useRef();
+  // const responseListener = useRef();
 
-    console.log("App.jsx useEffect first?");
-  
-    // Notifications.addNotificationReceivedListener(handleNotification);
+  // useEffect(() => {
+  //   // This listener is fired whenever a notification is received while the app is foregrounded
+  //   notificationListener.current = Notifications.addNotificationReceivedListener(handleNotification);
+
+  //   // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+  //   responseListener.current = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
     
-    // Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+  //   return () => {
+  //     console.log("notifications listeners unmounting in App.jsx (but they're commented out)");
+  //     Notifications.removeNotificationSubscription(notificationListener);
+  //     Notifications.removeNotificationSubscription(responseListener);
+  //   }
+  // }, []);
 
-  }, []);
+  // const handleNotification = notification => {
+  //   console.log("handleNotification notification : ", notification);
+  // };
 
-  const handleNotification = notification => {
-    console.log("handleNotification notification : ", notification);
-  };
-
-  const handleNotificationResponse = response => {
-    console.log("handleNotificationResponse response : ", response);
-  }
+  // const handleNotificationResponse = response => {
+  //   console.log("handleNotificationResponse response : ", response);
+  // }
 
   return (
     <AppContainer />

@@ -1,204 +1,81 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useRef, useEffect } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
+import * as Notifications from 'expo-notifications';
 
-import { StoreContext } from '../../contexts/storeContext.js';
-
-import { getAuthUser, getDbUser, getAreaUsersAndConversations } from '../../firebase.js';
-
-import LoadingScreen from '../LoadingScreen';
-import IntroMaster from './introComponents/IntroMaster';
 import Profile from './profileStackNavigator/Profile';
 import MapStackNavigator from './mapStackNavigator/MapStackNavigator';
 import Messages from './messagesStackNavigator/MessagesStackNavigator';
-import { set } from 'react-native-reanimated';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const Tab = createBottomTabNavigator();
 
-function MyStack() {
+export default function TabNavigator() {
 
-  console.log("signed in");
-
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState({});
-  const [areaUsers, setAreaUsers] = useState([]);
-  const [areaConversations, setAreaConversations] = useState([]);
-  const [userChats, setUserChats] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [gotAreaConversations, setGotAreaConversations] = useState(false);
-  const [gotUserChats, setGotUserChats] = useState(false);
-  const [allLoaded, setAllLoaded] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   useEffect(() => {
-    console.log("first useEffect in TabNavigator: get authUser and dbUser");
+    // This listener is fired whenever a notification is received while the app is foregrounded
+    notificationListener.current = Notifications.addNotificationReceivedListener(handleNotification);
+
+    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
     
-    if (loading) {
-      // Step 1: Get user and users from Mongo
-      (async () => {
-        try {
-          // Step 2: Get user from auth object
-          const uid = await getAuthUser();
-
-          console.log("uid in TabNavigator : ", uid);
-
-          // Step 3: Get user from users collection
-          let u = await getDbUser(uid);
-          u._id = uid;
-          setLoading(false);
-          setUser(u);
-        }
-        catch (e) {
-          console.log("error signing user in in TabNavigator.jsx useEffect : ", e);
-          firebase.auth().signOut();
-        }
-      })();
+    return () => {
+      console.log("notifications listeners unmounting in App.jsx (but they're commented out)");
+      Notifications.removeNotificationSubscription(notificationListener);
+      Notifications.removeNotificationSubscription(responseListener);
     }
   }, []);
 
-  useEffect(() => {
-    if (user.onboardingDone && !gotAreaConversations) {
-      // Step 4: If user has completed onboarding, get other users based on geolocation
-      console.log("second useEffect in TabNavigator: get areaUsers");
-      (async () => {
-        try {
-          const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-          console.log("arr in TabNavigator");
-          setAreaUsers(arr[0]);
-          setAreaConversations(arr[1]);
-          setGotAreaConversations(true);
-        }
-        catch (e) {
-          console.log("get area users error : ", e);
-        }
-      })();
-    }
-  }, [loading, user]);
+  const handleNotification = notification => {
+    console.log("handleNotification notification : ", notification);
+  };
 
-  useEffect(() => {
-    let unsubscribe;
-    // Step 6: Set up listener for userChats from Firebase
-    if (gotAreaConversations && !gotUserChats) {
-      console.log("third useEffect in TabNavigator : get userChats");
-      unsubscribe = firebase.firestore().collection("userChats").doc(user._id)
-      .onSnapshot((snapshot) => {
-        const d = snapshot.data();
-        let chatArray = d.chatArray;
-
-        let chatArray2 = [];
-        
-        Object.keys(chatArray).forEach((key) => {
-          chatArray2.push(chatArray[key]);
-        });
-        
-        // for conversations involving user
-        setUserChats(chatArray2);
-        setGotUserChats(true);
-      });
-    }
-
-    return () => {
-      if (unsubscribe != undefined) {
-        console.log("userChats listener defined and unmounting");
-        unsubscribe();
-      }
-    }
-  }, [gotAreaConversations, loading]);
-  
-  useEffect(() => {
-    // get requests
-    let unsubscribe2;
-    let arr = [];
-    if (gotUserChats && !allLoaded) {
-      console.log("user._id : ", user._id);
-      console.log("fourth useEffect in TabNavigator : getting requests");
-      unsubscribe2 = firebase.firestore().collection("requests")
-      .where("toId", "==", user._id)
-      .onSnapshot((snapshot) => {
-        snapshot.forEach((doc) => {
-          let d = doc.data();
-          d.id = doc.id;
-          arr.push(d);
-        });
-      });
-
-      setRequests(arr);
-      setAllLoaded(true);
-    }
-    return () => {
-      if (unsubscribe2 != undefined) {
-        console.log("requests listener defined and unmounting");
-        unsubscribe2();
-      }    }
-  }, [gotUserChats]);
-
-
-  return (
-    <StoreContext.Provider value={{
-      user,
-      areaUsers,
-      areaConversations,
-      userChats,
-      requests,
-      setUser
-    }}>
-      { loading ? <View style={ styles.container }><ActivityIndicator /></View>
-      : user.onboardingDone ? <Stack.Navigator>
-      <Stack.Screen name="TabNavigator" component={ TabNavigator } />
-      <Stack.Screen name="ProfileFull" component={ProfileFull} />
-      <Stack.Screen name="Conversation" component={Conversation} />
-      <Stack.Screen name="UsersList" component={UsersList} />
-      <Stack.Screen name="Name" component={Name} />
-      <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
-      <Stack.Screen name="Gender" component={Gender} />
-      <Stack.Screen name="Notifications" component={Notifications} />
-      <Stack.Screen name="Sports" component={Sports} />
-      <Stack.Screen name="Map" component={Map} />
-      <Stack.Screen name="ProfileText" component={ProfileText} />
-    </Stack.Navigator>
-      : <IntroMaster /> }
-    </StoreContext.Provider>
-  );
-}
-
-function TabNavigator() {
-  return (
-      <Tab.Navigator>
-        <Tab.Screen name="Profile" component={ Profile } />
-        <Tab.Screen name="MapStackNavigator" component={ MapStackNavigator } />
-        <Tab.Screen name="Messages" component={ Messages } />
-      </Tab.Navigator>
-  );
-}
-
-const Stack = createStackNavigator();
-
-import ProfileFull from './shared/ProfileFull';
-import Conversation from './messagesStackNavigator/Conversation';
-import UsersList from './shared/UsersList';
-import Name from './profileStackNavigator/Name';
-import DateOfBirth from './profileStackNavigator/DateOfBirth';
-import Gender from './profileStackNavigator/Gender';
-import Notifications from './profileStackNavigator/Notifications';
-import Sports from './profileStackNavigator/Sports';
-import Map from './profileStackNavigator/Map';
-import ProfileText from './profileStackNavigator/ProfileText';
-
-export default function StackNavigator() {
-  return (
-    <NavigationContainer>
-      <MyStack />
-    </NavigationContainer>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
+  const handleNotificationResponse = response => {
+    console.log("handleNotificationResponse response : ", response);
   }
-})
+  
+  return (
+    <Tab.Navigator initialRouteName="MapStackNavigator" tabBarOptions={{ activeTintColor: '#e91e63' }}>
+      <Tab.Screen
+        name="Profile"
+        component={ Profile }
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account" color={color} size={size} />
+          )
+        }}
+      />
+      <Tab.Screen
+        name="MapStackNavigator"
+        component={ MapStackNavigator }
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="map-marker-multiple" color={color} size={size} />
+          )
+        }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={ Messages }
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="message-reply-text" color={color} size={size} />
+          )
+        }}
+      />
+    </Tab.Navigator>
+  );
+}

@@ -19,7 +19,7 @@ const ProfileFull = (props) => {
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
 
   const today = new Date();
-  const birthDate = new Date(user1.dateOfBirth.seconds * 1000);
+  const birthDate = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
   let user1Age = today.getFullYear() - birthDate.getFullYear();
   let m = today.getMonth() - birthDate.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {

@@ -1,26 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 
-import { StoreContext } from '../../contexts/storeContext.js';
+import { StoreContext } from '../contexts/storeContext.js';
 
-import { getAuthUser, getDbUser, getAreaUsersAndConversations } from '../../firebase.js';
+import { getAuthUser, getDbUser, getAreaUsersAndConversations } from '../firebase.js';
 
-import LoadingScreen from '../LoadingScreen';
-import IntroMaster from './introComponents/IntroMaster';
-import Profile from './profileStackNavigator/Profile';
-import MapStackNavigator from './mapStackNavigator/MapStackNavigator';
-import Messages from './messagesStackNavigator/MessagesStackNavigator';
-import { set } from 'react-native-reanimated';
 
-const Tab = createBottomTabNavigator();
+import TabNavigator from './tabNavigator/TabNavigator';
+import ProfileFull from './tabNavigator/shared/ProfileFull';
+import Conversation from './tabNavigator/messagesStackNavigator/Conversation';
+import UsersList from './tabNavigator/shared/UsersList';
+import Name from './tabNavigator/profileStackNavigator/Name';
+import DateOfBirth from './tabNavigator/profileStackNavigator/DateOfBirth';
+import Gender from './tabNavigator/profileStackNavigator/Gender';
+import Notifications from './tabNavigator/profileStackNavigator/Notifications';
+import Sports from './tabNavigator/profileStackNavigator/Sports';
+import Map from './tabNavigator/profileStackNavigator/Map';
+import ProfileText from './tabNavigator/profileStackNavigator/ProfileText';
+import Active from './tabNavigator/profileStackNavigator/Active';
+import IntroMaster from './tabNavigator/introComponents/IntroMaster';
 
-function MyTabs() {
+const Stack = createStackNavigator();
 
-  console.log("signed in");
+function MyStack() {
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
@@ -33,17 +39,12 @@ function MyTabs() {
   const [allLoaded, setAllLoaded] = useState(false);
 
   useEffect(() => {
-    console.log("first useEffect in TabNavigator: get authUser and dbUser");
-    
     if (loading) {
-      // Step 1: Get user and users from Mongo
+      // Step 1: Get user
       (async () => {
         try {
           // Step 2: Get user from auth object
           const uid = await getAuthUser();
-
-          console.log("uid in TabNavigator : ", uid);
-
           // Step 3: Get user from users collection
           let u = await getDbUser(uid);
           u._id = uid;
@@ -61,11 +62,9 @@ function MyTabs() {
   useEffect(() => {
     if (user.onboardingDone && !gotAreaConversations) {
       // Step 4: If user has completed onboarding, get other users based on geolocation
-      console.log("second useEffect in TabNavigator: get areaUsers");
       (async () => {
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-          console.log("arr in TabNavigator");
           setAreaUsers(arr[0]);
           setAreaConversations(arr[1]);
           setGotAreaConversations(true);
@@ -79,18 +78,20 @@ function MyTabs() {
 
   useEffect(() => {
     let unsubscribe;
-    // Step 6: Set up listener for userChats from Firebase
+    const userId = user._id;
+    // Step 5: Set up listener for userChats from Firebase
     if (gotAreaConversations && !gotUserChats) {
-      console.log("third useEffect in TabNavigator : get userChats");
-      unsubscribe = firebase.firestore().collection("userChats").doc(user._id)
+      unsubscribe = firebase.firestore().collection("userChats").doc(userId)
       .onSnapshot((snapshot) => {
-        const d = snapshot.data();
-        let chatArray = d.chatArray;
+        let d = snapshot.data();
+        d = d ? d : {};
 
         let chatArray2 = [];
+
         
-        Object.keys(chatArray).forEach((key) => {
-          chatArray2.push(chatArray[key]);
+        
+        Object.keys(d).forEach((key) => {
+          chatArray2.push(d[key]);
         });
         
         // for conversations involving user
@@ -108,12 +109,10 @@ function MyTabs() {
   }, [gotAreaConversations, loading]);
   
   useEffect(() => {
-    // get requests
+    // Step 6: Set up listener and get requests
     let unsubscribe2;
     let arr = [];
     if (gotUserChats && !allLoaded) {
-      console.log("user._id : ", user._id);
-      console.log("fourth useEffect in TabNavigator : getting requests");
       unsubscribe2 = firebase.firestore().collection("requests")
       .where("toId", "==", user._id)
       .onSnapshot((snapshot) => {
@@ -124,7 +123,15 @@ function MyTabs() {
         });
       });
 
-      setRequests(arr);
+      // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
+      // so filter out duplicate requests here
+      let seen = {};
+      const uniqueArr = arr.filter((item) => {
+        const id = item._id;
+        return seen.hasOwnProperty(id) ? false : (seen[id] = true);
+      });
+
+      setRequests(uniqueArr);
       setAllLoaded(true);
     }
     return () => {
@@ -142,23 +149,36 @@ function MyTabs() {
       areaConversations,
       userChats,
       requests,
-      setUser
+      setUser,
+      setUserChats,
+      setAreaConversations,
+      setAreaUsers,
+      setRequests
     }}>
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
-      : user.onboardingDone ? <Tab.Navigator>
-        <Tab.Screen name="Profile" component={ Profile } />
-        <Tab.Screen name="Active Users" component={ MapStackNavigator } />
-        <Tab.Screen name="Messages" component={ Messages } />
-      </Tab.Navigator>
+      : user.onboardingDone ? <Stack.Navigator>
+        <Stack.Screen name="TabNavigator" component={ TabNavigator } options={{ headerShown: false }}/>
+        <Stack.Screen name="ProfileFull" component={ProfileFull} />
+        <Stack.Screen name="Conversation" component={Conversation} />
+        <Stack.Screen name="UsersList" component={UsersList} />
+        <Stack.Screen name="Name" component={Name} />
+        <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
+        <Stack.Screen name="Gender" component={Gender} />
+        <Stack.Screen name="Notifications" component={Notifications} />
+        <Stack.Screen name="Sports" component={Sports} />
+        <Stack.Screen name="Map" component={Map} />
+        <Stack.Screen name="ProfileText" component={ProfileText} />
+        <Stack.Screen name="Active" component={Active} />
+      </Stack.Navigator>
       : <IntroMaster /> }
     </StoreContext.Provider>
   );
 }
 
-export default function TabNavigator() {
+export default function StackNavigator() {
   return (
     <NavigationContainer>
-      <MyTabs />
+      <MyStack />
     </NavigationContainer>
   );
 }
