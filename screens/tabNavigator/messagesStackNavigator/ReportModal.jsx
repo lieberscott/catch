@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Alert, Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -18,7 +18,7 @@ const ReportModal = (props) => {
 
   const height = props.height;
   const show = props.purchaseReadReceiptsModal;
-  const profile = props.profile;
+  const len = props.len;
 
   const [animation, setAnimation] = useState(new Animated.ValueXY({ x: 0, y: -250 }));
 
@@ -126,11 +126,11 @@ const ReportModal = (props) => {
         </View>
         <TouchableOpacity style={ styles.line } onPress={ handleBlock }>
           <MaterialCommunityIcons name="flag" size={ 24 } color="red" />
-          <Text style={ styles.text }>  Report This Conversation</Text>
+          <Text style={ styles.text }>  Report { len > 1 ? "These Users" : "This User" }</Text>
         </TouchableOpacity>
         <TouchableOpacity style={ styles.line } onPress={ handleUnmatch }>
           <MaterialCommunityIcons name="block-helper" size={ 18 } color="orange" />
-          <Text style={ styles.text }>  Unmatch from this Conversation</Text>
+          <Text style={ styles.text }>  Leave this Conversation</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={ handleClose } style={ styles.lineBottom }>
           <MaterialCommunityIcons name="close-circle-outline" size={ 24 } color="purple"  style={ styles.cancelIcon }/>

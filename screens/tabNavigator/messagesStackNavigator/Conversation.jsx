@@ -27,6 +27,8 @@ const Conversation = (props) => {
   const userAvatar = user.photo;
 
   const convo = props.route.params.convo; // userChat data
+
+  const dot = props.route.params.dot;
   const chatId = convo.chatId;
 
   const otherPersonArray = convo.usersArr.filter((item, i) => item.userId !== userId);
@@ -63,6 +65,12 @@ const Conversation = (props) => {
       setLoaded(true);
     });
 
+    if (dot) {
+      firebase.firestore().collection("userChats").doc(userId).update({
+        [`${chatId}.readByReceiver`]: true
+      });
+    }
+
     return () => {
       unsubscribe !== undefined ? unsubscribe() : console.log("chatId " + chatId + " listener unloaded before being fully initialized");
     }
@@ -79,26 +87,45 @@ const Conversation = (props) => {
 
   const handleBlock2 = () => {
 
-    const newUsersArray = convo.usersArray.filter((item, i) => item !== userId)
+    const userInitiatingBlock = userId;
+    const userInitiatingBlockName = userName;
+    const userBlockedArr = otherPersonArray;
+    // const convo = convo; // already defined above
 
+    const newUsersArray = convo.usersArr.filter((item, i) => item !== userId)
     // Step 1: Remove user from convo in Firebase
-    firebase.firestore().collection("conversations").doc(convo.id).update({ usersArray: newUsersArray })
+    firebase.firestore().collection("conversations").doc(chatId).update({ usersArray: newUsersArray })
     .then(() => {
-      // Step 2: Send to Node to send an email to myself
-      return fetch("https://catch-app.glitch.me/report_user", {
+      // Step 2: Add blocked users to blockedUsers
+      let promises = [];
+      for (let i = 0; i < newUsersArray.length; i++) {
+        promises.push(firebase.firestore().collection("users").doc(userId).update({
+          blockedUsers: firebase.firestore.FieldValue.arrayUnion(newUsersArray[i])
+        }));
+      }
+      return Promise.all(promises);
+    })
+    .then(() => {
+      // Step 3: Send to Cloud function to send an email to myself
+      return fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: JSON.stringify({ convo: convo, reportedById: userId, reportedByName: userName })
+        body: JSON.stringify({ userInitiatingBlock, userInitiatingBlockName, userBlockedArr, messages })
       })
     })
     .then(() => {
-      // Step 3: Delete from local variables
-      const newState = store.userConversations.filter((item, i) => item.id !== convo.id);
-      store.setAndSaveUserConversations(newState);
-      Alert.alert("", "Thanks. We'll take it from here.");
+      // Step 4: Delete from local variables
+      const newState = store.userChats.filter((item, i) => item.chatId !== chatId);
+      store.setUserChats(newState);
+      Alert.alert("", "Thanks. We'll take it from here.", [
+        { text: "OK", onPress: () => {
+          setReportModal(false);
+          props.navigation.pop()
+        }},
+      ]);
     })
     .catch((err) => {
       Alert.alert("", "There was a problem with your request");
@@ -252,6 +279,7 @@ const Conversation = (props) => {
       />
 
       { reportModal && <ReportModal
+        len={ otherPersonArray.length }
         reportModal={ reportModal }
         setReportModal={ setReportModal }
         handleBlock2={ handleBlock2 }

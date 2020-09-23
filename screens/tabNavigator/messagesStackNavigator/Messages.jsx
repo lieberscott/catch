@@ -124,15 +124,10 @@ const Messages = (props) => {
   return (
     <SafeAreaView style={ styles.body }>
 
-      { /* Bar that says "Messages" */ }
-      <View style={ styles.border }>
-        <Text style={ styles.header }>Active Chats</Text>
-      </View>
-
       { /* FlatList of Conversations */ }
       <View style={ styles.bottom }>
         { userConversations.length === 0 ? <MessagesEmpty userPhoto={ userPhoto } /> : <SwipeListView
-          keyExtractor={ (item, key) => item.id }
+          keyExtractor={ (item, key) => item.chatId }
           previewRowKey={'0'}
           previewOpenValue={-100}
           previewOpenDelay={3000}
@@ -210,7 +205,6 @@ const styles = StyleSheet.create({
   body: {
   	flexGrow: 1,
     // paddingHorizontal: 10,
-    marginTop: 10,
     width: "100%",
     alignItems: "center"
   },

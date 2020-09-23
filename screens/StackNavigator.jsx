@@ -65,8 +65,33 @@ function MyStack() {
       (async () => {
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-          setAreaUsers(arr[0]);
-          setAreaConversations(arr[1]);
+          
+          // filter out blockedUsers from areaUsers
+          const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
+          let arr0 = arr[0].filter((item) => {
+            let blocked = false;
+            for (let i = 0; i < blockedUsers.length; i++) {
+              if (item._id === blockedUsers[i].userId) {
+                blocked = true;
+              }
+            }
+            return !blocked;
+          });
+
+          // filter out blockedUsers from areaConversations
+          let arr1 = arr[1].filter((item) => {
+            let blocked = false;
+            for (let i = 0; i < blockedUsers.length; i++) {
+              const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+              if (index !== -1) {
+                blocked = true;
+              }
+            }
+            return !blocked;
+          });
+          
+          setAreaUsers(arr0);
+          setAreaConversations(arr1);
           setGotAreaConversations(true);
         }
         catch (e) {
@@ -93,9 +118,40 @@ function MyStack() {
         Object.keys(d).forEach((key) => {
           chatArray2.push(d[key]);
         });
+
+        let chatArray3 = [];
+
+        // filter out blockedUsers
+        if (user.blockedUsers) {
+
+          const blockedUsers = user.blockedUsers;
+          const chatArrLen = chatArray2.length;
+
+          for (let i = 0; i < chatArrLen; i++) {
+
+            let blocked = false;
+            const usersLen = chatArray2[i].usersArr.length;
+
+            for (let j = 0; j < usersLen; j++) {
+              // check blockedUsers list against the usersArr
+              // blockedUsers and usersArr are the same formatted object: { userAvatar, userId, userName }
+              // since blockedUsers COMES FROM the usersArr
+              const index = blockedUsers.findIndex((item) => item.userId === chatArray2[i].usersArr[j].userId);
+
+              if (index !== -1) {
+                blocked = true;
+              }
+
+            }
+            if (!blocked) {
+              chatArray3.push(chatArray2[i]);
+            }
+          }
+        }
+        
         
         // for conversations involving user
-        setUserChats(chatArray2);
+        setUserChats(chatArray3);
         setGotUserChats(true);
       });
     }
@@ -157,18 +213,18 @@ function MyStack() {
     }}>
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
       : user.onboardingDone ? <Stack.Navigator>
-        <Stack.Screen name="TabNavigator" component={ TabNavigator } options={{ headerShown: false }}/>
-        <Stack.Screen name="ProfileFull" component={ProfileFull} />
-        <Stack.Screen name="Conversation" component={Conversation} />
-        <Stack.Screen name="UsersList" component={UsersList} />
-        <Stack.Screen name="Name" component={Name} />
-        <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
-        <Stack.Screen name="Gender" component={Gender} />
-        <Stack.Screen name="Notifications" component={Notifications} />
-        <Stack.Screen name="Sports" component={Sports} />
-        <Stack.Screen name="Map" component={Map} />
-        <Stack.Screen name="ProfileText" component={ProfileText} />
-        <Stack.Screen name="Active" component={Active} />
+        <Stack.Screen name="TabNavigator" component={ TabNavigator } options={{ headerShown: false, title: "" }}/>
+        <Stack.Screen name="Name" component={Name} options={{ title: "" }}/>
+        <Stack.Screen name="DateOfBirth" component={DateOfBirth} options={{ title: "" }}/>
+        <Stack.Screen name="Gender" component={Gender} options={{ title: "" }}/>
+        <Stack.Screen name="Notifications" component={Notifications} options={{ title: "" }}/>
+        <Stack.Screen name="Sports" component={Sports} options={{ title: "" }}/>
+        <Stack.Screen name="Map" component={Map} options={{ title: "" }}/>
+        <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }}/>
+        <Stack.Screen name="Active" component={Active} options={{ title: "" }}/>
+        <Stack.Screen name="Conversation" component={Conversation} options={{ title: "" }}/>
+        <Stack.Screen name="UsersList" component={UsersList} options={{ title: "" }}/>
+        <Stack.Screen name="ProfileFull" component={ProfileFull} options={{ title: "" }}/>
       </Stack.Navigator>
       : <IntroMaster /> }
     </StoreContext.Provider>

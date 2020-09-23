@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'r
 import { MaterialIcons } from '@expo/vector-icons';
 
 const turquoise = "#4ECDC4";
+// const turquoise = "red";
 
 const Gender = (props) => {
   
@@ -135,7 +136,7 @@ const Gender = (props) => {
       <View style={ styles.oneSection}>
         <View style={ styles.headerWrapper }>
           <MaterialIcons name="perm-identity" size={ 23 } color="gray" />
-          <Text style={ styles.header }>Gender (this will appear on your profile)</Text>
+          <Text style={ styles.header }>Gender</Text>
         </View>
         <View style={ styles.middle }>
           <TouchableOpacity activeOpacity={ 1 } onPress={() => props.route.params.updateProfile({ gender: true })} style={ styles.wrapperFemale }>

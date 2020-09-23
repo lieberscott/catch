@@ -6,6 +6,24 @@ import * as Permissions from 'expo-permissions';
 import * as Notifications from 'expo-notifications';
 import { Alert, Platform } from 'react-native';
 
+export const getDistance = (user0Loc, user1Loc) => {
+
+  const user0Lat = user0Loc.latitude;
+  const user0Lng = user0Loc.longitude;
+  const user1Lat = user1Loc.latitude;
+  const user1Lng = user1Loc.longitude;
+  
+  const R = 6378137; // Earth’s mean radius in meter
+  const dLat = (user1Lat - user0Lat) * Math.PI / 180;
+  const dLong = (user1Lng - user0Lng) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(user0Lat * Math.PI / 180) * Math.cos(user1Lat * Math.PI / 180) *
+    Math.sin(dLong / 2) * Math.sin(dLong / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const me = R * c; // meters
+  return me * 0.00062137; // miles
+}
+
 export const addPhoto = async (userId) => {
 
   try {

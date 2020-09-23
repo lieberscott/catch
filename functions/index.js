@@ -3,11 +3,12 @@ const admin = require("firebase-admin");
 const nodeMailer = require("nodemailer");
 admin.initializeApp();
 
+require("dotenv").config();
+
 
 exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *')
 .timeZone('America/New_York') // default is America/Los_Angeles
 .onRun((context) => {
-  console.log('This will be run every other day at Noon ET');
   
   const database = admin.firestore();
   let _24HoursAgo = new Date();
@@ -88,21 +89,52 @@ const transporter = nodeMailer.createTransport({
 
 exports.sendEmail = functions.https.onRequest((req, res) => {
 
+  const userInitiatingBlock = req.body.userInitiatingBlock;
+  const userInitiatingBlockName = req.body.userInitiatingBlockName;
+  const userBlockedArr = req.body.userBlockedArr;
+  const messages = req.body.messages;
+
+
+  let html = "<p>A user has blocked another user from a conversation</p>";
+  html += "<p>userInitiatingBlock : " + userInitiatingBlock + "</p>";
+  html += "<p>userInitiatingBlockName : " + userInitiatingBlockName + "</p>";
+  html += "<p>Other Users : </p><p>";
+  for (let i = 0; i < userBlockedArr.length; i++) {
+    html += "<ul>"
+    const keys = Object.keys(userBlockedArr[i]);
+    for (let j = 0; j < keys.length; j++) {
+      html += "<li>" + keys[j] + ": " + userBlockedArr[i][keys[j]] + "</li>";
+    }
+    html += "</ul>";
+  }
+
+
+  html += "</p><p>Conversation Messages : </p><p>";
+
+  for (let k = 0; k < messages.length; k++) {
+    html += "<ul><li>From Id : " + messages[k].user._id + "</li>";
+    html += "<li>From Name : " + messages[k].user.name + "</li>";
+    html += "<li>Message : " + messages[k].text + "</li></ul>"
+  }
+
+  html += "</p>";
+
   const mailOptions = {
     from: process.env.GMAIL_ADDRESS,
     to: process.env.GMAIL_ADDRESS,
-    subject: "A User has reported another User",
+    subject: "User " + userInitiatingBlockName  + " has reported another User",
     // text: req.body.text
-    text: "Some text"
+    html: html
   };
 
-  return transporter.sendMail(mailOptions)
-  .then(() => {
-    console.log("email sent");
-    return res.send("email sent");
-  })
-  .catch((err) => {
-    console.log("send Email error : ", err);
-    return res.status(500).send("Error sending mail");
+  transporter.sendMail(mailOptions, (err, responseObj) => {
+    if (err) {
+      console.log("send Email error : ", err);
+      return res.status(500).send("Error sending mail");
+    }
+    else {
+      console.log("email sent");
+      return res.send("email sent");
+    }
   });
 });

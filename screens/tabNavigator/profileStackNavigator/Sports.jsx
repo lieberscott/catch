@@ -5,8 +5,6 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 const turquoise = "#4ECDC4";
 
 const Sports = (props) => {
-
-  console.log("props.route.params : ", props.route.params);
   
   const s = props.route.params.sports || {
     Baseball: "Played Little League",

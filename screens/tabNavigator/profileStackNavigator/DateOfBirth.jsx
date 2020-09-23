@@ -55,11 +55,10 @@ const DateOfBirth = (props) => {
     <View style={ styles.container }>
       <View style={ styles.oneSection}>
         <View style={ styles.headerWrapper }>
-          <MaterialIcons name="card-travel" size={ 23 } color="gray" />
-          <Text style={ styles.header }>Name</Text>
+          <MaterialIcons name="date-range" size={ 23 } color="gray" />
+          <Text style={ styles.header }>Date Of Birth</Text>
         </View>
         <View style={ styles.middle }>
-        <Text style={ styles.subhead }>Next, when is your birthday?</Text>
         <Text style={ styles.warning }>You must be 18 to participate</Text>
         {show ? (
           <DateTimePicker
@@ -150,6 +149,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     alignSelf: "center",
     color: "#444"
+  },
+  warning: {
+    textAlign: "center"
   }
 })
 

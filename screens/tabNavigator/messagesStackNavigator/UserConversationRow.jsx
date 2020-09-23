@@ -22,13 +22,15 @@ const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
   const [width, setWidth] = useState(0);
   const navigation = useNavigation();
 
+  const dot = !convo.readByReceiver && convo.lastMessageFromId !== userId;
+
 
      return (
-      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("Conversation", { convo })} onLayout={(e) => {
+      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("Conversation", { convo, dot })} onLayout={(e) => {
         const w = e.nativeEvent.layout.width;
         setWidth(w);
       }}>
-        { !convo.readByUser ? <View style={ styles.newMessage } /> : [] }
+        { dot ? <View style={ styles.newMessage } /> : [] }
         <Image
           style={ styles.image }
           source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png" }}

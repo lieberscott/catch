@@ -6,26 +6,28 @@ const bodyMarginH = 10; // from Messages.jsx
 const imageMarginR = 16;
 const imageDimensions = 80;
 
-const AreaConversationRow = ({ users }) => {
+const AreaConversationRow = ({ users, distance, hours }) => {
   const len = users.length;
   const sportsKeys = Object.getOwnPropertyNames(users[0].sports);
 
   const navigation = useNavigation();
 
   return (
-      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users, requestAllowed: true })}>
-        <Image style={ styles.image } source={{ uri: users[0].photo }} />
-        { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
+    <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users })}>
+      <Image style={ styles.image } source={{ uri: users[0].photo }} />
+      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
 
-        <View style={ styles.textWrapper }>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
-          </View>
-          { sportsKeys.map((item, i) => (
-            <Text key={ sportsKeys[i] } ellipsizeMode="tail" numberOfLines={ 1 } style={ styles.message }>{ sportsKeys[i] }: { users[0].sports[sportsKeys[i]].skill_level }</Text>
-          ))}
+      <View style={ styles.textWrapper }>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
         </View>
-      </TouchableOpacity>
+       <Text style={ styles.distanceText }>{ distance <= 1 ? "Less than a mile away" : distance + " miles away" }</Text>
+       <View style={{ flexDirection: "row" }}>
+          <View style={{ height: 5, width: 5, borderRadius: 5, backgroundColor: "green", alignSelf: "center" }} />
+          <Text style={ styles.active }> { hours } hours ago</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   )
 }
 

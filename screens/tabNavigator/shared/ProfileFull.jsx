@@ -8,13 +8,17 @@ import { Ionicons } from '@expo/vector-icons';
 import * as firebase from 'firebase';
 import firestore from 'firebase/firestore';
 
+import { getDistance } from '../../../utils.js';
+
 
 const { width, height } = Dimensions.get("window");
 
 const ProfileFull = (props) => {
+  console.log("profile Full");
 
   const store = useContext(StoreContext);
   const user0 = store.user;
+  const userLoc = user0.coordinates;
   
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
 
@@ -25,7 +29,9 @@ const ProfileFull = (props) => {
   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
     user1Age--;
   }
-  
+
+  const distance0 = getDistance(user0.coordinates, user1.coordinates);
+  const distance = Math.round(distance0 * 10) / 10;
   const conversation = props.route.params.conversation || false; // if request is for a current conversation
   const conversationId = props.route.params.conversationId || false;
   const requestFromOther = props.route.params.requestFromOther;
@@ -34,9 +40,8 @@ const ProfileFull = (props) => {
 
   const [responded, setResponded] = useState(false);
 
-
   return (
-    <Fragment>
+    <View style={{ flexGrow: 1 }}>
       <SafeAreaView style={ styles.flexZero } />
         <ScrollView
           contentContainerStyle={ styles.scrollViewOuter }
@@ -56,6 +61,9 @@ const ProfileFull = (props) => {
           </View>
           <View style={ styles.nameAndAgeWrapper }>
             <Text style={ styles.nameAndAgeText }>{ user1.name }, { user1Age }, { user1.gender ? "F" : "M" }</Text>
+          </View>
+          <View style={ styles.nameAndAgeWrapper }>
+            <Text style={ styles.distanceText }>{ distance <= 1 ? "Less than a mile away" : distance + " miles away" }</Text>
           </View>
           <View style={ styles.profileTextWrapper }>
             <Text>{ user1.profileText }</Text>
@@ -92,9 +100,9 @@ const ProfileFull = (props) => {
               // onCalloutPress={ () => navigation.navigate("ProfileFull", { user: pin }) }
             />
           </MapView>
-          <View style={ styles.bottom } />
-        </ScrollView>
-    </Fragment>
+        <View style={ styles.bottom } />
+      </ScrollView>
+    </View>
   )
 }
 
@@ -120,6 +128,9 @@ const styles = StyleSheet.create({
   buttonText: {
     textAlign: "center",
     color: "#eee"
+  },
+  distanceText: {
+    fontSize: 13
   },
   flexZero: {
     flex: 0

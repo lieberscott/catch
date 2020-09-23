@@ -4,6 +4,8 @@ import { GeoFirestore } from 'geofirestore';
 // import firebase from 'firebase/app';
 // import 'firebase/storage';
 
+import { getDistance } from './utils.js';
+
 export const deleteAccount = async (userId) => {
   try {
     await firebase.firestore().collection("users").doc(userId).delete();
@@ -58,6 +60,7 @@ export const acceptRequestUser = async (user0, user1) => {
     coordinates: new firebase.firestore.GeoPoint(user0.coordinates.latitude, user0.coordinates.longitude),
     createdAt: new Date(),
     messages: [],
+    lastMessageTime: new Date(),
     userObjects: [
       {
         _id: user0._id,
@@ -221,7 +224,9 @@ export const loginUser = async (credential) => {
         onboardingDone: false,
         available: false,
         getsNotifications: true,
-        notificationToken: "-1"
+        notificationToken: "-1",
+        active: true,
+        timeOfActivation: new Date(0)
       })
 
       console.log("res after setting new user in firebase.js : ", res);
@@ -280,10 +285,22 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       d.id = doc.id;
 
       // area conversations - only push if conversation does not include user
-      if (d.userObjects.findIndex((item, i) => item._id === userId) !== -1) {
+      if (d.userObjects.findIndex((item, i) => item._id === userId) === -1) {
         areaConversations0.push(d);
       }
     });
+
+    // calculate distance for areaConversations
+    const areaConversations1 = areaConversations0.map((item) => {
+      const distance0 = getDistance(userLoc, item.coordinates);
+      const distance = Math.round(distance0 * 10) / 10;
+
+      item.distance = distance;
+      return item;
+    });
+
+    // sort conversations by distance
+    areaConversations1.sort((a, b) => a.distance - b.distance);
 
     let sixHoursAgo = new Date();
     sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
@@ -313,7 +330,11 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     // filter out users who aren't active
     const areaUsers1 = areaUsers0.filter((item, i) => {
       const timeOfActivation = item.timeOfActivation.seconds ? new Date(item.timeOfActivation.seconds * 1000) : new Date(item.timeOfActivation);
-      if (item.active && timeOfActivation > sixHoursAgo) {
+      
+      console.log("i : ", i);
+      console.log("timeOfActivation : ", timeOfActivation);
+      console.log("timeOfActivation > sixHoursAgo : ", timeOfActivation > sixHoursAgo);
+      if (item.active && new Date(timeOfActivation) > new Date(sixHoursAgo)) {
         return true;
       }
       else {
@@ -321,7 +342,19 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       }
     });
 
-    return [areaUsers1, areaConversations0];
+    // calculate distance for users
+    const areaUsers2 = areaUsers1.map((item, i) => {
+      const distance0 = getDistance(userLoc, item.coordinates);
+      const distance = Math.round(distance0 * 10) / 10;
+
+      item.distance = distance;
+      return item;
+    })
+
+    // sort users by distance
+    areaUsers2.sort((a, b) => a.distance - b.distance);
+
+    return [areaUsers2, areaConversations1];
   }
   catch (e) {
     console.log("geofirestore error : ", e);
@@ -675,9 +708,9 @@ export const addTestCloudFunctionsData = async () => {
     readByReceiver: false,
     usersArr: [
       {
-        userAvatar: "https://randomuser.me/api/portraits/men/5.jpg",
-        userName: "Morrie",
-        userId: "userId4"
+        userAvatar: "https://randomuser.me/api/portraits/men/3.jpg",
+        userName: "Frank",
+        userId: "userId1"
       },
       {
         userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
