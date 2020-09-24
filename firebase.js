@@ -285,7 +285,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       d.id = doc.id;
 
       // area conversations - only push if conversation does not include user
-      if (d.userObjects.findIndex((item, i) => item._id === userId) === -1) {
+      if (d.userObjects.findIndex((item, i) => item._id === userId) !== -1) {
         areaConversations0.push(d);
       }
     });
@@ -789,4 +789,89 @@ export const testCloudFunctionsLocally = async () => {
   catch (e) {
     console.log("testCloudFunctionsLocally error : ", e);
   }
+}
+
+export const deleteOldConvosTest = () => {
+  // const database = admin.firestore();
+  let _24HoursAgo = new Date();
+  _24HoursAgo.setHours(_24HoursAgo.getHours() - 24);
+
+  // const deleteConvos = [];
+  // let deleteUserChat = [];
+
+  let promises = [];
+
+  // Step 1: Get all conversations where last message is older than 24 hours
+  firebase.firestore().collection("conversations")
+  .where("lastMessageTime", "<", _24HoursAgo)
+  .get()
+  .then((oldConvos) => {
+    console.log("one");
+    oldConvos.forEach((doc) => {
+      let d = doc.data();
+      const conversationId = doc.id;
+      console.log("two : ", conversationId);
+
+      // Step 2: Add a promise to delete the converssation from the conversations collection
+      promises.push(firebase.firestore().collection("conversations").doc(conversationId).delete());
+
+      for (let i = 0; i < d.userObjects.length; i++) {
+        const userId = d.userObjects[i]._id;
+
+        // Step 3: For each user involved in conversation, add a promise to delete that conversation from the user's userChats document
+        promises.push(firebase.firestore().collection("userChats").doc(userId).update({
+          [conversationId]: firebase.firestore.FieldValue.delete()
+        }));
+      }
+    });
+
+    // Step 4: Get old requests to delete as well
+    return firebase.firestore().collection("requests").where("createdAt", "<", _24HoursAgo).get();
+  })
+  .then((oldRequests) => {
+    console.log("three");
+    oldRequests.forEach((doc) => {
+      let d = doc.data();
+      const docId = doc.id;
+
+      console.log("four : ", docId);
+
+      // Step 5: Add a promise to delete the old request
+      promises.push(firebase.firestore().collection("requests").doc(docId).delete());
+
+    });
+
+    // Step 6: Delete everything
+    return Promise.all(promises);
+  })
+  .then(() => {
+    console.log("Deleted conversations older than 24 hours and requests older than 24 hours at " + new Date());
+    return res.send("deleted");
+  })
+  .catch((err) => {
+    console.log("deleteOldConvosAndRequests error : ", err);
+    return res.status(500).send("error");
+  });
+}
+
+export const addRequestTest = () => {
+  let req = {
+    _id: "someId",
+    createdAt: new Date(),
+    date_of_birth: new Date(1990, 3, 3),
+    gender: 0,
+    getsNotifications: true,
+    coordinates: new firebase.firestore.GeoPoint(41.5, -87.5),
+    name: "Joey Joe Joe",
+    notificationToken: "-1",
+    profileText: "Tis no man, but an eating machine.",
+    photo: "https://randomuser.me/api/portraits/men/10.jpg",
+    sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
+    toId: "01P4eORz41OmDL4HxHHegnrAIYu1"
+  }
+
+  req.existingConversation = false;
+  req.conversationId = false;
+
+  firebase.firestore().collection("requests").add(req);
 }

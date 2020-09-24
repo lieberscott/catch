@@ -8,7 +8,7 @@ import UsersList from '../shared/UsersList';
 
 const Stack = createStackNavigator();
 
-export default function MapStackNavigator() {
+export default function MessagesStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Messages" component={ Messages } />

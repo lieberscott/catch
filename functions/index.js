@@ -26,7 +26,7 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *'
   .then((oldConvos) => {
     oldConvos.forEach((doc) => {
       let d = doc.data();
-      const conversationId = d.id;
+      const conversationId = doc.id;
 
       // Step 2: Add a promise to delete the converssation from the conversations collection
       promises.push(database.collection("conversations").doc(conversationId).delete());
@@ -47,7 +47,7 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *'
   .then((oldRequests) => {
     oldRequests.forEach((doc) => {
       let d = doc.data();
-      const docId = d.id;
+      const docId = doc.id;
 
       // Step 5: Add a promise to delete the old request
       promises.push(database.collection("requests").doc(docId).delete());
@@ -59,11 +59,9 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *'
   })
   .then(() => {
     console.log("Deleted conversations older than 24 hours and requests older than 24 hours at " + new Date());
-    return res.send("deleted");
   })
   .catch((err) => {
     console.log("deleteOldConvosAndRequests error : ", err);
-    return res.status(500).send("error");
   });
 
 });

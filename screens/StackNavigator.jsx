@@ -175,19 +175,20 @@ function MyStack() {
         snapshot.forEach((doc) => {
           let d = doc.data();
           d.id = doc.id;
+          console.log("D : ", d);
           arr.push(d);
         });
+        // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
+        // so filter out duplicate requests here
+        let seen = {};
+        const uniqueArr = arr.filter((item) => {
+          const id = item._id;
+          return seen.hasOwnProperty(id) ? false : (seen[id] = true);
+        });
+
+        setRequests(uniqueArr);
       });
 
-      // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
-      // so filter out duplicate requests here
-      let seen = {};
-      const uniqueArr = arr.filter((item) => {
-        const id = item._id;
-        return seen.hasOwnProperty(id) ? false : (seen[id] = true);
-      });
-
-      setRequests(uniqueArr);
       setAllLoaded(true);
     }
     return () => {
@@ -214,16 +215,8 @@ function MyStack() {
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
       : user.onboardingDone ? <Stack.Navigator>
         <Stack.Screen name="TabNavigator" component={ TabNavigator } options={{ headerShown: false, title: "" }}/>
-        <Stack.Screen name="Name" component={Name} options={{ title: "" }}/>
-        <Stack.Screen name="DateOfBirth" component={DateOfBirth} options={{ title: "" }}/>
-        <Stack.Screen name="Gender" component={Gender} options={{ title: "" }}/>
-        <Stack.Screen name="Notifications" component={Notifications} options={{ title: "" }}/>
-        <Stack.Screen name="Sports" component={Sports} options={{ title: "" }}/>
-        <Stack.Screen name="Map" component={Map} options={{ title: "" }}/>
-        <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }}/>
-        <Stack.Screen name="Active" component={Active} options={{ title: "" }}/>
-        <Stack.Screen name="Conversation" component={Conversation} options={{ title: "" }}/>
         <Stack.Screen name="UsersList" component={UsersList} options={{ title: "" }}/>
+        <Stack.Screen name="Conversation" component={Conversation} options={{ title: "" }}/>
         <Stack.Screen name="ProfileFull" component={ProfileFull} options={{ title: "" }}/>
       </Stack.Navigator>
       : <IntroMaster /> }

@@ -17,6 +17,7 @@ const Map = (props) => {
   const [coords, setCoords] = useState([l1, l2]);
   const [deltas, setDeltas] = useState([0.05, 0.05]);
 
+
   return (
     <View style={ styles.container }>
       <View style={ styles.headerWrapper }>
@@ -25,18 +26,19 @@ const Map = (props) => {
       </View>
       <View style={ styles.mapContainer }>
         <MapView
-          ref={ mapViewRef }
+          // ref={ mapViewRef }
           style={ styles.mapStyle }
           // showsUserLocation={ true }
           // followsUserLocation={ true }
           initialRegion={{ latitude: coords[0], longitude: coords[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
-          maxZoomLevel={ 17 }
-          minZoomLevel={ 6 }
-          provider={PROVIDER_GOOGLE}
+          // maxZoomLevel={ 17 }
+          // minZoomLevel={ 3 }
+          // provider={PROVIDER_GOOGLE}
           // onUserLocationChange={() => changeLocation() }
           onRegionChangeComplete={(data) => {
             setDeltas([data.latitudeDelta, data.longitudeDelta]);
-            setCoords([data.latitude, data.longitude])}}
+            setCoords([data.latitude, data.longitude])
+          }}
         />
         <View style={ styles.imageWrapper }>
           <Image

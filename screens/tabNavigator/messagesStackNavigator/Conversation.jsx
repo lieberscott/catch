@@ -200,7 +200,6 @@ const Conversation = (props) => {
     else {
       console.log("usersArr :: ", usersArr);
       const newUsersArray = usersArr.filter((item, i) => item._id !== userId);
-      console.log("newUsersArray : ", newUsersArray);
       props.navigation.navigate("ProfileFull", { users: newUsersArray });
     }
   }

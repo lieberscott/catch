@@ -24,9 +24,6 @@ const RequestRow = ({ request }) => {
             <Text style={ styles.name }>{ request.name }</Text>
             <Text style={{ marginLeft: 10, backgroundColor: "blue", color: "white", padding: 5 }}>Catch Request</Text>
           </View>
-          { sportsKeys.map((item, i) => (
-            <Text key={ sportsKeys[i] } ellipsizeMode="tail" numberOfLines={ 1 } style={ styles.message }>{ sportsKeys[i] }: { request.sports[sportsKeys[i]].skill_level }</Text>
-          ))}
         </View>
       </TouchableOpacity>
   )

@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Notifications from 'expo-notifications';
 
-import Profile from './profileStackNavigator/Profile';
+import Profile from './profileStackNavigator/ProfileStackNavigator';
 import MapStackNavigator from './mapStackNavigator/MapStackNavigator';
 import Messages from './messagesStackNavigator/MessagesStackNavigator';
 

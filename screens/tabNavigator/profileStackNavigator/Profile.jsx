@@ -4,8 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-
-import { updateUser, uploadImage, signOut, createConvos, addTestCloudFunctionsData, testCloudFunctionsLocally } from '../../../firebase.js';
+import { updateUser, uploadImage, signOut, createConvos, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, addRequestTest } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
@@ -33,7 +32,7 @@ const Profile = (props) => {
   const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
   const userName = user.name;
 
-  {/* Get active status */}
+   {/* Get active status */}
   const active0 = user.active;
   const timeOfActivation0 = user.timeOfActivation || new Date();
   const timeOfActivation = timeOfActivation0.seconds ? new Date(timeOfActivation0.seconds) : new Date(timeOfActivation0);
@@ -60,8 +59,6 @@ const Profile = (props) => {
   today.getMonth() == birthday.getMonth() && today.getDate() < birthday.getDate()) {
     userAge--;
   }
-
-  const [settingsButton, setSettingsButton] = useState(new Animated.Value(1));
 
   const choosePhoto = async () => {
     let arr;
@@ -99,8 +96,9 @@ const Profile = (props) => {
     }
   }
 
+
   return (
-    <View style={{ alignItems: "center", backgroundColor: "#fdfdfd" }}>
+     <View style={{ alignItems: "center", backgroundColor: "#fdfdfd" }}>
       <SafeAreaView style={ styles.flexZero } />
       <AdMobBanner
         bannerSize="banner"
@@ -137,20 +135,23 @@ const Profile = (props) => {
             </View>
           </View>
         </View>
+
+
+
         <View style={ styles.oneSection}>
           <View style={ styles.headerWrapper }>
             <MaterialIcons name="person-outline" size={ 23 } color="gray" />
             <Text style={ styles.header }>Location</Text>
           </View>
           <View style={ styles.mapContainer }>
-            <MapView
+          <MapView
               style={ styles.mapStyle }
               // showsUserLocation={ true }
               // followsUserLocation={ true }
               initialRegion={{ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
               // maxZoomLevel={ 17 }
               // minZoomLevel={ 6 }
-              provider={PROVIDER_GOOGLE}
+              // provider={PROVIDER_GOOGLE}
               zoomEnabled={ false }
               scrollEnabled={ false }
               // onUserLocationChange={() => changeLocation() }
@@ -170,6 +171,9 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
         </View>
+
+
+
         <View style={ styles.oneSection}>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
@@ -236,6 +240,15 @@ const Profile = (props) => {
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
           <Text style={ styles.signoutText }>Run cloud functions locally to test</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={ () => deleteOldConvosTest() } style={[ styles.signoutWrapper, { backgroundColor: "pink" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Delete Old Convos Test</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ () => addRequestTest() } style={[ styles.signoutWrapper, { backgroundColor: "turquoise" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Add Request Test</Text>
+        </TouchableOpacity>
+        <View style={{ height: 300 }} />
       </ScrollView>
     </View>
   )

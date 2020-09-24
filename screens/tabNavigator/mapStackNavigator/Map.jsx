@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
-import { Alert, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, Button, TouchableOpacity, ScrollView } from 'react-native';
+import { Alert, FlatList, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, Button, TouchableOpacity, ScrollView } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
-import { sendRequest, addPushNotification } from "../../../firebase.js";
+import { sendRequest, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
 
 import { registerForPushNotifications, getDistance } from '../../../utils.js';
 
@@ -35,6 +35,8 @@ const Map = (props) => {
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
+
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -82,6 +84,42 @@ const Map = (props) => {
     }
   }
 
+  const onRefresh = async () => {
+    try {
+      const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
+      
+      // filter out blockedUsers from areaUsers
+      const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
+      let arr0 = arr[0].filter((item) => {
+        let blocked = false;
+        for (let i = 0; i < blockedUsers.length; i++) {
+          if (item._id === blockedUsers[i].userId) {
+            blocked = true;
+          }
+        }
+        return !blocked;
+      });
+
+      // filter out blockedUsers from areaConversations
+      let arr1 = arr[1].filter((item) => {
+        let blocked = false;
+        for (let i = 0; i < blockedUsers.length; i++) {
+          const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+          if (index !== -1) {
+            blocked = true;
+          }
+        }
+        return !blocked;
+      });
+      
+      store.setAreaUsers(arr0);
+      store.setAreaConversations(arr1);
+    }
+    catch (e) {
+      console.log("get area users error : ", e);
+    }
+  }
+
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
       <SafeAreaView style={{ flex: 0 }} />
@@ -97,6 +135,9 @@ const Map = (props) => {
         <View style={ styles.top }>
           { areaConversations.length === 0 ? <ActiveUsersEmpty userPhoto={ userPhoto } /> : <SwipeListView
             keyExtractor={ (item, key) => item.userObjects ? item.id + Math.random() : item._id + Math.random() }
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
+            }
             previewRowKey={'0'}
             previewOpenValue={-100}
             previewOpenDelay={3000}
