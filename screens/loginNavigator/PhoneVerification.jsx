@@ -1,16 +1,13 @@
-import React, { Fragment, useState, useRef, useContext } from 'react';
+import React, { Fragment, useState, useRef } from 'react';
 import { Dimensions, Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 
-import { StoreContext } from '../../contexts/storeContext';
-import { loginUserFromMongo } from '../../utils.js';
 import { loginUser } from '../../firebase.js';
 
 import Cell from './Cell';
 import Code from './Code';
-// import { SafeAreaView } from 'react-navigation';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDPRr5eNoIoOD4zEIS0UWksdrW1S3prgXU",
@@ -26,8 +23,6 @@ const firebaseConfig = {
 const { width } = Dimensions.get("window");
 
 const PhoneVerification = ({ navigation }) => {
-
-  const store = useContext(StoreContext);
 
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -96,13 +91,6 @@ const PhoneVerification = ({ navigation }) => {
         code
       );
       if (credential) {
-        console.log("credential : ", credential);
-        // const u = await loginUserFromMongo(phone);
-        // console.log("checkCode u after logging in : ", u)
-        // await store.setAndSaveUser(u);
-        console.log("after setAndSaveUser and before signInWithCredential in PhoneVerification.jsx");
-        // if successful, person should be logged in and redirected to Home screen
-        // await firebase.auth().signInWithCredential(credential);
         const bool = await loginUser(credential);
         console.log("bool in Phone Verification after loginUser called : ", bool);
       }
@@ -125,7 +113,7 @@ const PhoneVerification = ({ navigation }) => {
 
   return (
     <Fragment>
-      <SafeAreaView style={{ flex: 0 }} />
+      <SafeAreaView style={ styles.flexZero } />
       <SafeAreaView style={ styles.container }>
         <FirebaseRecaptchaVerifierModal
           ref={ recaptchaRef }
@@ -197,6 +185,9 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center"
+  },
+  flexZero: {
+    flex: 0
   },
   image: {
     height: null,

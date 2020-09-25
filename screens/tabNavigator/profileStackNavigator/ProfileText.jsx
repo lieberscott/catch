@@ -57,9 +57,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center" 
   },
-  marginRight: {
-    marginRight: 10
-  },
   oneSection: {
     marginHorizontal: 20,
     marginVertical: 10

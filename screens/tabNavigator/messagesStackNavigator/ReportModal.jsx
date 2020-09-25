@@ -1,20 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Alert, Animated, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-
-const textColor = "#3f80b5";
-const borderBlue = "#52c5fa";
-const backgroundBlue = "#d4feff";
 const modalHeight = 250;
 
 const ReportModal = (props) => {
-
-  const userId = props.userId;
-  const deviceToken = props.deviceToken;
 
   const height = props.height;
   const show = props.purchaseReadReceiptsModal;
@@ -59,50 +52,6 @@ const ReportModal = (props) => {
     }).start(() => props.setReportModal(false));
   }
 
-  {/* Styles */}
-  const styles = StyleSheet.create({
-      cancelIcon: {
-        marginLeft: -3
-      },
-      close: {
-        position: "absolute",
-        right: 20,
-        top: 20
-      },
-      innerModal: {
-        height: modalHeight,
-        width: "100%",
-        alignSelf: "center",
-        backgroundColor: "white",
-        position: "absolute",
-        borderRadius: 20,
-        padding: 20
-      },
-      line: {
-        flexDirection: "row",
-        borderBottomWidth: 0.5,
-        borderBottomColor: "#d3d3d3",
-        padding: 10
-      },
-      lineBottom: {
-        flexDirection: "row",
-        padding: 10
-      },
-      outerModal: {
-        flex: 1
-      },
-      text: {
-        fontSize: 18,
-        color: "gray"
-      },
-      title: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "black",
-        marginVertical: 20
-      }
-  });
-
   const handleBlock = () => {
     Alert.alert("", "Are you sure you want to report this user?", [
       { text: "Block & Report", onPress: () => props.handleBlock2() },
@@ -144,26 +93,45 @@ const ReportModal = (props) => {
 
 export default ReportModal;
 
-/*
-<Modal visible={ show } transparent={ true } presentationSytle="fullScreen">
-      <TouchableOpacity activeOpacity={ 1 } onPress={ handleClose } style={ styles.outerModal } />
-      <Animated.View style={[ styles.innerModal, animatedViewStyle ]}>
-        <FontAwesome name="close" onPress={ handleClose } size={24} color="#aaa" style={ styles.close } />
-        <View style={ styles.line }>
-          <Text style={ styles.title }>Safety Toolkit</Text>
-        </View>
-        <TouchableOpacity style={ styles.line } onPress={ handleBlock }>
-          <MaterialCommunityIcons name="flag" size={ 24 } color="red" />
-          <Text style={ styles.text }>  Report This Conversation</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={ styles.line } onPress={ handleUnmatch }>
-          <MaterialCommunityIcons name="block-helper" size={ 18 } color="orange" />
-          <Text style={ styles.text }>  Unmatch from this Conversation</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ handleClose } style={ styles.lineBottom }>
-          <MaterialCommunityIcons name="close-circle-outline" size={ 24 } color="purple"  style={ styles.cancelIcon }/>
-          <Text style={ styles.text }>  Cancel</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    </Modal>
-    */
+const styles = StyleSheet.create({
+  cancelIcon: {
+    marginLeft: -3
+  },
+  close: {
+    position: "absolute",
+    right: 20,
+    top: 20
+  },
+  innerModal: {
+    height: modalHeight,
+    width: "100%",
+    alignSelf: "center",
+    backgroundColor: "white",
+    position: "absolute",
+    borderRadius: 20,
+    padding: 20
+  },
+  line: {
+    flexDirection: "row",
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#d3d3d3",
+    padding: 10
+  },
+  lineBottom: {
+    flexDirection: "row",
+    padding: 10
+  },
+  outerModal: {
+    flex: 1
+  },
+  text: {
+    fontSize: 18,
+    color: "gray"
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "black",
+    marginVertical: 20
+  }
+});

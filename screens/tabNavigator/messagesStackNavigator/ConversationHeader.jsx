@@ -2,9 +2,8 @@ import React from 'react';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
-const imageMarginR = 16;
 const imageDimensions = 80;
 
 const turquoise = "#4ECDC4";
@@ -18,7 +17,7 @@ const ConversationHeader = (props) => {
     <View style={ styles.container }>
       <MaterialIcons name="chevron-left" size={ 30 } style={ styles.headerLeft } onPress={() => props.navigation.pop() } />
       <TouchableOpacity  onPress={() => props.openUsersList() } style={ styles.wrapper }>
-        <View style={{ flexDirection: "row" }}>
+        <View style={ styles.flexDirRow }>
           <Image source={{ uri: otherPersonArray[0].userAvatar }} style={ styles.image } />
           { len > 1 ? <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> : [] }
         </View>
@@ -38,6 +37,9 @@ const styles = StyleSheet.create({
     width: width,
     flexDirection: "row",
     backgroundColor: "white"
+  },
+  flexDirRow: {
+    flexDirection: "row"
   },
   headerLeft: {
     position: "absolute",

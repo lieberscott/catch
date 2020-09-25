@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Switch, Text, YellowBox, View } from 'react-native';
 
-
 YellowBox.ignoreWarnings([
   'Non-serializable values were found in the navigation state'
 ]);
@@ -12,9 +11,6 @@ const borderCol = "#e3e3e3";
 const Notifications = (props) => {
 
   const notifications = props.route.params.notifications;
-
-  const userId = props.route.params.userId;
-  const deviceToken = props.route.params.deviceToken;
 
   const [push, setPush] = useState(notifications || false);
 

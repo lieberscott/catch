@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Image, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import ActiveUsersEmpty from '../mapStackNavigator/ActiveUsersEmpty';
 
-const bodyMarginH = 10; // from Messages.jsx
 const imageMarginR = 16;
 const imageDimensions = 80;
 
@@ -35,7 +33,7 @@ const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
           style={ styles.image }
           source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png" }}
         />
-        { usersLen > 2 ? <View style={{ position: "absolute" }}><Text>+ { usersLen - 2 }</Text></View> : [] }
+        { usersLen > 2 ? <View style={ styles.absPos }><Text>+ { usersLen - 2 }</Text></View> : [] }
 
         <View style={ [styles.textWrapper, { width: width - imageDimensions - imageMarginR }] }>
           <Text style={ styles.name }>{ usersArr[firstOtherUserIndex].userName } { usersLen > 2 ? "+" + usersLen - 2 : "" }</Text>
@@ -46,6 +44,9 @@ const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
 }
 
 const styles = StyleSheet.create({
+  absPos: {
+    position: "absolute"
+  },
   body: {
     flexDirection: "row",
     paddingVertical: 8,

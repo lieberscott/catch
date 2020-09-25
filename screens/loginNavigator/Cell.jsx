@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
-// import isMobilePhone from 'validator/lib/isMobilePhone';
-import { StackActions } from '@react-navigation/native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const turquoise = "#4ECDC4";
 

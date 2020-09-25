@@ -59,9 +59,11 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *'
   })
   .then(() => {
     console.log("Deleted conversations older than 24 hours and requests older than 24 hours at " + new Date());
+    return true;
   })
   .catch((err) => {
     console.log("deleteOldConvosAndRequests error : ", err);
+    return false;
   });
 
 });

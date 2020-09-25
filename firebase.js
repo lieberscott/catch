@@ -1,8 +1,6 @@
 import * as firebase from 'firebase';
 import firestore from 'firebase/firestore';
 import { GeoFirestore } from 'geofirestore';
-// import firebase from 'firebase/app';
-// import 'firebase/storage';
 
 import { getDistance } from './utils.js';
 

@@ -39,15 +39,6 @@ const DateOfBirth = (props) => {
     setTimeout(() => props.goRight(), 60);
   }
 
-  const showMode = currentMode => {
-    setShow(true);
-    setMode(currentMode);
-  };
-
-  const showDatepicker = () => {
-    showMode('date');
-  };
-
   const styles = StyleSheet.create({
     buttonsWrapper: {
       flexDirection: "row",

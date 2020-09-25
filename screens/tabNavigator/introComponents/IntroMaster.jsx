@@ -1,5 +1,5 @@
-import React, { Fragment, useState, useRef, useContext, useEffect } from 'react';
-import { Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import React, { useState, useRef, useContext, useEffect } from 'react';
+import { Alert, Dimensions, Image, Keyboard, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 import * as firebase from 'firebase';
 import { uploadImage, updateUser } from '../../../firebase.js';
@@ -19,7 +19,7 @@ import Sports from './Sports';
 import Photo from './Photo';
 
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const IntroMaster = ({ navigation }) => {
 
@@ -44,16 +44,11 @@ const IntroMaster = ({ navigation }) => {
   const [page, setPage] = useState(0);
   const [firstPartDone, setFirstPartDone] = useState(false);
 
-  const [disabledBack, setDisabledBack] = useState(true); // false at page0 because you can't go left from there
-  const [disabledNext, setDisabledNext] = useState(false);
-
   {/* Set Errors */}
   const [nameError, setNameError] = useState(false);
   const [dateGood, setDateGood] = useState(false)
 
   const scrollViewRef = useRef();
-  const textInputRef1 = useRef();
-  const textInputRef2 = useRef();
 
 
   useEffect(() => {
@@ -179,8 +174,6 @@ const IntroMaster = ({ navigation }) => {
       });
       if (!result.cancelled) {
 
-        // const response = await fetch(result.uri);
-
         // compress image - commenting out for now because, with aspect ratio control, image is already a controlled size?
         const manipResult = await ImageManipulator.manipulateAsync(
           result.uri,
@@ -193,7 +186,6 @@ const IntroMaster = ({ navigation }) => {
         const name = userId + Date.now().toString();
 
         const downloadUrl = await uploadImage(blob, name);
-        console.log("downloadUrl in IntroMaster second? : ", downloadUrl);
         setPhotoUrl(downloadUrl);
         setPhoto(true);
       }
@@ -206,7 +198,7 @@ const IntroMaster = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={ styles.flexOne }>
         { !firstPartDone
         ? <Onboarding
             onDone={ () => setFirstPartDone(true) }
@@ -236,7 +228,7 @@ const IntroMaster = ({ navigation }) => {
               }
             ]}
           />
-        : <View style={{ flex: 1 }}>
+        : <View style={ styles.flexOne }>
             <View style={ styles.setupTitle }>
               <Text style={ styles.titleText }>Let's set up your profile</Text>
             </View>
@@ -314,7 +306,7 @@ const IntroMaster = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flexOne: {
     flex: 1
   },
   image: {

@@ -1,7 +1,7 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Alert, Animated, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import { updateUser, uploadImage, signOut, createConvos, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, addRequestTest } from '../../../firebase.js';
@@ -98,7 +98,7 @@ const Profile = (props) => {
 
 
   return (
-     <View style={{ alignItems: "center", backgroundColor: "#fdfdfd" }}>
+     <View style={ styles.container }>
       <SafeAreaView style={ styles.flexZero } />
       <AdMobBanner
         bannerSize="banner"
@@ -248,7 +248,7 @@ const Profile = (props) => {
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
           <Text style={ styles.signoutText }>Add Request Test</Text>
         </TouchableOpacity>
-        <View style={{ height: 300 }} />
+        <View style={ styles.bottomArea } />
       </ScrollView>
     </View>
   )
@@ -262,8 +262,15 @@ const styles = StyleSheet.create({
     marginTop: bodyMarginTop
     // alignItems: "center"
   },
+  bottomArea: {
+    height: 300
+  },
   buttonWrapper: {
     flexDirection: "row"
+  },
+  container: {
+    alignItems: "center",
+    backgroundColor: "#fdfdfd"
   },
   flexZero: {
     flex: 0

@@ -1,31 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Image, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const bodyMarginH = 10; // from Messages.jsx
 const imageMarginR = 16;
 const imageDimensions = 80;
 
 const RequestRow = ({ request }) => {
 
-  const sportsKeys = Object.getOwnPropertyNames(request.sports);
-
-  const [width, setWidth] = useState(0);
   const navigation = useNavigation();
 
   return (
-      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("ProfileFull", { users: [request] })}>
-        <Image
-          style={ styles.image }
-          source={{ uri: request.photo }}
-        />
-        <View style={ styles.textWrapper }>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={ styles.name }>{ request.name }</Text>
-            <Text style={{ marginLeft: 10, backgroundColor: "blue", color: "white", padding: 5 }}>Catch Request</Text>
-          </View>
+    <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("ProfileFull", { users: [request] })}>
+      <Image
+        style={ styles.image }
+        source={{ uri: request.photo }}
+      />
+      <View style={ styles.textWrapper }>
+        <View style={ styles.textWrapperInner }>
+          <Text style={ styles.name }>{ request.name }</Text>
+          <Text style={ styles.requestText }>Catch Request</Text>
         </View>
-      </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
   )
 }
 
@@ -64,9 +60,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: "red"
   },
+  requestText: {
+    marginLeft: 10,
+    backgroundColor: "blue",
+    color: "white",
+    padding: 5 
+  },
   textWrapper: {
     flexDirection: "column",
     justifyContent: "center"
+  },
+  textWrapperInner: {
+    flexDirection: "row",
+    alignItems: "center"
   }
 });
 

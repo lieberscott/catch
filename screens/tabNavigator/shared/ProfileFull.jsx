@@ -1,24 +1,18 @@
 // if drag touch starts in bottom half of card, angle should tilt upward instead of downward
-import React, { Fragment, useState, useContext } from 'react';
-import { Alert, Animated, Button, Dimensions, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import React, {  useState, useContext } from 'react';
+import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { StoreContext } from '../../../contexts/storeContext';
-import { Ionicons } from '@expo/vector-icons';
-import * as firebase from 'firebase';
-import firestore from 'firebase/firestore';
 
 import { getDistance } from '../../../utils.js';
-
 
 const { width, height } = Dimensions.get("window");
 
 const ProfileFull = (props) => {
-  console.log("profile Full");
 
   const store = useContext(StoreContext);
   const user0 = store.user;
-  const userLoc = user0.coordinates;
   
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
 
@@ -32,24 +26,15 @@ const ProfileFull = (props) => {
 
   const distance0 = getDistance(user0.coordinates, user1.coordinates);
   const distance = Math.round(distance0 * 10) / 10;
-  const conversation = props.route.params.conversation || false; // if request is for a current conversation
-  const conversationId = props.route.params.conversationId || false;
-  const requestFromOther = props.route.params.requestFromOther;
 
   const sportsKeys = Object.getOwnPropertyNames(user1.sports);
-
-  const [responded, setResponded] = useState(false);
 
   return (
     <View style={{ flexGrow: 1 }}>
       <SafeAreaView style={ styles.flexZero } />
         <ScrollView
           contentContainerStyle={ styles.scrollViewOuter }
-          // bouncesZoom="true"
-          // directionalLockEnabled={ true }
-          // fadingEdgeLength={ 500 }
           scrollEnabled={ true }
-          // overflow="scroll"
           showsVerticalScrollIndicator={ false }
           pinchGestureEnabled={ false }
         >
@@ -87,17 +72,12 @@ const ProfileFull = (props) => {
             pitchEnabled={ false }
             minZoomLevel={ 7 }
             maxZoomLevel={ 19 }
-            // onRegionChangeComplete={(offsets) => handleRegionChange(offsets)}
             pitchEnabled={ false }
             rotateEnabled={ false }
-            // onMapReady={() => mapRef.animateCamera({ latitude: userLat, longitude: userLng, latitudeDelta: latDelta, longitudeDelta: lngDelta })}
           >
             <Marker
               pinColor="red"
               coordinate={{ latitude: user1.coordinates.latitude, longitude: user1.coordinates.longitude }}
-              // title={ pin.name }
-              // description={ pin.profile_text }
-              // onCalloutPress={ () => navigation.navigate("ProfileFull", { user: pin }) }
             />
           </MapView>
         <View style={ styles.bottom } />
@@ -110,24 +90,6 @@ const styles = StyleSheet.create({
   bottom: {
     height: 600,
     backgroundColor: "#f5f5f5"
-  },
-  buttonAccept: {
-    backgroundColor: "rgba(2, 117, 216, 0.9)",
-    flex: 1,
-    paddingVertical: 6,
-    borderRadius: 5,
-    marginHorizontal: 10
-  },
-  buttonReject: {
-    backgroundColor: "rgba(255, 0, 0, 0.9)",
-    flex: 1,
-    paddingVertical: 6,
-    borderRadius: 5,
-    marginHorizontal: 10
-  },
-  buttonText: {
-    textAlign: "center",
-    color: "#eee"
   },
   distanceText: {
     fontSize: 13
@@ -147,9 +109,6 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 5,
     alignSelf: "center"
-  },
-  message: {
-    flex: 1
   },
   nameAndAgeWrapper: {
     flexDirection: "row",
@@ -175,26 +134,10 @@ const styles = StyleSheet.create({
     height: height,
     width: width
   },
-  sendMessage: {
-    borderRadius: 10,
-    position: "absolute",
-    top: "90%",
-    width: "95%",
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    flexDirection: "row"
-  },
   skillLevel: {
     fontWeight: "500",
     textAlign: "center",
     fontSize: 12
-  },
-  sportText: {
-    flexWrap: "wrap",
-    fontWeight: "700",
-    fontSize: 17
   },
   sport: {
     flex: 1,

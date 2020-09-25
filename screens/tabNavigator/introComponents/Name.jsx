@@ -1,17 +1,9 @@
 import React from 'react';
-import { useState } from 'react';
-import { Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
-// import isMobilePhone from 'validator/lib/isMobilePhone';
-import { StackActions } from '@react-navigation/native';
+import { Image, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const turquoise = "#4ECDC4";
 
-const nextPage = 1;
-const prevPage = 0; //
-
 const Name = (props) => {
-
-  const activateButton = props.name.length >= 1;
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[ styles.container, { width: props.width } ]}>
@@ -116,12 +108,6 @@ const styles = StyleSheet.create({
   small: {
     fontSize: 10,
     // textAlign: "center"
-  },
-  topWrapper: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1
   },
   white: {
     color: "white"

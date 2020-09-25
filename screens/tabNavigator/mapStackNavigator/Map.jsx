@@ -1,12 +1,12 @@
-import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
-import { Alert, FlatList, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, Button, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Alert, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
 import { sendRequest, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
 
-import { registerForPushNotifications, getDistance } from '../../../utils.js';
+import { registerForPushNotifications } from '../../../utils.js';
 
 import { StoreContext } from "../../../contexts/storeContext.js";
 
@@ -31,7 +31,6 @@ const Map = (props) => {
   const areaConversations0 = store.areaConversations || [];
   const areaUsers = store.areaUsers || [];
   const areaConversations = areaConversations0.concat(areaUsers);
-  // console.log("areaConversations : ", areaConversations);
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
@@ -285,30 +284,8 @@ const styles = StyleSheet.create({
     width: 150,
     height: 96 // image is 80, plus paddingVertical of 8
   },
-  backRightBtnLeft: {
-      backgroundColor: 'green',
-      right: 75,
-  },
   backRightBtnRight: {
       backgroundColor: 'blue',
-      right: 0,
-  },
-  backRightBtnInactive: {
-    alignItems: 'center',
-    bottom: 0,
-    justifyContent: 'center',
-    position: 'absolute',
-    backgroundColor: "gray",
-    top: 0,
-    width: 150,
-    height: 96 // image is 80, plus paddingVertical of 8
-  },
-  backRightBtnLeftInactive: {
-      backgroundColor: 'gray',
-      right: 75,
-  },
-  backRightBtnRightInactive: {
-      backgroundColor: 'gray',
       right: 0,
   },
   backTextWhite: {
@@ -344,11 +321,6 @@ const styles = StyleSheet.create({
     width: imageDimensions * 0.6,
     left: imageDimensions * 0.6
   },
-  inactive: {
-    backgroundColor: "gray",
-    color: "white",
-    textAlign: "center"
-  },
   mapStyle: {
     flex: 1,
     width: width,
@@ -366,18 +338,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: "blue"
-    // justifyContent: 'space-between',
-    // paddingLeft: 15,
-    // borderWidth: 1
   },
   rowBackInactive: {
     alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
     backgroundColor: "gray"
-    // justifyContent: 'space-between',
-    // paddingLeft: 15,
-    // borderWidth: 1
   },
   textWrapper: {
     justifyContent: "center",

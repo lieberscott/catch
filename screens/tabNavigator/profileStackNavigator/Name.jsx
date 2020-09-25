@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { updateUser } from '../../../firebase.js';
-
 const Name = (props) => {
   
   const n = props.route.params.name;

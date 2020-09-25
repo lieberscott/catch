@@ -1,14 +1,7 @@
 import React from 'react';
-import { useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
-// import isMobilePhone from 'validator/lib/isMobilePhone';
-import { StackActions } from '@react-navigation/native';
-
+import { Image, KeyboardAvoidingView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const turquoise = "#4ECDC4";
-
-const nextPage = 1;
-const prevPage = 0; //
 
 const Photo = (props) => {
 
@@ -84,26 +77,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 50
   },
-  input: {
-    height: 20,
-    fontSize: 20,
-    display:"flex",
-    width:"100%",
-    padding:0,
-    borderWidth:0,
-    justifyContent: "center",
-    paddingHorizontal: 3,
-    justifyContent: "center"
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    height: 40,
-    borderRadius: 20,
-    borderColor: turquoise,
-    borderWidth: 0.5,
-    alignItems: "center",
-    paddingHorizontal: 15
-  },
   middle: {
     flex: 1,
     width: "100%",
@@ -118,18 +91,6 @@ const styles = StyleSheet.create({
   small: {
     fontSize: 10,
     // textAlign: "center"
-  },
-  topWrapper: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1
-  },
-  usNo: {
-    alignSelf: "center",
-    textAlign: "center",
-    fontSize: 10,
-    marginTop: 3
   },
   white: {
     color: "white"

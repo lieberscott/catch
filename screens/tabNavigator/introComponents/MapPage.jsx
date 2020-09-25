@@ -1,23 +1,17 @@
-import React from 'react';
-import { useState, useRef, useEffect } from 'react';
-import { Image, StyleSheet, Text, View, Dimensions, Button, TouchableOpacity, Alert } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import React, { useState, useRef, useEffect } from 'react';
+import { Image, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
 const turquoise = "#4ECDC4";
 
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const MapPage = (props) => {
 
   const mapViewRef = useRef();
 
-  const [pins_arr, setPins_arr] = useState([]);
-  const [first, setFirst] = useState(true);
   const [deltas, setDeltas] = useState([0.05, 0.05]);
-  // const store = useContext(StoreContext);
-  // console.log("store : ", store);
-
 
   useEffect(() => {
     if (props.loc[0] !== 37.09019985390777 && props.loc[1] !== -95.71290001273155) {

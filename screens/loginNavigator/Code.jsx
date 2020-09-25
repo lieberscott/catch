@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { StackActions } from '@react-navigation/native';
-import { StoreContext } from "../../contexts/storeContext.js";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 const turquoise = "#4ECDC4";
@@ -39,7 +37,7 @@ const Code = (props) => {
           { props.resentMessage ? <Text style={ styles.resendMsg }>Code resent.</Text> : [] }
         </View>
       </View>
-      <View style={{ flexDirection: "row"}}>
+      <View style={ styles.flexDirRow }>
         <View style={ styles.bar }>
           <Text style={ styles.text }>{ code.length > 0 ? code[0] : "" }</Text>
         </View>
@@ -115,6 +113,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flex: 1,
     flexWrap: "wrap"
+  },
+  flexDirRow: {
+    flexDirection: "row"
   },
   height: {
     marginTop: 10,

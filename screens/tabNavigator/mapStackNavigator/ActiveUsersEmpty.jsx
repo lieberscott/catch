@@ -1,27 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Animated, FlatList, Image, StatusBar, StyleSheet, Text, View, Dimensions, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 
 const ActiveUsersEmpty = (props) => {
 
-  const userPhoto = props.userPhoto || 'https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png';
   const [animation, setAnimation] = useState(new Animated.Value(0));
 
   useEffect(() => {
     infiniteLoop();
-    // console.log("useEffect activeUsersEmpty");
-    // Animated.loop(
-    //   Animated.sequence([
-    //     Animated.delay(1500),
-    //     Animated.timing(animation, {
-    //       toValue: 1,
-    //       duration: 1500,
-    //       useNativeDriver: false
-    //     })
-    //   ]),
-    //   {
-    //     iterations: 100
-    //   }
-    // ).start()
   }, []);
 
   const infiniteLoop = () => {
@@ -88,11 +73,8 @@ const styles = StyleSheet.create({
     height: 200,
     width: 200,
     borderRadius: 100,
-    // borderWidth: 1,
-    // borderColor: "white",
     alignItems: "center",
-    justifyContent: "center",
-    // backgroundColor: "white"
+    justifyContent: "center"
   },
   image: {
     height: 125,

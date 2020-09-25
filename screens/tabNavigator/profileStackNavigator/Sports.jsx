@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const turquoise = "#4ECDC4";
 
@@ -8,8 +8,8 @@ const Sports = (props) => {
   
   const s = props.route.params.sports || {
     Baseball: "Played Little League",
-    Football: "Played Pee Wee",
-    Frisbee: "Can Throw a Pretty Good Spiral"
+    Football: "Can Throw A Pretty Good Spiral",
+    Frisbee: "Can Throw a Pretty Good Backhand"
   };
 
   const [baseball, setBaseball] = useState(s.Baseball ? true : false);
@@ -138,10 +138,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 12
   },
-  buttonWrapper: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
   choiceButton: {
     marginVertical: 20,
     backgroundColor: turquoise,
@@ -172,27 +168,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 10
   },
-  flatListItem: {
-    backgroundColor: "#f8f8f8",
-    padding: 10,
-    justifyContent: "space-between",
-    flexDirection: "row"
-  },
-  flatListWrapper: {
-    flex: 1,
-    padding: 10,
-    marginTop: 10,
-    color: "#444",
-    flexDirection: "row"
-  },
-  header: {
-    color: "gray",
-    marginLeft: 10
-  },
-  headerWrapper: {
-    flexDirection: "row",
-    alignItems: "center" 
-  },
   line: {
     width: "90%",
     borderBottomWidth: 0.5,
@@ -206,10 +181,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 10,
     marginTop: 5
-  },
-  oneSection: {
-    marginHorizontal: 20,
-    marginVertical: 10
   },
   subhead: {
     alignSelf: "center",
