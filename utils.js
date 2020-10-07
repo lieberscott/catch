@@ -112,14 +112,7 @@ export const registerForPushNotifications = async () => {
   return token;
 }
 
-export const sendPushNotification = (pushToken, title, body, data) => {
-  const message = {
-    to: pushToken,
-    sound: 'default',
-    title,
-    body,
-    data: { data: 'goes here' }
-  };
+export const sendPushNotification = (notificationsArr) => {
   
   fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',
@@ -128,6 +121,7 @@ export const sendPushNotification = (pushToken, title, body, data) => {
       'Accept-encoding': 'gzip, deflate',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(message),
+    body: JSON.stringify(notificationsArr)
   });
+  return true;
 }

@@ -10,11 +10,11 @@ import { addPhoto } from '../../../utils.js';
 import { StoreContext } from '../../../contexts/storeContext.js';
 const mHorizontal = 20; // body margin
 const turquoise = "#4ECDC4";
+const bodyMarginTop = 20;
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 const { width } = Dimensions.get("window");
-const bodyMarginTop = 20;
 
 const Profile = (props) => {
 
@@ -84,8 +84,8 @@ const Profile = (props) => {
     }
   }
 
-  const updateProfile = async (update, num) => {
-    const result = await updateUser(update, userId);
+  const updateProfile = async (update, num, coords) => {
+    const result = await updateUser(update, userId, coords);
     if (result) {
       // update locally
       const key = Object.keys(update);
@@ -109,7 +109,7 @@ const Profile = (props) => {
       <ScrollView style={ styles.body }>
         <View style={ styles.top }>
           <View>
-            <TouchableOpacity style={ styles.imageWrapper }>
+            <TouchableOpacity style={ styles.imageWrapper } onPress={ () => props.navigation.navigate("ProfileFull", { users: [user] })}>
               <Image source={{ uri: userPhoto }} style={ styles.image } />
             </TouchableOpacity>
             <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
@@ -134,6 +134,7 @@ const Profile = (props) => {
               />
             </View>
           </View>
+          <Text style={ styles.small }>Users will stay active for 6 hours. Conversations are cleared 6 hours after the most recent message.</Text>
         </View>
 
 
@@ -148,7 +149,7 @@ const Profile = (props) => {
               style={ styles.mapStyle }
               // showsUserLocation={ true }
               // followsUserLocation={ true }
-              initialRegion={{ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
+              region={{ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
               // maxZoomLevel={ 17 }
               // minZoomLevel={ 6 }
               // provider={PROVIDER_GOOGLE}
@@ -357,6 +358,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
     alignSelf: "center",
     marginBottom: 40
+  },
+  small: {
+    width: "80%",
+    alignSelf: "center",
+    marginTop: 5
   },
   top: {
     alignItems: "center",

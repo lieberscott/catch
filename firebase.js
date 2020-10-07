@@ -406,15 +406,20 @@ export const sendRequest = async (user, item) => {
 
 
 export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => {
+  console.log("send message in firebase.js");
   // set up updates to all userChats arr (would be more than 2 if there is a group chat)
   const promises = usersArr.map((item, i) => {
-    return firebase.firestore().collection("userChats").doc(item._id).update({ [`${chatId}`]: userChatUpdate })
-  })
+    return firebase.firestore().collection("userChats").doc(item.userId).set({ [`${chatId}`]: userChatUpdate })
+  }, { merge: true });
+
+  console.log("part 2 in firebase.js");
 
   try {
+    console.log("part 3 in firebase.js");
     // Add message to convo messagesArr
     const res = await firebase.firestore().collection("conversations").doc(chatId).update({ messages: firebase.firestore.FieldValue.arrayUnion(message), lastMessageTime: new Date() });
   
+    console.log("part 4 in firebase.js");
     // Add message to BOTH (ALL?) userChats arrs
     const res2 = await Promise.all(promises);
 

@@ -131,7 +131,7 @@ const Messages = (props) => {
         stopLeftSwipe={ 200 }
         stopRightSwipe={ -200 }
         renderHiddenItem={ (data, rowMap) => (
-          <View key={Math.random().toString() } style={styles.rowBack}>
+          <View key={data.item.id + Math.random().toString() } style={styles.rowBack}>
             <TouchableOpacity
               style={[styles.backRightBtn, styles.backRightBtnLeft]}
               onPress={ data.item.toId ? () => decline(data.item) : () => remove(data.item) }

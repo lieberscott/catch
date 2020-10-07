@@ -59,6 +59,7 @@ const Conversation = (props) => {
       const d = snapshot.data();
       let messages0 = d.messages;
       messages0.reverse();
+
       setUsersArr(d.userObjects);
       setMessages(messages0);
       setLoaded(true);
@@ -91,7 +92,7 @@ const Conversation = (props) => {
     const userBlockedArr = otherPersonArray;
     // const convo = convo; // already defined above
 
-    const newUsersArray = convo.usersArr.filter((item, i) => item !== userId)
+    const newUsersArray = convo.usersArr.filter((item, i) => item !== userId);
     // Step 1: Remove user from convo in Firebase
     firebase.firestore().collection("conversations").doc(chatId).update({ usersArray: newUsersArray })
     .then(() => {
@@ -173,6 +174,8 @@ const Conversation = (props) => {
       }
     }
 
+    console.log("part 2");
+
     // Step 0.1: Compose userChat update object
     const userChatUpdate = {
       lastMessageCreatedAt: new Date(),
@@ -182,12 +185,28 @@ const Conversation = (props) => {
       readByReceiver: false
     }
 
+    // Step 0.2: Compose array of notifications
+    const newUsersArray = usersArr.filter((item, i) => item._id !== userId && item.notificationToken !== "-1");
+    const tokensArr = newUsersArray.map((item, i) => item.notificationToken);
+    const notificationsArr = tokensArr.map((item, i) => {
+      return {
+        to: item,
+        sound: 'default',
+        title: "You have received a new message!",
+        // body,
+        // data: { data: 'goes here' }
+      };
+    })
+
+    console.log("part 3");
+
     try {
       const res = await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
+      console.log("res : ", res);
       if (res) {
-        setMessages(GiftedChat.append(arr, [message]));
+        // setMessages(prevState => GiftedChat.append(prevState, [message]));
         setComposerText("");
-        sendPushNotification(userId, userName, otherPersonIdsArray, "You have received a new message");
+        sendPushNotification(notificationsArr);
         registerForPushNotifications();
       }
       else {
@@ -195,7 +214,7 @@ const Conversation = (props) => {
       }
     }
     catch (e) {
-      Alert.alert("", "There was an error. Please try again.");
+      Alert.alert("", "There was an error 2. Please try again.");
     }
   }
 
@@ -212,10 +231,6 @@ const Conversation = (props) => {
 
 
   {/* Animated Styles */}
-
-  const animatedSendingStyles = {
-    transform: [{ rotate: 0 }]
-  }
 
   return (
     <View style={ styles.view }>

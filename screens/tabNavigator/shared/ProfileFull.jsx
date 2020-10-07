@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   },
   profileTextWrapper: {
     width: "100%",
+    paddingHorizontal: 20,
     paddingVertical: 20
   },
   scrollViewInner: {

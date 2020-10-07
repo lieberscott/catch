@@ -142,7 +142,7 @@ const Map = (props) => {
               const active = data.item.active ? data.item.active && new Date(timeOfActivation) > new Date(_12HoursAgo) : true;
 
               return (
-              <View key={Math.random().toString() } style={active ? styles.rowBack : styles.rowBackInactive }>
+              <View key={data.item.id + Math.random().toString() } style={active ? styles.rowBack : styles.rowBackInactive }>
                 <TouchableOpacity
                   activeOpacity={ 1 }
                   style={ [styles.backRightBtn, styles.backRightBtnRight] }
@@ -178,11 +178,11 @@ const Map = (props) => {
 
               if (item.userObjects) {
                 const conversation = item.userObjects.length > 1 ? true : false;
-              return <AreaConversationRow key={ item.id + Math.random() } users={ item.userObjects } distance={ item.distance } hours={ hours } />
+              return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } />
               }
               else {
                 // this will always only be one user, but in an array [{ }] so you can reuse the AreaConversationRow component
-                return <AreaConversationRow key={ item._id + Math.random() } users={ [item] } distance={ item.distance } hours={ hours } />
+                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } />
               }
             }}
             ListFooterComponent={() => areaConversations.length ?  <View style={ styles.body }>
@@ -225,10 +225,14 @@ const Map = (props) => {
           const users = convo.userObjects ? convo.userObjects : [convo];
           const len = users.length;
 
+          let sixHoursAgo = new Date();
+          sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
+
+
           return (
             <Marker
               pinColor={ i === 0 ? "green" : "red" }
-              key={ "pin" + i + Math.random() }
+              key={ "pin" + convo.id }
               coordinate={{ latitude: convo.coordinates.latitude, longitude: convo.coordinates.longitude }}
               // title={ pin.name }
               // description={ pin.profile_text }
@@ -237,7 +241,7 @@ const Map = (props) => {
               <Callout onPress={ i === 0 ? undefined : () => props.navigation.navigate("UsersList", { users }) }>
                 <Image style={ styles.image } source={{ uri: users[0].photo }} />
                 { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
-                { i === 0 ?<Text style={ styles.centerText }>Your location</Text> : <Fragment><View style={ styles.centerText }>
+                { i === 0 ?<Text style={ styles.centerText }>{ convo.active && new Date(timeOfActivation) > new Date(sixHoursAgo) ? "Active" : "Inactive" }</Text> : <Fragment><View style={ styles.centerText }>
                   <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
                 </View>
                 <View>
@@ -289,18 +293,21 @@ const styles = StyleSheet.create({
   },
   centerText: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    textAlign: "center"
   },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    width: width
+    width: width,
+    paddingTop: 20
   },
   flexOne: {
     flex: 1,
-    alignItems: "center"
+    alignItems: "center",
+    backgroundColor: "white"
   },
   flexZero: {
     flex: 0

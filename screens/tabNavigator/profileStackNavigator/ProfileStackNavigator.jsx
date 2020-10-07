@@ -14,15 +14,15 @@ const Stack = createStackNavigator();
 
 export default function ProfileStackNavigator() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Profile" component={Profile} options={{ title: "" }}/>
-      <Stack.Screen name="Name" component={Name} options={{ title: "" }}/>
-      <Stack.Screen name="DateOfBirth" component={DateOfBirth} options={{ title: "" }}/>
-      <Stack.Screen name="Gender" component={Gender} options={{ title: "" }}/>
-      <Stack.Screen name="Notifications" component={Notifications} options={{ title: "" }}/>
-      <Stack.Screen name="Sports" component={Sports} options={{ title: "" }}/>
-      <Stack.Screen name="Map" component={Map} options={{ title: "" }}/>
-      <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }}/>
+    <Stack.Navigator headerMode="screen">
+      <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="Name" component={Name} options={{ title: "" }} />
+      <Stack.Screen name="DateOfBirth" component={DateOfBirth} options={{ title: "" }} />
+      <Stack.Screen name="Gender" component={Gender} options={{ title: "" }} />
+      <Stack.Screen name="Notifications" component={Notifications} options={{ title: "" }} />
+      <Stack.Screen name="Sports" component={Sports} options={{ title: "" }} />
+      <Stack.Screen name="Map" component={Map} options={{ title: "" }} />
+      <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }} />
     </Stack.Navigator>
   );
 }
