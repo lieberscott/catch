@@ -194,7 +194,8 @@ const styles = StyleSheet.create({
   bottom: {
     flex: 6,
     backgroundColor: "white",
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    width: "100%"
   },
   rowBack: {
     alignItems: 'center',

@@ -36,10 +36,8 @@ function MyStack() {
       // Step 1: Get user
       (async () => {
         try {
-          console.log("Step 2: Get user auth object");
           // Step 2: Get user from auth object
           const uid = await getAuthUser();
-          console.log("Step 3: Get user from users collection");
           // Step 3: Get user from users collection
           let u = await getDbUser(uid);
           u._id = uid;
@@ -54,15 +52,53 @@ function MyStack() {
     }
   }, []);
 
+  useEffect(() => {
+    if (user.onboardingDone && !gotAreaConversations) {
+      // Step 4: If user has completed onboarding, get other users based on geolocation
+      (async () => {
+        try {
+          const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
+          
+          // filter out blockedUsers from areaUsers
+          const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
+          let arr0 = arr[0].filter((item) => {
+            let blocked = false;
+            for (let i = 0; i < blockedUsers.length; i++) {
+              if (item._id === blockedUsers[i].userId) {
+                blocked = true;
+              }
+            }
+            return !blocked;
+          });
 
-
+          // filter out blockedUsers from areaConversations
+          let arr1 = arr[1].filter((item) => {
+            let blocked = false;
+            for (let i = 0; i < blockedUsers.length; i++) {
+              const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+              if (index !== -1) {
+                blocked = true;
+              }
+            }
+            return !blocked;
+          });
+          
+          setAreaUsers(arr0);
+          setAreaConversations(arr1);
+          setGotAreaConversations(true);
+        }
+        catch (e) {
+          console.log("get area users error : ", e);
+        }
+      })();
+    }
+  }, [loading, user]);
 
   useEffect(() => {
     let unsubscribe;
     const userId = user._id;
-    // Step 4: Set up listener for userChats from Firebase
-    if (user.onboardingDone && !gotUserChats) {
-      console.log("Step 4: Set up listener for userChats");
+    // Step 5: Set up listener for userChats from Firebase
+    if (gotAreaConversations && !gotUserChats) {
       unsubscribe = firebase.firestore().collection("userChats").doc(userId)
       .onSnapshot((snapshot) => {
         let d = snapshot.data();
@@ -119,15 +155,13 @@ function MyStack() {
         unsubscribe();
       }
     }
-  }, [user, loading]);
-
-
+  }, [gotAreaConversations, loading]);
+  
   useEffect(() => {
-    // Step 5: Set up listener and get requests
+    // Step 6: Set up listener and get requests
     let unsubscribe2;
     let arr = [];
-    if (gotUserChats && !gotRequests) {
-      console.log("Step 5: Set up listener for requests");
+    if (gotUserChats && !allLoaded) {
       unsubscribe2 = firebase.firestore().collection("requests")
       .where("toId", "==", user._id)
       .onSnapshot((snapshot) => {
@@ -146,8 +180,9 @@ function MyStack() {
         });
 
         setRequests(uniqueArr);
-        setGotRequests(true);
       });
+
+      setAllLoaded(true);
     }
     return () => {
       if (unsubscribe2 != undefined) {
@@ -155,82 +190,6 @@ function MyStack() {
         unsubscribe2();
       }    }
   }, [gotUserChats]);
-
-
-
-
-
-  useEffect(() => {
-    if (gotRequests && !allLoaded) {
-      // Step 6: If user has completed onboarding, get other users based on geolocation
-      (async () => {
-        console.log("Step 6: getAreaUsersAndConversations");
-        try {
-          const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-          
-          // filter out blockedUsers from areaUsers
-          const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
-          let arr0 = arr[0].filter((item) => {
-            let blocked = false;
-            for (let i = 0; i < blockedUsers.length; i++) {
-              if (item._id === blockedUsers[i].userId) {
-                blocked = true;
-              }
-            }
-            return !blocked;
-          });
-
-          // filter out blockedUsers from areaConversations
-          let arr1 = arr[1].filter((item) => {
-            let blocked = false;
-            for (let i = 0; i < blockedUsers.length; i++) {
-              const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
-              if (index !== -1) {
-                blocked = true;
-              }
-            }
-            return !blocked;
-          });
-
-          // filter out requests from areaUsers
-          let arr02 = arr0.filter((item) => {
-            let req = false;
-            for (let i = 0; i < requests.length; i++) {
-              if (item._id === requests[i]._id) {
-                req = true;
-              }
-            }
-            return !req;
-          });
-
-          // filter out userChats from areaUsers
-          let arr03 = arr02.filter((item) => {
-            let userChat = false;
-            for (let i = 0; i < userChats.length; i++) {
-              for (let j = 0; j < userChats[i].usersArr.length; j++) {
-                if (item._id === userChats[i].usersArr[j].userId) {
-                  userChat = true;
-                }
-              }
-            }
-            return !userChat;
-          });
-
-          
-          setAreaUsers(arr03);
-          setAreaConversations(arr1);
-          setAllLoaded(true);
-        }
-        catch (e) {
-          console.log("get area users error : ", e);
-        }
-      })();
-    }
-  }, [gotRequests]);
-
-  
-
-
 
 
   return (

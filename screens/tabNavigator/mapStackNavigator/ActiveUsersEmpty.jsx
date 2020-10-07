@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const ActiveUsersEmpty = (props) => {
 
   const [animation, setAnimation] = useState(new Animated.Value(0));
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     infiniteLoop();
   }, []);
+
 
   const infiniteLoop = () => {
     Animated.timing(animation, {
@@ -46,7 +48,12 @@ const ActiveUsersEmpty = (props) => {
   }
 
   return (
-    <View style={ styles.container }>
+    <ScrollView
+      contentContainerStyle={ styles.container }
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={ () => props.onRefresh() } />
+      }
+    >
       <Animated.View style={ animatedPulseStyles } />
         <View style={ styles.imageWrapper }>
           <Image
@@ -56,9 +63,9 @@ const ActiveUsersEmpty = (props) => {
           />
         </View>
         <View style={ styles.title }>
-          <Text>Finding users in your area</Text>
+          <Text style={ styles.text }>There are no active users in your area. Try again later or pull down to refresh.</Text>
         </View>
-    </View>
+    </ScrollView>
   )
 }
 
@@ -81,6 +88,9 @@ const styles = StyleSheet.create({
     width: 125,
     flex: 1,
     borderRadius: 100
+  },
+  text: {
+    textAlign: "center"
   },
   title: {
     position: "absolute",

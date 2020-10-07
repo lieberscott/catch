@@ -9,7 +9,6 @@ import Notifications from './Notifications';
 import Sports from './Sports';
 import Map from './Map';
 import ProfileText from './ProfileText';
-import Active from './Active';
 
 const Stack = createStackNavigator();
 
@@ -24,7 +23,6 @@ export default function ProfileStackNavigator() {
       <Stack.Screen name="Sports" component={Sports} options={{ title: "" }}/>
       <Stack.Screen name="Map" component={Map} options={{ title: "" }}/>
       <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }}/>
-      <Stack.Screen name="Active" component={Active} options={{ title: "" }}/>
     </Stack.Navigator>
   );
 }

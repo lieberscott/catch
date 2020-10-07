@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
 import { Alert, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
@@ -31,6 +31,7 @@ const Map = (props) => {
   const areaConversations0 = store.areaConversations || [];
   const areaUsers = store.areaUsers || [];
   const areaConversations = areaConversations0.concat(areaUsers);
+  areaConversations.unshift(user);
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
@@ -45,41 +46,46 @@ const Map = (props) => {
   }, []);
 
   const request = async (item) => {
-    try {
-      const token = await registerForPushNotifications();
-      if (token) {
-        const res1 = await addPushNotification(user._id, token);
-      }
-      const res2 = await sendRequest(user, item);
-
-      if (res2) {
-        // add that outgoing request has been made to areaConversations locally so you don't request twice
-        
-        if (item.createdAt) { // createdAt is a property on the pure user object, but is not included in the areaConversation "user" object
-          let newAreaUsers = areaUsers.map((user, i) => {
-            if (user._id == item._id) {
-              user.requestAlreadyMade = true;
-            }
-            return user;
-          });
-          // console.log("newAreaUsers : ", newAreaUsers);
-          store.setAreaUsers(newAreaUsers);
-        }
-        else {
-          let newAreaConversations = areaConversations0.map((convo, i) => {
-            if (convo._id == item._id) {
-              convo.requestAlreadyMade = true;
-            }
-            return convo;
-          });
-          store.setAreaConversations(newAreaConversations);
-        }
-        Alert.alert("", "Your request has been sent!");
-      }
-
+    if (!user.active) {
+      Alert.alert("", "You must mark yourself as `active` on your profile page in order to request games of catch!");
     }
-    catch(e) {
-      console.log("request error : ", e);
+    else {
+      try {
+        const token = await registerForPushNotifications();
+        if (token) {
+          const res1 = await addPushNotification(user._id, token);
+        }
+        const res2 = await sendRequest(user, item);
+
+        if (res2) {
+          // add that outgoing request has been made to areaConversations locally so you don't request twice
+          
+          if (item.createdAt) { // createdAt is a property on the pure user object, but is not included in the areaConversation "user" object
+            let newAreaUsers = areaUsers.map((user, i) => {
+              if (user._id == item._id) {
+                user.requestAlreadyMade = true;
+              }
+              return user;
+            });
+            // console.log("newAreaUsers : ", newAreaUsers);
+            store.setAreaUsers(newAreaUsers);
+          }
+          else {
+            let newAreaConversations = areaConversations0.map((convo, i) => {
+              if (convo._id == item._id) {
+                convo.requestAlreadyMade = true;
+              }
+              return convo;
+            });
+            store.setAreaConversations(newAreaConversations);
+          }
+          Alert.alert("", "Your request has been sent!");
+        }
+
+      }
+      catch(e) {
+        console.log("request error : ", e);
+      }
     }
   }
 
@@ -87,32 +93,8 @@ const Map = (props) => {
     try {
       const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
       
-      // filter out blockedUsers from areaUsers
-      const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
-      let arr0 = arr[0].filter((item) => {
-        let blocked = false;
-        for (let i = 0; i < blockedUsers.length; i++) {
-          if (item._id === blockedUsers[i].userId) {
-            blocked = true;
-          }
-        }
-        return !blocked;
-      });
-
-      // filter out blockedUsers from areaConversations
-      let arr1 = arr[1].filter((item) => {
-        let blocked = false;
-        for (let i = 0; i < blockedUsers.length; i++) {
-          const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
-          if (index !== -1) {
-            blocked = true;
-          }
-        }
-        return !blocked;
-      });
-      
-      store.setAreaUsers(arr0);
-      store.setAreaConversations(arr1);
+      store.setAreaUsers(arr[0]);
+      store.setAreaConversations(arr[1]);
     }
     catch (e) {
       console.log("get area users error : ", e);
@@ -120,8 +102,8 @@ const Map = (props) => {
   }
 
   return (
-    <View style={{ flex: 1, alignItems: "center" }}>
-      <SafeAreaView style={{ flex: 0 }} />
+    <View style={ styles.flexOne }>
+      <SafeAreaView style={ styles.flexZero } />
       <AdMobBanner
         bannerSize="banner"
         adUnitID={ Platform.OS === 'ios' ? "ca-app-pub-8262004996000143/8383797064" : "ca-app-pub-8262004996000143/6607680969" } // Test ID, Replace with your-admob-unit-id
@@ -132,7 +114,7 @@ const Map = (props) => {
         <StatusBar barStyle="dark-content" />
         { /* FlatList of Conversations */ }
         <View style={ styles.top }>
-          { areaConversations.length === 0 ? <ActiveUsersEmpty userPhoto={ userPhoto } /> : <SwipeListView
+          { areaConversations.length === 0 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
             keyExtractor={ (item, key) => item.userObjects ? item.id + Math.random() : item._id + Math.random() }
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
@@ -146,6 +128,7 @@ const Map = (props) => {
             data={ areaConversations }
             ItemSeparatorComponent={() => <View style={ styles.alignCenter }><View style={ styles.separator } /></View> }
             renderHiddenItem={ (data, rowMap) => {
+
               let timeOfActivation;
         
               if (data.item.lastMessageTime) {
@@ -175,6 +158,9 @@ const Map = (props) => {
             previewOpenValue={-40}
             previewOpenDelay={3000}
             renderItem={({ item, index }) => {
+              if (index === 0) {
+                return <View />;
+              }
               let timeOfActivation;
               let now = new Date();
               let hours;
@@ -241,23 +227,23 @@ const Map = (props) => {
 
           return (
             <Marker
-              pinColor="red"
+              pinColor={ i === 0 ? "green" : "red" }
               key={ "pin" + i + Math.random() }
               coordinate={{ latitude: convo.coordinates.latitude, longitude: convo.coordinates.longitude }}
               // title={ pin.name }
               // description={ pin.profile_text }
               // onCalloutPress={ () => navigation.navigate("ProfileFull", { user: pin }) }
             >
-              <Callout onPress={ () => props.navigation.navigate("UsersList", { users }) }>
+              <Callout onPress={ i === 0 ? undefined : () => props.navigation.navigate("UsersList", { users }) }>
                 <Image style={ styles.image } source={{ uri: users[0].photo }} />
                 { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                { i === 0 ?<Text style={ styles.centerText }>Your location</Text> : <Fragment><View style={ styles.centerText }>
                   <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
                 </View>
                 <View>
                   <Text style={ styles.active }>{ hours } hours ago</Text>
                 </View>
-                <Text style={ styles.distanceText }>{ convo.distance <= 1 ? "Less than a mile away" : convo.distance + " miles away" }</Text>
+                <Text style={ styles.distanceText }>{ convo.distance <= 1 ? "Less than a mile away" : convo.distance + " miles away" }</Text></Fragment> }
               </Callout>
             </Marker>
           )
@@ -301,12 +287,23 @@ const styles = StyleSheet.create({
     width: imageDimensions,
     marginRight: imageMarginR
   },
+  centerText: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     width: width
+  },
+  flexOne: {
+    flex: 1,
+    alignItems: "center"
+  },
+  flexZero: {
+    flex: 0
   },
   image: {
     borderRadius: 50,

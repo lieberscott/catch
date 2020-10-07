@@ -274,7 +274,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     // get areaConversations - not a listener, just a get
     const docs = await geocollection.near({
       center: new firebase.firestore.GeoPoint(userLoc.latitude, userLoc.longitude),
-      radius: 3200 // km converts to 20 miles
+      radius: 32 // km converts to 20 miles
     }).get();
 
     // slice out all the conversations involving user (since they will be in userChats)
@@ -283,7 +283,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       d.id = doc.id;
 
       // area conversations - only push if conversation does not include user
-      if (d.userObjects.findIndex((item, i) => item._id === userId) !== -1) {
+      if (d.userObjects.findIndex((item, i) => item._id === userId) === -1) {
         areaConversations0.push(d);
       }
     });
@@ -304,8 +304,8 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
 
     const docs2 = await geocollection2.near({
-      center: new firebase.firestore.GeoPoint(41.1, -87.9),
-      radius: 3200 // km converts to 20 miles
+      center: new firebase.firestore.GeoPoint(userLoc.latitude, userLoc.longitude),
+      radius: 32 // km converts to 20 miles
     })
     .get();
 
@@ -328,10 +328,6 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     // filter out users who aren't active
     const areaUsers1 = areaUsers0.filter((item, i) => {
       const timeOfActivation = item.timeOfActivation.seconds ? new Date(item.timeOfActivation.seconds * 1000) : new Date(item.timeOfActivation);
-      
-      console.log("i : ", i);
-      console.log("timeOfActivation : ", timeOfActivation);
-      console.log("timeOfActivation > sixHoursAgo : ", timeOfActivation > sixHoursAgo);
       if (item.active && new Date(timeOfActivation) > new Date(sixHoursAgo)) {
         return true;
       }
@@ -442,43 +438,259 @@ export const createConvos = async () => { // not for production, only for testin
   const geocollection2 = geofirestore.collection("users");
 
   let newConvo = {
-    coordinates: new firebase.firestore.GeoPoint(41.88043118753208, -87.63034075498381),
+    coordinates: new firebase.firestore.GeoPoint(41.88656118753228, -87.63254075498391),
     createdAt: new Date(),
     messages: [
       {
-        _id: "someId",
+        _id: "someMessageId",
         createdAt: new Date(2020, 7, 9),
-        text: "Yo",
+        text: "Hey, what's up?",
         user: {
-          _id: "userId",
-          avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-          name: "Zach"
+          _id: "myUserId7",
+          avatar: "https://randomuser.me/api/portraits/men/17.jpg",
+          name: "Goran"
         }
       },
       {
-        _id: "someId2",
+        _id: "someMessageId2",
         createdAt: new Date(2020, 8, 9),
-        text: "Yo to you",
+        text: "Meh, not much",
         user: {
-          _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
-          avatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
-          name: "Scott"
+          _id: "myUserId8",
+          avatar: "https://randomuser.me/api/portraits/men/18.jpg",
+          name: "Hagar Horrible"
         }
       }
     ],
     userObjects: [
       {
-        _id: "userId",
-        name: "Zach",
-        date_of_birth: new Date(1993, 1, 1),
+        _id: "myUserId7",
+        coordinates: { latitude: 41.88656118753228, longitude: -87.63254075498391 },
+        date_of_birth: new Date(1993, 2, 3),
         gender: false,
-        coordinates: { latitude: 41.88043118753208, longitude: -87.63034075498381 },
-        sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-        photo: "https://randomuser.me/api/portraits/men/65.jpg",
         getsNotifications: true,
-        notificationToken: "token1",
-        profileText: "This is my profile"
+        name: "Goran",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/17.jpg",
+        profileText: "I will be involved in conversation with Hagar Horrible",
+        sports: { Baseball: { interested: true, skill_level: "Played Little League" }, Football: { interested: true, skill_level: "Can throw a pretty good spiral" }, Frisbee: { interested: true, skill_level: "Good backhand thrower" } },
       },
+      {
+        _id: "myUserId8",
+        coordinates: new firebase.firestore.GeoPoint(41.88556118753228, -87.63454075498391),
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Hagar Horrible",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/18.jpg",
+        profileText: "I will be involved in conversation with Goran",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
+      }
+    ],
+    timeOfActivation: new Date(2020, 9, 8)
+  };
+
+  let newConvo2 = {
+    coordinates: new firebase.firestore.GeoPoint(30.88556118753228, -87.63054075498391),
+    createdAt: new Date(),
+    messages: [
+      {
+        _id: "someMessageId",
+        createdAt: new Date(2020, 7, 9),
+        text: "Hey, what's up?",
+        user: {
+          _id: "myUserId9",
+          avatar: "https://randomuser.me/api/portraits/men/19.jpg",
+          name: "Igor"
+        }
+      },
+      {
+        _id: "someMessageId2",
+        createdAt: new Date(2020, 8, 9),
+        text: "Meh, not much still",
+        user: {
+          _id: "myUserId10",
+          avatar: "https://randomuser.me/api/portraits/men/20.jpg",
+          name: "Jaialai"
+        }
+      }
+    ],
+    userObjects: [
+      {
+        _id: "myUserId9",
+        coordinates: { latitude: 30.88556118753228, longitude: -87.63054075498391 },
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Igor",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/19.jpg",
+        profileText: "I will be involved in conversation outside Geolocation with Jaialai",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
+      },
+      {
+        _id: "myUserId10",
+        coordinates: { latitude: 30.89956118753228, longitude: -87.63054075498391 },
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Jaialai",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/20.jpg",
+        profileText: "I will be involved in conversation outside Geolocation with Igor",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
+      }
+    ],
+    timeOfActivation: new Date(2020, 9, 8)
+  };
+
+  let newConvo3 = {
+    coordinates: new firebase.firestore.GeoPoint(41.88756118753228, -87.63554075498391),
+    createdAt: new Date(),
+    messages: [
+      {
+        _id: "someMessageId",
+        createdAt: new Date(2020, 7, 9),
+        text: "Hey, what's up?",
+        user: {
+          _id: "myUserId11",
+          avatar: "https://randomuser.me/api/portraits/men/21.jpg",
+          name: "Keanu"
+        }
+      },
+      {
+        _id: "someMessageId2",
+        createdAt: new Date(2020, 8, 9),
+        text: "Meh, not much still",
+        user: {
+          _id: "myUserId12",
+          avatar: "https://randomuser.me/api/portraits/men/22.jpg",
+          name: "Leury"
+        }
+      }
+    ],
+    userObjects: [
+      {
+        _id: "myUserId11",
+        coordinates: { latitude: 41.88756118753228, longitude: -87.63554075498391 },
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Keanu",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/21.jpg",
+        profileText: "I will be involved in conversation with both Scott and Leury",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
+      },
+      {
+        _id: "myUserId12",
+        coordinates: { latitude: 41.88956118753228, longitude: -87.63554075498391 },
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Leury",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/22.jpg",
+        profileText: "I will be involved in conversation with just Keanu",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
+      }
+    ],
+    timeOfActivation: new Date(2020, 9, 8)
+  };
+
+
+  let newConvo4 = {
+    coordinates: new firebase.firestore.GeoPoint(41.88043118753208, -87.63034075498481),
+    createdAt: new Date(),
+    messages: [
+      {
+        _id: "someMessageId",
+        createdAt: new Date(2020, 7, 9),
+        text: "Hey, what's up?",
+        user: {
+          _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
+          avatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+          name: "Scott"
+        }
+      },
+      {
+        _id: "someMessageId2",
+        createdAt: new Date(2020, 8, 9),
+        text: "Meh, not much still",
+        user: {
+          _id: "myUserId11",
+          avatar: "https://randomuser.me/api/portraits/men/21.jpg",
+          name: "Keanu"
+        }
+      }
+    ],
+    userObjects: [
       {
         _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
         name: "Scott",
@@ -490,17 +702,45 @@ export const createConvos = async () => { // not for production, only for testin
         getsNotifications: true,
         notificationToken: "token",
         profileText: "Looking to play baseball catch"
+      },
+      {
+        _id: "myUserId11",
+        coordinates: { latitude: 41.88756118753228, longitude: -87.63554075498391 },
+        date_of_birth: new Date(1993, 2, 3),
+        gender: false,
+        getsNotifications: true,
+        name: "Keanu",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/21.jpg",
+        profileText: "I will be involved in conversation with both Scott and Leury",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
       }
-    ]
+    ],
+    timeOfActivation: new Date(2020, 9, 8)
   };
-  let newConvo2 = {
-    coordinates: new firebase.firestore.GeoPoint(41.88043118753218, -87.63034075498381),
+
+
+  let newConvo5 = {
+    coordinates: new firebase.firestore.GeoPoint(41.88043118753208, -87.63034075498481),
     createdAt: new Date(),
     messages: [
       {
-        _id: "someId2",
-        createdAt: new Date(2020, 8, 9),
-        text: "Now I'm initiating the convo",
+        _id: "someMessageId",
+        createdAt: new Date(2020, 7, 9),
+        text: "Hey, what's up?",
         user: {
           _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
           avatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
@@ -508,13 +748,13 @@ export const createConvos = async () => { // not for production, only for testin
         }
       },
       {
-        _id: "someId3",
-        createdAt: new Date(2020, 7, 9),
+        _id: "someMessageId2",
+        createdAt: new Date(2020, 8, 9),
         text: "Cool bro",
         user: {
-          _id: "userId2",
-          avatar: "https://randomuser.me/api/portraits/men/66.jpg",
-          name: "Yoni"
+          _id: "myUserId6",
+          avatar: "https://randomuser.me/api/portraits/men/16.jpg",
+          name: "Felonios"
         }
       }
     ],
@@ -524,7 +764,7 @@ export const createConvos = async () => { // not for production, only for testin
         name: "Scott",
         date_of_birth: new Date(1984, 3, 25),
         gender: 0,
-        coordinates: { latitude: 41.88043118753218, longitude: -87.63034075498481 },
+        coordinates: { latitude: 41.88043118753208, longitude: -87.63034075498481 },
         sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
         photo: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
         getsNotifications: true,
@@ -532,30 +772,47 @@ export const createConvos = async () => { // not for production, only for testin
         profileText: "Looking to play baseball catch"
       },
       {
-        _id: "userId2",
-        name: "Yoni",
-        date_of_birth: new Date(1993, 1, 1),
+
+        _id: "myUserId6",
+        coordinates: { latitude: 41.88656118753228, longitude: -87.63154075498391 },
+        date_of_birth: new Date(1993, 2, 3),
         gender: false,
-        coordinates: { latitude: 41.88043118753208, longitude: -87.63034075498381 },
-        sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-        photo: "https://randomuser.me/api/portraits/men/66.jpg",
         getsNotifications: true,
-        notificationToken: "token2",
-        profileText: "This is my profile again as Yoni"
+        name: "Felonios",
+        notificationToken: "-1",
+        photo: "https://randomuser.me/api/portraits/men/16.jpg",
+        profileText: "I will be involved in a conversation with Scott",
+        sports: {
+          Baseball: {
+            interested: true,
+            skill_level: "Played Little League"
+          },
+          Football: {
+            interested: true,
+            skill_level: "Can throw a pretty good spiral"
+          },
+          Frisbee: {
+            interested: true,
+            skill_level: "Good backhand thrower"
+          }
+        }
       }
-    ]
-  }
-  let userChat = {
+    ],
+    timeOfActivation: new Date(2020, 9, 8)
+  };
+  
+
+  let userChat4 = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
-    lastMessageFromId: "01P4eORz41OmDL4HxHHegnrAIYu1",
-    lastMessageFromname: "Scott",
-    lastMessageText: "We're meeting at the old playground near the Stevens place",
+    lastMessageFromId: "myUserId11",
+    lastMessageFromname: "Keanu",
+    lastMessageText: "Cool bro",
     readByReceiver: false,
     usersArr: [
       {
-        userAvatar: "https://randomuser.me/api/portraits/men/65.jpg",
-        userName: "Zach",
-        userId: "userId"
+        userAvatar: "https://randomuser.me/api/portraits/men/21.jpg",
+        userName: "Keanu",
+        userId: "myUserId11"
       },
       {
         userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
@@ -565,17 +822,17 @@ export const createConvos = async () => { // not for production, only for testin
     ]
   }
 
-  let userChat2 = {
+  let userChat5 = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
-    lastMessageFromId: "userId2",
-    lastMessageFromname: "Yoni",
+    lastMessageFromId: "myUserId6",
+    lastMessageFromname: "Felonios",
     lastMessageText: "Cool bro",
     readByReceiver: false,
     usersArr: [
       {
-        userAvatar: "https://randomuser.me/api/portraits/men/66.jpg",
-        userName: "Yoni",
-        userId: "userId2"
+        userAvatar: "https://randomuser.me/api/portraits/men/16.jpg",
+        userName: "Felonios",
+        userId: "myUserId6"
       },
       {
         userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
@@ -586,39 +843,21 @@ export const createConvos = async () => { // not for production, only for testin
   }
 
   try {
-    const res = await geocollection.add(newConvo);
-    const res2 = await geocollection.add(newConvo2);
-    const docId = res.id;
-    const docId2 = res2.id;
-    userChat.chatId = docId;
-    userChat2.chatId = docId2;
-    // console.log("res : ", res);
-    // console.log("res2 : ", res2);
-    const res3 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
-      [`${docId}`]: userChat
-    }, { merge: true });
-    const res4 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
-      [`${docId2}`]: userChat2
-    }, { merge: true });
-    const res5 = await firebase.firestore().collection("userChats").doc("userId").set({
-      [`${docId}`]: userChat
-    });
-    const res6 = await firebase.firestore().collection("userChats").doc("userId2").set({
-      [`${docId2}`]: userChat2
-    });
-    const res7 = await geocollection2.add({
+
+    const pers1 = await geocollection2.add({
       _id: "myUserId",
       active: true,
       available: true,
-      coordinates: new firebase.firestore.GeoPoint(41.88043118753228, -87.63034075498391),
-      createdAt: new Date(),
-      date_of_birth: new Date(1983, 3, 3),
+      coordinates: new firebase.firestore.GeoPoint(41.88046118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
       gender: false,
       getsNotifications: true,
+      name: "Abel",
       notificationToken: "-1",
       onboardingDone: false,
-      photo: "https://randomuser.me/api/portraits/men/34.jpg",
-      profileText: "I'm a fake user",
+      photo: "https://randomuser.me/api/portraits/men/10.jpg",
+      profileText: "I'm supposed to be active but timeOfActivation was longer than 6 hours ago",
       sports: {
         Baseball: {
           interested: true,
@@ -633,8 +872,371 @@ export const createConvos = async () => { // not for production, only for testin
           skill_level: "Good backhand thrower"
         }
       },
-      timeOfActivation: new Date(2020, 11, 11)
-    })
+      timeOfActivation: new Date(2020, 9, 5)
+    });
+
+    const pers2 = await geocollection2.add({
+      _id: "myUserId2",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88116118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Bort",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/11.jpg",
+      profileText: "I'm supposed to be active AND timeOfActivation was WITHIN the last 6 hours",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers3 = await geocollection2.add({
+      _id: "myUserId3",
+      active: false,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88256118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Cain",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/13.jpg",
+      profileText: "I'm supposed to be inactive",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers4 = await geocollection2.add({
+      _id: "myUserId4",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(35.88356118753228, -89.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Delonte",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/14.jpg",
+      profileText: "I'm supposed to be more than 20 miles away",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers5 = await geocollection2.add({
+      _id: "myUserId5",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88556118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Elon",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/15.jpg",
+      profileText: "I'm supposed to be blocked (eventually)",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+    
+    const pers6 = await geocollection2.add({
+      _id: "myUserId6",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88656118753228, -87.63154075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Felonios",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/16.jpg",
+      profileText: "I will be involved in a conversation with Scott",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers7 = await geocollection2.add({
+      _id: "myUserId7",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88656118753228, -87.63254075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Goran",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/17.jpg",
+      profileText: "I will be involved in conversation with Hagar Horrible",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers8 = await geocollection2.add({
+      _id: "myUserId8",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88556118753228, -87.63454075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Hagar Horrible",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/18.jpg",
+      profileText: "I will be involved in conversation with Goran",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers9 = await geocollection2.add({
+      _id: "myUserId9",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(30.88556118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Igor",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/19.jpg",
+      profileText: "I will be involved in conversation outside Geolocation with Jaialai",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers10 = await geocollection2.add({
+      _id: "myUserId10",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(30.89956118753228, -87.63054075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Jaialai",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/20.jpg",
+      profileText: "I will be involved in conversation outside Geolocation with Igor",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers11 = await geocollection2.add({
+      _id: "myUserId11",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88756118753228, -87.63554075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Keanu",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/21.jpg",
+      profileText: "I will be involved in conversation with both Scott and Leury",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+    const pers12 = await geocollection2.add({
+      _id: "myUserId12",
+      active: true,
+      available: true,
+      coordinates: new firebase.firestore.GeoPoint(41.88956118753228, -87.63554075498391),
+      createdAt: new Date(2020, 1, 1),
+      date_of_birth: new Date(1993, 2, 3),
+      gender: false,
+      getsNotifications: true,
+      name: "Leury",
+      notificationToken: "-1",
+      onboardingDone: false,
+      photo: "https://randomuser.me/api/portraits/men/22.jpg",
+      profileText: "I will be involved in conversation with just Keanu",
+      sports: {
+        Baseball: {
+          interested: true,
+          skill_level: "Played Little League"
+        },
+        Football: {
+          interested: true,
+          skill_level: "Can throw a pretty good spiral"
+        },
+        Frisbee: {
+          interested: true,
+          skill_level: "Good backhand thrower"
+        }
+      },
+      timeOfActivation: new Date(2020, 9, 7)
+    });
+
+
+
+    const res = await geocollection.add(newConvo);
+    const res2 = await geocollection.add(newConvo2);
+    const res3 = await geocollection.add(newConvo3);
+    const res4 = await geocollection.add(newConvo4);
+    const res5 = await geocollection.add(newConvo5);
+    const docId4 = res4.id;
+    const docId5 = res5.id;
+
+
+    userChat4.chatId = docId4;
+    userChat5.chatId = docId5;
+    // console.log("res : ", res);
+    // console.log("res2 : ", res2);
+    const res6 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
+      [`${docId4}`]: userChat4
+    }, { merge: true });
+    const res7 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
+      [`${docId5}`]: userChat5
+    }, { merge: true });
   }
 
   catch (e) {

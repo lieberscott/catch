@@ -6,6 +6,8 @@ import ReportModal from './ReportModal';
 import * as firebase from 'firebase';
 import firestore from 'firebase/firestore';
 
+import { StoreContext } from '../../../contexts/storeContext';
+
 import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
 
 const turquoise = "#4ECDC4";
