@@ -193,7 +193,6 @@ export const uploadImage = async (blob, name, prevUrl) => {
 
     // if replacing a photo, delete previous photo (only WON'T be used during initial onboarding)
     if (prevUrl) {
-      console.log("prevUrl : ", prevUrl);
       const deleteRef = firebase.storage().refFromURL(prevUrl);
       await deleteRef.delete();
     }
@@ -215,7 +214,7 @@ export const loginUser = async (credential) => {
     
     if (result.additionalUserInfo.isNewUser) {
       console.log("isNewUser");
-      const res = firebase.firestore().collection("users").doc(result.user.uid).set({
+      const res = await firebase.firestore().collection("users").doc(result.user.uid).set({
       // const res = await firebase.database().ref("users/" + result.user.uid).set({
         _id: result.user.uid,
         createdAt: new Date(),
@@ -239,9 +238,14 @@ export const loginUser = async (credential) => {
 }
 
 export const getAuthUser = async () => {
-  const userRes = firebase.auth().currentUser;
-  console.log("userRes.uid in firebase.js");
-  return userRes.uid;
+  const user = firebase.auth().currentUser;
+  return user.uid;
+}
+
+export const reauthenticateUser = async () => {
+  const user = firebase.auth().currentUser;
+  const credentials = firebase.auth.EmailAuthProvider.credential('puf@firebaseui.com', 'firebase');
+
 }
 
 export const getDbUser = async (uid) => {
@@ -395,7 +399,7 @@ export const sendRequest = async (user, item) => {
   }
 
   try {
-    await firebase.firestore().collection("requests").add(req);
+    const res = await firebase.firestore().collection("requests").add(req);
     return true;
   }
   catch(e) {
@@ -409,8 +413,14 @@ export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => 
   console.log("send message in firebase.js");
   // set up updates to all userChats arr (would be more than 2 if there is a group chat)
   const promises = usersArr.map((item, i) => {
-    return firebase.firestore().collection("userChats").doc(item.userId).set({ [`${chatId}`]: userChatUpdate })
-  }, { merge: true });
+    return firebase.firestore().collection("userChats").doc(item.userId).update({
+      [`${chatId}.lastMessageCreatedAt`]: new Date(),
+      [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
+      [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
+      [`${chatId}.lastMessageText`]: userChatUpdate.lastMessageText,
+      [`${chatId}.readByReceiver`]: false
+    })
+  });
 
   console.log("part 2 in firebase.js");
 
@@ -810,7 +820,7 @@ export const createConvos = async () => { // not for production, only for testin
   let userChat4 = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
     lastMessageFromId: "myUserId11",
-    lastMessageFromname: "Keanu",
+    lastMessageFromName: "Keanu",
     lastMessageText: "Cool bro",
     readByReceiver: false,
     usersArr: [
@@ -830,7 +840,7 @@ export const createConvos = async () => { // not for production, only for testin
   let userChat5 = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
     lastMessageFromId: "myUserId6",
-    lastMessageFromname: "Felonios",
+    lastMessageFromName: "Felonios",
     lastMessageText: "Cool bro",
     readByReceiver: false,
     usersArr: [
@@ -1308,7 +1318,7 @@ export const addTestCloudFunctionsData = async () => {
   let userChat = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
     lastMessageFromId: "01P4eORz41OmDL4HxHHegnrAIYu1",
-    lastMessageFromname: "Scott",
+    lastMessageFromName: "Scott",
     lastMessageText: "Jimminy Jillikins",
     readByReceiver: false,
     usersArr: [
@@ -1339,6 +1349,24 @@ export const addTestCloudFunctionsData = async () => {
 
   catch (e) {
     console.log("addTestCloudFunctionsData error : ", e);
+  }
+}
+
+export const deleteUser = async (photoUrl) => {
+  const user = firebase.auth().currentUser;
+
+  try {
+    const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
+    if (photoUrl) {
+      const deleteRef = firebase.storage().refFromURL(photoUrl);
+      await deleteRef.delete();
+    }
+    const res2 = await user.delete();
+    return true;
+  }
+  catch (e) {
+    console.log("delete User error : ", e);
+    return false;
   }
 }
 

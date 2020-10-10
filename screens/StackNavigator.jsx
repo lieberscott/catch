@@ -39,6 +39,7 @@ function MyStack() {
           console.log("Step 2: Get user auth object");
           // Step 2: Get user from auth object
           const uid = await getAuthUser();
+          console.log("uid : ", uid);
           console.log("Step 3: Get user from users collection");
           // Step 3: Get user from users collection
           let u = await getDbUser(uid);
@@ -47,7 +48,7 @@ function MyStack() {
           setUser(u);
         }
         catch (e) {
-          console.log("error signing user in in TabNavigator.jsx useEffect : ", e);
+          console.log("error signing user in in StackNavigator.jsx useEffect : ", e);
           firebase.auth().signOut();
         }
       })();
@@ -66,6 +67,7 @@ function MyStack() {
       unsubscribe = firebase.firestore().collection("userChats").doc(userId)
       .onSnapshot((snapshot) => {
         let d = snapshot.data();
+        console.log("snapshot");
         d = d ? d : {};
 
         let chatArray2 = [];
@@ -134,7 +136,6 @@ function MyStack() {
         snapshot.forEach((doc) => {
           let d = doc.data();
           d.id = doc.id;
-          console.log("D : ", d);
           arr.push(d);
         });
         // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
@@ -170,6 +171,7 @@ function MyStack() {
           
           // filter out blockedUsers from areaUsers
           const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
+          console.log("blockedUsers : ", blockedUsers);
           let arr0 = arr[0].filter((item) => {
             let blocked = false;
             for (let i = 0; i < blockedUsers.length; i++) {
@@ -230,7 +232,7 @@ function MyStack() {
 
   
 
-
+  console.log("Step 2: re-render of StackNaviator.jsx after store.setUser (in IntroMaster.jsx)");
 
 
   return (

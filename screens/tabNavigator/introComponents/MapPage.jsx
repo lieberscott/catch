@@ -15,7 +15,6 @@ const MapPage = (props) => {
 
   useEffect(() => {
     if (props.loc[0] !== 37.09019985390777 && props.loc[1] !== -95.71290001273155) {
-      console.log("change location called");
       mapViewRef.current.animateToRegion({ latitude: props.loc[0], longitude: props.loc[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }, 500);
     }
   }, [props.loc])
@@ -34,9 +33,9 @@ const MapPage = (props) => {
             // showsUserLocation={ true }
             // followsUserLocation={ true }
             initialRegion={{ latitude: props.loc[0], longitude: props.loc[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
-            maxZoomLevel={ 17 }
-            minZoomLevel={ 6 }
-            provider={PROVIDER_GOOGLE}
+            // maxZoomLevel={ 17 }
+            // minZoomLevel={ 6 }
+            // provider={PROVIDER_GOOGLE}
             // onUserLocationChange={() => changeLocation() }
             onRegionChangeComplete={(data) => {
               setDeltas([data.latitudeDelta, data.longitudeDelta]);

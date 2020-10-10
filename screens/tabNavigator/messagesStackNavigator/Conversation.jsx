@@ -9,6 +9,7 @@ import firestore from 'firebase/firestore';
 import { StoreContext } from '../../../contexts/storeContext';
 
 import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
+import { addPushNotification } from '../../../firebase.js';
 
 const turquoise = "#4ECDC4";
 
@@ -92,7 +93,8 @@ const Conversation = (props) => {
     const userBlockedArr = otherPersonArray;
     // const convo = convo; // already defined above
 
-    const newUsersArray = convo.usersArr.filter((item, i) => item !== userId);
+    const newUsersArray = convo.usersArr.filter((item, i) => item.userId !== userId);
+    console.log('newUsersArray : ', newUsersArray);
     // Step 1: Remove user from convo in Firebase
     firebase.firestore().collection("conversations").doc(chatId).update({ usersArray: newUsersArray })
     .then(() => {
@@ -104,7 +106,7 @@ const Conversation = (props) => {
         }));
 
         // add current user to OTHER users' blocked users (so this user doesn't show up for them either)
-        promises.push(firebase.firestore.collection("users").doc(newUsersArray[i]).update({
+        promises.push(firebase.firestore().collection("users").doc(newUsersArray[i].userId).update({
           blockedUsers: firebase.firestore.FieldValue.arrayUnion(userId)
         }))
 
@@ -127,7 +129,12 @@ const Conversation = (props) => {
     .then(() => {
       // Step 4: Delete from local variables
       const newState = store.userChats.filter((item, i) => item.chatId !== chatId);
+      const newState2 = {...user };
+      for (let i = 0; i < newUsersArray.length; i++) {
+        newState2.blockedUsers.push(newUsersArray[i]);
+      }
       store.setUserChats(newState);
+      store.setUser(newState2);
       Alert.alert("", "Thanks. We'll take it from here.", [
         { text: "OK", onPress: () => {
           setReportModal(false);
@@ -174,8 +181,6 @@ const Conversation = (props) => {
       }
     }
 
-    console.log("part 2");
-
     // Step 0.1: Compose userChat update object
     const userChatUpdate = {
       lastMessageCreatedAt: new Date(),
@@ -198,16 +203,17 @@ const Conversation = (props) => {
       };
     })
 
-    console.log("part 3");
 
     try {
       const res = await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
-      console.log("res : ", res);
       if (res) {
         // setMessages(prevState => GiftedChat.append(prevState, [message]));
         setComposerText("");
         sendPushNotification(notificationsArr);
-        registerForPushNotifications();
+        const token = await registerForPushNotifications(userId, user.notificationToken);
+        if (token !== user.notificationToken) {
+          const res = await addPushNotification(userId, token);
+        }
       }
       else {
         Alert.alert("", "There was an error. Please try again.");

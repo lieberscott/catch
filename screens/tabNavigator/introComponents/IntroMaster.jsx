@@ -137,13 +137,14 @@ const IntroMaster = ({ navigation }) => {
       if (res) {
         let newState = { ...store.user };
         const keys = Object.getOwnPropertyNames(update);
-        console.log("keys : ", keys);
+        console.log("Step 1: keys in IntroMaster.jsx");
         for (let i = 0; i < keys.length; i++) {
           // newState["name"] = "Scott" (update["name"])
           newState[keys[i]] = update[keys[i]];
         }
         newState.coordinates = { latitude: loc[0], longitude: loc[1] };
         store.setUser(newState);
+        console.log("Step 2: after store.setUser in IntroMaster.jsx");
         // navigation.navigate("SignedIn");
       }
       else {

@@ -6,7 +6,7 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 
 import { sendRequest, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
 
-import { registerForPushNotifications } from '../../../utils.js';
+import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
 
 import { StoreContext } from "../../../contexts/storeContext.js";
 
@@ -24,6 +24,7 @@ const Map = (props) => {
   const mapRef = useRef();
 
   const user = store.user;
+  const blockedUsers = user.blockedUsers;
   const userPhoto = user.photo;
   const userLat = user.coordinates ? user.coordinates.latitude : 41.87818;
   const userLng = user.coordinates ? user.coordinates.longitude : -87.6298;
@@ -56,6 +57,20 @@ const Map = (props) => {
           const res1 = await addPushNotification(user._id, token);
         }
         const res2 = await sendRequest(user, item);
+
+        const newUsersArray = usersArr.filter((item, i) => item._id !== userId && item.notificationToken !== "-1");
+        const tokensArr = newUsersArray.map((item, i) => item.notificationToken);
+        const notificationsArr = tokensArr.map((item, i) => {
+          return {
+            to: item,
+            sound: 'default',
+            title: "You have received a new message!",
+            // body,
+            // data: { data: 'goes here' }
+          };
+        })
+
+        sendPushNotification(notificationsArr);
 
         if (res2) {
           // add that outgoing request has been made to areaConversations locally so you don't request twice
@@ -90,11 +105,25 @@ const Map = (props) => {
   }
 
   const onRefresh = async () => {
+
+    const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
     try {
       const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
+
+      // filter out blockedUsers from areaConversations
+      let arr1 = arr[1].filter((item) => {
+        let blocked = false;
+        for (let i = 0; i < blockedUsers.length; i++) {
+          const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+          if (index !== -1) {
+            blocked = true;
+          }
+        }
+        return !blocked;
+      });
       
       store.setAreaUsers(arr[0]);
-      store.setAreaConversations(arr[1]);
+      store.setAreaConversations(arr1);
     }
     catch (e) {
       console.log("get area users error : ", e);
@@ -114,7 +143,7 @@ const Map = (props) => {
         <StatusBar barStyle="dark-content" />
         { /* FlatList of Conversations */ }
         <View style={ styles.top }>
-          { areaConversations.length === 0 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
+          { areaConversations.length === 1 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
             keyExtractor={ (item, key) => item.userObjects ? item.id + Math.random() : item._id + Math.random() }
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
@@ -198,7 +227,7 @@ const Map = (props) => {
           style={ styles.mapStyle }
           ref={ mapRef }
           provider={PROVIDER_GOOGLE}
-          camera={{ center: { latitude: userLat, longitude: userLng }, pitch: 0, heading: 1, altitude: 11, zoom: 11 }}
+          camera={{ center: { latitude: userLat, longitude: userLng }, pitch: 1, heading: 0, altitude: 5, zoom: 10 }}
           pitchEnabled={ false }
           minZoomLevel={ 7 }
           maxZoomLevel={ 19 }

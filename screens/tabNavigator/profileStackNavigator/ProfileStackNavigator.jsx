@@ -9,10 +9,16 @@ import Notifications from './Notifications';
 import Sports from './Sports';
 import Map from './Map';
 import ProfileText from './ProfileText';
+import Reauthorization from './Reauthorization';
+
+console.log("Step 6A: ProfileStackNavigator 1");
 
 const Stack = createStackNavigator();
 
+console.log("Step 6B: ProfileStackNavigator 2");
+
 export default function ProfileStackNavigator() {
+  console.log("Step 6C ProfileStackNavigator 3");
   return (
     <Stack.Navigator headerMode="screen">
       <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />
@@ -23,6 +29,7 @@ export default function ProfileStackNavigator() {
       <Stack.Screen name="Sports" component={Sports} options={{ title: "" }} />
       <Stack.Screen name="Map" component={Map} options={{ title: "" }} />
       <Stack.Screen name="ProfileText" component={ProfileText} options={{ title: "" }} />
+      <Stack.Screen name="Reauthorization" component={Reauthorization} options={{ title: "" }} />
     </Stack.Navigator>
   );
 }

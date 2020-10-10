@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, signOut, createConvos, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, addRequestTest } from '../../../firebase.js';
+import { updateUser, uploadImage, deleteUser, signOut, createConvos, getAuthUser, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, addRequestTest } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
@@ -18,7 +18,10 @@ const { width } = Dimensions.get("window");
 
 const Profile = (props) => {
 
+  console.log("Step 7A: Profile 1");
+
   const store = useContext(StoreContext);
+  console.log("Step 7B: Profile 2");
 
   useEffect(() => {
     (async () => {
@@ -94,6 +97,13 @@ const Profile = (props) => {
     if (num > 2) {
       props.navigation.pop();
     }
+  }
+
+  const handleDelete = () => {
+    Alert.alert("", "Are you sure you want to delete your profile? This can not be undone. All data will be lost.", [
+      { text: "OK", onPress: () => props.navigation.navigate("Reauthorization", { photoUrl: user.photo }) },
+      { text: "Cancel" }
+    ]);
   }
 
 
@@ -225,13 +235,34 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity onPress={ () => signOut() } style={ styles.signoutWrapper }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Sign Out</Text>
-        </TouchableOpacity>
+        <View style={{ height: 60 }} />
+        <View style={ styles.oneSection}>
+          <View style={ styles.headerWrapper }>
+            <MaterialIcons name="settings" size={ 23 } color="gray" />
+            <Text style={ styles.header }>Danger Zone</Text>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchableOrange } onPress={() => signOut()}>
+              <Text style={{ color: "orange" }}>Sign Out</Text>
+              <MaterialIcons name="chevron-right" color="orange" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchableRed } onPress={() => handleDelete() }>
+              <Text style={{ color: "red" }}>Delete</Text>
+              <MaterialIcons name="chevron-right" color="red" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        
         <TouchableOpacity onPress={ () => createConvos() } style={[ styles.signoutWrapper, { backgroundColor: "orange" }] }>
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
           <Text style={ styles.signoutText }>Create Convos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ () => getAuthUser() } style={[ styles.signoutWrapper, { backgroundColor: "gold" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Get Auth User</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={ () => addTestCloudFunctionsData() } style={[ styles.signoutWrapper, { backgroundColor: "blue" }] }>
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
@@ -379,7 +410,28 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     marginTop: 10,
-    color: "#444",
+    alignItems: "center"
+  },
+  touchableOrange: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: "orange",
+    borderRadius: 20,
+    padding: 10,
+    marginTop: 10,
+    alignItems: "center"
+  },
+  touchableRed: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: "red",
+    borderRadius: 20,
+    padding: 10,
+    marginTop: 10,
     alignItems: "center"
   }
 });

@@ -118,7 +118,7 @@ const PhoneVerification = ({ navigation }) => {
         <FirebaseRecaptchaVerifierModal
           ref={ recaptchaRef }
           firebaseConfig={ firebaseConfig }
-          />
+        />
         <TouchableOpacity activeOpacity={ 1 } onPress={ page1 ? () => navigation.pop() : () => scrollViewRef.current.scrollTo({ x: 0, animated: true })} style={ styles.chevron }>
           <Entypo name="chevron-left" size={ 20 } />
         </TouchableOpacity>
