@@ -1,9 +1,14 @@
 // if drag touch starts in bottom half of card, angle should tilt upward instead of downward
-import React, {  useState, useContext } from 'react';
-import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, {  useLayoutEffect, useEffect, useState, useContext } from 'react';
+import { Alert, Dimensions, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
+import ReportModalProfile from './ReportModalProfile';
+import ProfileHeader from './ProfileHeader';
+
 import { StoreContext } from '../../../contexts/storeContext';
+
+import { blockUser } from '../../../firebase.js';
 
 import { getDistance } from '../../../utils.js';
 
@@ -28,6 +33,71 @@ const ProfileFull = (props) => {
   const distance = Math.round(distance0 * 10) / 10;
 
   const sportsKeys = Object.getOwnPropertyNames(user1.sports);
+
+  const [loaded, setLoaded] = useState(false);
+  const [reportModal, setReportModal] = useState(false);
+
+  useEffect(() => {
+    if (!loaded) {
+      setLoaded(true);
+    }
+  }, []);
+
+  {/* Set Header */}
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      headerTitle: () => <ProfileHeader handleMenu={ handleMenu } reportModal={ reportModal } setReportModal={ setReportModal } navigation={ props.navigation } />
+    });
+  }, [loaded]);
+
+  const handleMenu = () => {
+    Keyboard.dismiss();
+    setReportModal(true);
+  }
+
+
+  const handleBlock2 = async () => {
+
+    const userObj1 = {
+      userAvatar: user1.photo,
+      userName: user1.name,
+      userId: user1._id
+    }
+    // const convo = convo; // already defined above
+
+    try {
+      const res1 = await blockUser(user0, user1);
+
+      if (res1) {
+        const newState2 = {...user0 };
+        console.log("newState2 : ", newState2);
+        if (newState2.blockedUsers) {
+          newState2.blockedUsers.push(userObj1);
+        }
+        else {
+          newState.blockedUsers = [userObj1];
+        }
+        store.setUser(newState2);
+        
+        Alert.alert("", "User has been blocked", [
+          { text: "OK", onPress: () => {
+            setReportModal(false);
+            props.navigation.pop()
+          }},
+        ]);
+      }
+
+      else {
+        Alert.alert("", "There was a problem. Please try again.");
+      }
+    }
+    catch(e) {
+      console.log("handle block error : ", e);
+      Alert.alert("", "There was a problem. Please try again.");
+    }
+  }
+
+
 
   return (
     <View style={{ flexGrow: 1 }}>
@@ -82,6 +152,12 @@ const ProfileFull = (props) => {
           </MapView>
         <View style={ styles.bottom } />
       </ScrollView>
+      { reportModal && <ReportModalProfile
+          reportModal={ reportModal }
+          setReportModal={ setReportModal }
+          handleBlock2={ handleBlock2 }
+          height={ height }
+      /> }
     </View>
   )
 }

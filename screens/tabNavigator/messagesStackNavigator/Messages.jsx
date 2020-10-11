@@ -65,7 +65,7 @@ const Messages = (props) => {
   const decline = async (item) => {
     try {
       const res = await declineRequest(item.id);
-      const newState = [...store.requests];
+      const newState = [...requests0];
       const newState2 = newState.filter((request, i) => request.id !== item.id);
       // update the convoArr locally
       store.setRequests(newState2);
@@ -76,31 +76,28 @@ const Messages = (props) => {
   }
 
   const accept = async (request) => {
+    console.log("accept request : ", request);
 
-    // Step 1: Get all current conversaitons via the store
-    let userChats0 = userChats.length ? [...userChats] : [];
-    console.log("userChats0 : ", userChats0);
-    console.log("request : ", request);
-    // Step 2: Filter through current conversations to get the one this user is requesting to join
-    const userChat = userChats0.filter((item, i) => item.chatId === request.conversationId);
-    console.log("userChat : ", userChat);
-    // Step 3: Get all current users in that conversation
-    const usersArr = userChat[0].usersArr;
-    // Step 4: Send it as an extra argument
+    let usersArr;
 
+    if (request.conversationId) {
+      // Step 1: Get all current conversaitons via the store
+      let userChats0 = userChats.length ? [...userChats] : [];
+      // Step 2: Filter through current conversations to get the one this user is requesting to join
+      const userChat = userChats0.filter((item, i) => item.chatId === request.conversationId);
+      // Step 3: Get all current users in that conversation
+      usersArr = userChat[0].usersArr;
+      // Step 4: Send it as an extra argument
+    }
+    else {
+      usersArr = [];
+    }
 
     try {
-      console.log("hello 1")
       const docId = request.existingConversation ? await acceptRequestConvo(user, request, usersArr) : await acceptRequestUser(user, request);
 
       if (docId) {
-        let newRequestsArr = [];
-        console.log("hello 4");
-        
-        for (let i = 0; i < requests0.length; i++) {
-          newRequestsArr.push(requests0[i]);
-        }
-        // store.requests.length ? [...requests0] : [];
+        let newRequestsArr = requests0.length ? [...requests0] : [];
         const newRequestsArr2 = newRequestsArr.filter((item, i) => item.id !== request.id);
         // // update the convoArr locally
         // newConvo.id = docId;

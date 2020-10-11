@@ -18,6 +18,10 @@ const UserConversationRow = (props) => {
   // first user in conversation other than the current user
   const usersLen = usersArr.length; // if more than 2, then you have a group chat
   const firstOtherUserIndex = usersArr.findIndex((item, i) => item.userId !== userId);
+  const reversedArr = usersArr.slice().reverse();
+  const index = reversedArr.findIndex((item, i) => item.userId !== userId);
+  const count = usersArr.length - 1;
+  const lastOtherUserIndex = index >= 0 ? count - index : index;
   const [width, setWidth] = useState(0);
   const navigation = useNavigation();
 
@@ -34,10 +38,10 @@ const UserConversationRow = (props) => {
           style={ styles.image }
           source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png" }}
         />
-        { usersLen > 2 ? <View style={ styles.absPos }><Text>+ { usersLen - 2 }</Text></View> : [] }
+        { usersLen === 2 ? [] : usersLen >= 3 ? <Image style={ styles.image2 } source={{ uri: usersArr[lastOtherUserIndex].userAvatar }} /> : <View style={ styles.groupChatAvatar }><Text>+{ usersLen }</Text></View> }
 
         <View style={ [styles.textWrapper, { width: width - imageDimensions - imageMarginR }] }>
-          <Text style={ styles.name }>{ usersArr[firstOtherUserIndex].userName } { usersLen > 2 ? "+" + usersLen - 2 : "" }</Text>
+          <Text style={ styles.name }>{ usersArr[firstOtherUserIndex].userName } { usersLen > 2 ? "+" + (usersLen - 2).toString() : "" }</Text>
           <Text ellipsizeMode="tail" numberOfLines={ 1 } style={ styles.message }>{ convo.lastMessageText }</Text>
         </View>
       </TouchableOpacity>
@@ -53,11 +57,26 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: "white"
   },
+  groupChatAvatar: {
+    backgroundColor: "#eee",
+    borderRadius: 50,
+    position: "absolute",
+    height: imageDimensions * 0.6,
+    width: imageDimensions * 0.6,
+    left: imageDimensions * 0.6
+  },
   image: {
     borderRadius: 50,
     height: imageDimensions,
     width: imageDimensions,
     marginRight: imageMarginR
+  },
+  image2: {
+    position: "absolute",
+    borderRadius: 50,
+    height: imageDimensions * 0.6,
+    width: imageDimensions * 0.6,
+    left: imageDimensions * 0.6
   },
   message: {
     textAlign: "left",

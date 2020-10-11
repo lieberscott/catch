@@ -7,12 +7,11 @@ const imageDimensions = 80;
 const UsersList = (props) => {
 
  const users = props.route.params.users;
- const requestAllowed = props.route.params.requestAllowed;
 
   return (
     <View style={ styles.container }>
       { users.map((user, i) => (
-        <TouchableOpacity key={ user._id } style={ styles.body } onPress={() => props.navigation.navigate("ProfileFull", { users: [users[i]], requestAllowed })}>
+        <TouchableOpacity key={ user._id } style={ styles.body } onPress={() => props.navigation.navigate("ProfileFull", { users: [users[i]] })}>
           <Image style={ styles.image } source={{ uri: user.photo }} />
           <View style={ styles.textWrapper }>
             <View style={{ flexDirection: "row", alignItems: "center" }}>

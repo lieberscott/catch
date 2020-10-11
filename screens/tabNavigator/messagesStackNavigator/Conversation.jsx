@@ -218,7 +218,8 @@ const Conversation = (props) => {
 
   const openUsersList = () => {
     if (otherPersonArray.length > 1) {
-      props.navigation.navigate("UsersList", { users: otherPersonArray });
+      const newUsersArray = usersArr.filter((item, i) => item._id !== userId);
+      props.navigation.navigate("UsersList", { users: newUsersArray });
     }
     else {
       const newUsersArray = usersArr.filter((item, i) => item._id !== userId);

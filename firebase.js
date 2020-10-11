@@ -170,19 +170,19 @@ export const acceptRequestUser = async (user0, user1) => {
 
 export const acceptRequestConvo = async (user0, user1, usersArr) => {
 
-  const firestore = firebase.firestore();
+  // const firestore = firebase.firestore();
 
   // Create a GeoFirestore reference
-  const geofirestore = new GeoFirestore(firebase.firestore());
-  const geocollection = geofirestore.collection('conversations');
+  // const geofirestore = new GeoFirestore(firebase.firestore());
+  // const geocollection = geofirestore.collection('conversations');
 
-  const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
-  const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
+  // const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
+  // const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
 
   const userObj1 = {
-    userAvatar: user0.photo,
-    userName: user0.name,
-    userId: user0._id
+    userAvatar: user1.photo,
+    userName: user1.name,
+    userId: user1._id
   }
 
   const userObj2 = {
@@ -198,13 +198,11 @@ export const acceptRequestConvo = async (user0, user1, usersArr) => {
     sports: user1.sports
   }
 
-  console.log("hello 2");
-  let usersArr2 = [];
-  for (let i = 0; i < usersArr.length; i++) {
-    usersArr2.push(usersArr[i]);
-  }
-  // [...usersArr];
-  console.log("hello 3");
+  // let usersArr2 = [];
+  // for (let i = 0; i < usersArr.length; i++) {
+  //   usersArr2.push(usersArr[i]);
+  // }
+  let usersArr2 = [...usersArr];
 
   usersArr2.push(userObj1);
 
@@ -223,17 +221,20 @@ export const acceptRequestConvo = async (user0, user1, usersArr) => {
   // Step 1: Delete request
   promises.push(firebase.firestore().collection("requests").doc(user1.id).delete());
 
+
+  console.log("user1._id : ", user1._id);
+  console.log("`${user1.conversationId}` : ", `${user1.conversationId}`);
   // Step 2: Add userChat to new user (user1)
   promises.push(firebase.firestore().collection("userChats").doc(user1._id).set({
     [`${user1.conversationId}`]: userChat
   }, { merge: true }));
 
-  console.log("usersArr.length : ", usersArr.length);
 
   // Step 3: Update usersArr for existing users in chat
   for (let i = 0; i < usersArr.length; i++) {
+    console.log("`${user1.conversationId}` : ", `${user1.conversationId}`);
     promises.push(firebase.firestore().collection("userChats").doc(usersArr[i].userId).update({
-      [`${user1.conversationId}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1)
+      [`${user1.conversationId}.usersArr`]: usersArr2
     }))
   }
 
@@ -241,6 +242,8 @@ export const acceptRequestConvo = async (user0, user1, usersArr) => {
   promises.push(firebase.firestore().collection("conversations").doc(user1.conversationId).update({
     userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
   }));
+
+  console.log("promises.length : ", promises.length);
 
 
   try {
@@ -546,6 +549,54 @@ export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => 
   }
 }
 
+
+export const blockUser = async (user0, user1) => {
+
+  const userInitiatingBlock = user0._id;
+  const userInitiatingBlockName = user0.name;
+  const userBlocked = user1._id;
+
+
+  const userObj0 = {
+    userAvatar: user0.photo,
+    userName: user0.name,
+    userId: user0._id
+  }
+
+  const userObj1 = {
+    userAvatar: user1.photo,
+    userName: user1.name,
+    userId: user1._id
+  }
+
+  let promises = [];
+  promises.push(firebase.firestore().collection("users").doc(user0._id).update({
+    blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj1)
+  }))
+
+  promises.push(firebase.firestore().collection("users").doc(user1._id).update({
+    blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj0)
+  }))
+
+  try {
+    const res1 = await Promise.all(promises);
+    fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body: JSON.stringify({ userInitiatingBlock, userInitiatingBlockName, userBlockedArr: [userBlocked], messages: [] })
+    });
+    return true;
+  }
+  catch(e) {
+    console.log("block User error : ", e);
+    return false;
+  }
+
+
+}
 
 
 export const createConvos = async (user) => { // not for production, only for testing
@@ -1592,7 +1643,7 @@ export const deleteOldConvosTest = () => {
   });
 }
 
-export const addRequestTest = (user) => {
+export const addRequestTest = async (user) => {
 
   const u = firebase.auth().currentUser;
   const uid = u.uid;
@@ -1615,7 +1666,12 @@ export const addRequestTest = (user) => {
   req.existingConversation = false;
   req.conversationId = false;
 
-  firebase.firestore().collection("requests").add(req);
+  try {
+    const res1 = await firebase.firestore().collection("requests").add(req);
+  }
+  catch(e) {
+    console.log("userRequestTest error : ", e);
+  }
 }
 
 export const convoRequestTest = async () => {
@@ -1624,7 +1680,7 @@ export const convoRequestTest = async () => {
 
   console.log("convoRequestTest");
 
-  let req = {
+  let req2 = {
     _id: "someId2",
     createdAt: new Date(),
     date_of_birth: new Date(1990, 3, 3),
@@ -1641,5 +1697,10 @@ export const convoRequestTest = async () => {
     conversationId: "fZpLbvkwkaijIbxiAPjZ"
   }
 
-  firebase.firestore().collection("requests").add(req);
+  try {
+    const res1 = await firebase.firestore().collection("requests").add(req2);
+  }
+  catch(e) {
+    console.log("convoRequestTest error : ", e);
+  }
 }
