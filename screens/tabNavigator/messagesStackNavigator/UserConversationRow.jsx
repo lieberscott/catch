@@ -6,8 +6,9 @@ import { useNavigation } from '@react-navigation/native';
 const imageMarginR = 16;
 const imageDimensions = 80;
 
-const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
+const UserConversationRow = (props) => {
 
+  const { convo, userId } = props;
   const usersObj = convo.usersArr;
   let usersArr = [];
   Object.keys(usersObj).forEach((key) => {
@@ -24,7 +25,7 @@ const UserConversationRow = ({ convo, userId, userName, userAvatar }) => {
 
 
      return (
-      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("Conversation", { convo, dot })} onLayout={(e) => {
+      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("Conversation", { convo, dot, remove: props.remove })} onLayout={(e) => {
         const w = e.nativeEvent.layout.width;
         setWidth(w);
       }}>

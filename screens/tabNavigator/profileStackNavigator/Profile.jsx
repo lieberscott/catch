@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, deleteUser, signOut, createConvos, getAuthUser, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, addRequestTest } from '../../../firebase.js';
+import { updateUser, uploadImage, deleteUser, signOut, createConvos, getAuthUser, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, convoRequestTest, addRequestTest } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
@@ -34,6 +34,8 @@ const Profile = (props) => {
   const userId = user._id;
   const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
   const userName = user.name;
+
+  console.log("user.photo : ", user.photo);
 
    {/* Get active status */}
   const active0 = user.active;
@@ -256,29 +258,17 @@ const Profile = (props) => {
         </View>
 
         
-        <TouchableOpacity onPress={ () => createConvos() } style={[ styles.signoutWrapper, { backgroundColor: "orange" }] }>
+        <TouchableOpacity onPress={ () => createConvos(user) } style={[ styles.signoutWrapper, { backgroundColor: "orange" }] }>
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
           <Text style={ styles.signoutText }>Create Convos</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={ () => getAuthUser() } style={[ styles.signoutWrapper, { backgroundColor: "gold" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Get Auth User</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => addTestCloudFunctionsData() } style={[ styles.signoutWrapper, { backgroundColor: "blue" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Add data for Cloud function testing</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => testCloudFunctionsLocally() } style={[ styles.signoutWrapper, { backgroundColor: "green" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Run cloud functions locally to test</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => deleteOldConvosTest() } style={[ styles.signoutWrapper, { backgroundColor: "pink" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Delete Old Convos Test</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => addRequestTest() } style={[ styles.signoutWrapper, { backgroundColor: "turquoise" }] }>
+        <TouchableOpacity onPress={ () => addRequestTest(user) } style={[ styles.signoutWrapper, { backgroundColor: "turquoise" }] }>
           <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
           <Text style={ styles.signoutText }>Add Request Test</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ () => convoRequestTest() } style={[ styles.signoutWrapper, { backgroundColor: "pink" }] }>
+          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
+          <Text style={ styles.signoutText }>Convo Request Test</Text>
         </TouchableOpacity>
         <View style={ styles.bottomArea } />
       </ScrollView>

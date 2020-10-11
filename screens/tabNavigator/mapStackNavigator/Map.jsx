@@ -144,7 +144,7 @@ const Map = (props) => {
         { /* FlatList of Conversations */ }
         <View style={ styles.top }>
           { areaConversations.length === 1 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
-            keyExtractor={ (item, key) => item.userObjects ? item.id + Math.random() : item._id + Math.random() }
+            keyExtractor={ (item, key) => item.userObjects ? item.id.toString() : item._id.toString() }
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
             }
@@ -171,13 +171,13 @@ const Map = (props) => {
               const active = data.item.active ? data.item.active && new Date(timeOfActivation) > new Date(_12HoursAgo) : true;
 
               return (
-              <View key={data.item.id + Math.random().toString() } style={active ? styles.rowBack : styles.rowBackInactive }>
+              <View key={data.item.id ? data.item.id.toString() : data.item._id.toString() } style={active ? styles.rowBack : styles.rowBackInactive }>
                 <TouchableOpacity
                   activeOpacity={ 1 }
                   style={ [styles.backRightBtn, styles.backRightBtnRight] }
                   onPress={ data.item.requestAlreadyMade ? () => Alert.alert("", "You have already requested a game of catch with this user. They are still considering your request.") : () => request(data.item) }
                 >
-                    <Text style={styles.backTextWhite}>{ "Request To Join" }</Text>
+                    <Text style={styles.backTextWhite}>Request To Join</Text>
                 </TouchableOpacity>
               </View>
             )}}

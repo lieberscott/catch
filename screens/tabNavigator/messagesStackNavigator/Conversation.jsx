@@ -29,7 +29,7 @@ const Conversation = (props) => {
   const convo = props.route.params.convo; // userChat data
 
   const dot = props.route.params.dot;
-  const chatId = convo.chatId;
+  const chatId = convo.chatId ? convo.chatId : convo.id;
 
   const otherPersonArray = convo.usersArr.filter((item, i) => item.userId !== userId);
   const otherPersonIdsArray = otherPersonArray.map((item, i) => {
@@ -58,12 +58,15 @@ const Conversation = (props) => {
     unsubscribe = firebase.firestore().collection("conversations").doc(chatId)
     .onSnapshot((snapshot) => {
       const d = snapshot.data();
-      let messages0 = d.messages;
-      messages0.reverse();
 
-      setUsersArr(d.userObjects);
-      setMessages(messages0);
-      setLoaded(true);
+      if (d) {
+        let messages0 = d.messages;
+        messages0.reverse();
+
+        setUsersArr(d.userObjects);
+        setMessages(messages0);
+        setLoaded(true);
+      }
     });
 
     if (dot) {
@@ -86,7 +89,7 @@ const Conversation = (props) => {
   }
 
 
-  const handleBlock2 = () => {
+  const handleBlock2 = async () => {
 
     const userInitiatingBlock = userId;
     const userInitiatingBlockName = userName;
@@ -94,12 +97,10 @@ const Conversation = (props) => {
     // const convo = convo; // already defined above
 
     const newUsersArray = convo.usersArr.filter((item, i) => item.userId !== userId);
-    console.log('newUsersArray : ', newUsersArray);
-    // Step 1: Remove user from convo in Firebase
-    firebase.firestore().collection("conversations").doc(chatId).update({ usersArray: newUsersArray })
-    .then(() => {
-      // Step 2: Add blocked users to blockedUsers
-      let promises = [];
+    
+    let promises = [];
+
+      // add users to blocked users
       for (let i = 0; i < newUsersArray.length; i++) {
         promises.push(firebase.firestore().collection("users").doc(userId).update({
           blockedUsers: firebase.firestore.FieldValue.arrayUnion(newUsersArray[i])
@@ -109,31 +110,24 @@ const Conversation = (props) => {
         promises.push(firebase.firestore().collection("users").doc(newUsersArray[i].userId).update({
           blockedUsers: firebase.firestore.FieldValue.arrayUnion(userId)
         }))
-
-
       }
 
-      return Promise.all(promises);
-    })
-    .then(() => {
-      // Step 3: Send to Cloud function to send an email to myself
-      return fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
+    try {
+      const res1 = await props.route.params.remove(convo);
+      const res2 = await Promise.all(promises);
+      const res3 = fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         method: "POST",
         body: JSON.stringify({ userInitiatingBlock, userInitiatingBlockName, userBlockedArr, messages })
-      })
-    })
-    .then(() => {
-      // Step 4: Delete from local variables
-      const newState = store.userChats.filter((item, i) => item.chatId !== chatId);
+      });
+
       const newState2 = {...user };
       for (let i = 0; i < newUsersArray.length; i++) {
         newState2.blockedUsers.push(newUsersArray[i]);
       }
-      store.setUserChats(newState);
       store.setUser(newState2);
       Alert.alert("", "Thanks. We'll take it from here.", [
         { text: "OK", onPress: () => {
@@ -141,26 +135,23 @@ const Conversation = (props) => {
           props.navigation.pop()
         }},
       ]);
-    })
-    .catch((err) => {
-      Alert.alert("", "There was a problem with your request");
-      console.log("report error : ", err);
-    });
+
+    }
+    catch (e) {
+      console.log("handleBlock error : ", e);
+      Alert.alert("", "There was an error. Please try again.")
+    }
   }
 
-  const handleUnmatch2 = () => {
-    // Step 1: Remove user from convo in Firebase
-    firebase.firestore().collection("conversations").doc(convo.id).set({ usersArray: newUsersArray }, { merge: true })
-    .then(() => {
-      // Step 2: Delete from local variables
-      const newState = store.userConversations.filter((item, i) => item.id !== convo.id);
-      store.setAndSaveUserConversations(newState);
-      Alert.alert("", "Thanks. We'll take it from here.");
-    })
-    .catch((err) => {
-      Alert.alert("", "There was a problem with your request");
-      console.log("report error : ", err);
-    });
+  const handleUnmatch2 = async () => {
+    try {
+      const res1 = await props.route.params.remove(convo);
+      props.navigation.pop();
+    }
+    catch(e) {
+      console.log("handleUnmatch error : ", e);
+      Alert.alert("", "There was an error. Please try again.");
+    }
   }
 
 

@@ -56,8 +56,6 @@ function MyStack() {
   }, []);
 
 
-
-
   useEffect(() => {
     let unsubscribe;
     const userId = user._id;
@@ -67,14 +65,13 @@ function MyStack() {
       unsubscribe = firebase.firestore().collection("userChats").doc(userId)
       .onSnapshot((snapshot) => {
         let d = snapshot.data();
-        console.log("snapshot");
+        console.log("snapshot for userChats");
         d = d ? d : {};
 
         let chatArray2 = [];
 
-        
-        
         Object.keys(d).forEach((key) => {
+          d[key].id = key;
           chatArray2.push(d[key]);
         });
 
@@ -83,7 +80,7 @@ function MyStack() {
         // filter out blockedUsers
         if (user.blockedUsers) {
 
-          const blockedUsers = user.blockedUsers;
+          const blockedUsers = user.blockedUsers || [];
           const chatArrLen = chatArray2.length;
 
           for (let i = 0; i < chatArrLen; i++) {
@@ -107,7 +104,10 @@ function MyStack() {
             }
           }
         }
-        
+
+        else {
+          chatArray3 = [...chatArray2];
+        }
         
         // for conversations involving user
         setUserChats(chatArray3);
@@ -133,6 +133,7 @@ function MyStack() {
       unsubscribe2 = firebase.firestore().collection("requests")
       .where("toId", "==", user._id)
       .onSnapshot((snapshot) => {
+        console.log("requests snapshot");
         snapshot.forEach((doc) => {
           let d = doc.data();
           d.id = doc.id;
@@ -145,7 +146,6 @@ function MyStack() {
           const id = item._id;
           return seen.hasOwnProperty(id) ? false : (seen[id] = true);
         });
-
         setRequests(uniqueArr);
         setGotRequests(true);
       });
@@ -156,9 +156,6 @@ function MyStack() {
         unsubscribe2();
       }    }
   }, [gotUserChats]);
-
-
-
 
 
   useEffect(() => {

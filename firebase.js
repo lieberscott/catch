@@ -27,29 +27,51 @@ export const addPushNotification = async (userId, notificationToken) => {
   }
 }
 
-export const removeFromConversation = async (item, newArr) => {
+export const removeFromConversation = async (item, newArr, userObj) => {
 
-  const promises = item.usersArr.map((item, i) => {
-    return firebase.firestore().collection("userChats").doc(item.userId).update({ usersArr: newArr })
-  });
+  const user = firebase.auth().currentUser;
+  const uid = user.uid;
+
+  let promises = [];
+
+  // Step 1: Remove chat from user's userChats
+  promises.push(firebase.firestore().collection("userChats").doc(uid).set({
+    [`${item.id}`]: firebase.firestore.FieldValue.delete()
+  }, { merge: true }));
+
+  // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
+  if (newArr.length === 1) {
+    promises.push(firebase.firestore().collection("userChats").doc(newArr[0].userId).set({
+      [`${item.id}`]: firebase.firestore.FieldValue.delete()
+    }, { merge: true }));
+
+    promises.push(firebase.firestore().collection("conversations").doc(item.id).delete());
+  }
+
+  // Step 3: Else, remove user from userChats array, and from conversation usersArray (actually they'll stay in conversation usersArray, too difficult to match a whole object to remove from an array in firestore)
+  else {
+    for (let i = 0; i < newArr.length; i++) {
+      promises.push(firebase.firestore().collection("userChats").doc(newArr[i].userId).set({
+        usersArr: firebase.firestore.FieldValue.arrayRemove(userObj[0])
+      }, { merge: true }));
+    }
+  }
 
   try {
-    // Step 1: remove user from conversation in firebase
     const res1 = await Promise.all(promises);
-
-    // Step 2: remove conversation locally from array
+    return true;
   }
   catch (e) {
     console.log("removeFromConversation error : ", e);
+    return false;
   }
 }
 
 export const acceptRequestUser = async (user0, user1) => {
-  const firestore = firebase.firestore();
 
   // Create a GeoFirestore reference
-  const GeoFirestore = geofirestore.initializeApp(firestore);
-  const geocollection = GeoFirestore.collection('conversations');
+  const geofirestore = new GeoFirestore(firebase.firestore());
+  const geocollection = geofirestore.collection('conversations');
 
   const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
   const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
@@ -70,7 +92,7 @@ export const acceptRequestUser = async (user0, user1) => {
         photo: user0.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
         getsNotifications: user0.getsNotifications,
         notificationToken: user0.notificationToken,
-        profileText: user0.profileText
+        profileText: user0.profileText ? user0.profileText : ""
       },
       {
         _id: user1._id,
@@ -82,7 +104,47 @@ export const acceptRequestUser = async (user0, user1) => {
         photo: user1.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
         getsNotifications: user1.getsNotifications,
         notificationToken: user1.notificationToken,
-        profileText: user1.profileText
+        profileText: user1.profileText ? user1.profileText : ""
+      }
+    ]
+  }
+
+  let userChat = {
+    lastMessageCreatedAt: new Date(),
+    lastMessageFromId: user1._id,
+    lastMessageFromName: user1.name,
+    lastMessageText: "You accepted " + user1.name + "'s request!",
+    readByReceiver: false,
+    usersArr: [
+      {
+        userAvatar: user0.photo,
+        userName: user0.name,
+        userId: user0._id
+      },
+      {
+        userAvatar: user1.photo,
+        userName: user1.name,
+        userId: user1._id
+      }
+    ]
+  }
+
+  let userChat2 = {
+    lastMessageCreatedAt: new Date(),
+    lastMessageFromId: user1._id,
+    lastMessageFromName: user1.name,
+    lastMessageText: user0.name + " accepted your request!",
+    readByReceiver: false,
+    usersArr: [
+      {
+        userAvatar: user0.photo,
+        userName: user0.name,
+        userId: user0._id
+      },
+      {
+        userAvatar: user1.photo,
+        userName: user1.name,
+        userId: user1._id
       }
     ]
   }
@@ -90,65 +152,106 @@ export const acceptRequestUser = async (user0, user1) => {
   try {
     const res1 = await firebase.firestore().collection("requests").doc(user1.id).delete();
     const docRef = await geocollection.add(newConvo);
-    return docRef.id;
+    const docRefId = docRef.id;
+    const res2 = await firebase.firestore().collection("userChats").doc(user0._id).set({
+      [`${docRefId}`]: userChat
+    }, { merge: true });
+    const res3 = await firebase.firestore().collection("userChats").doc(user1._id).set({
+      [`${docRefId}`]: userChat2
+    }, { merge: true });
+    return docRefId;
   }
   catch (e) {
+    console.log("acceptRequest error : ", e);
     return false;
   }
 }
 
 
-// export const acceptRequest = async (user0, user1) => {
-//   const firestore = firebase.firestore();
+export const acceptRequestConvo = async (user0, user1, usersArr) => {
 
-//   // Create a GeoFirestore reference
-//   const GeoFirestore = geofirestore.initializeApp(firestore);
-//   const geocollection = GeoFirestore.collection('conversations');
+  const firestore = firebase.firestore();
 
-//   const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
-//   const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
+  // Create a GeoFirestore reference
+  const geofirestore = new GeoFirestore(firebase.firestore());
+  const geocollection = geofirestore.collection('conversations');
 
-//   let newConvo = {
-//     coordinates: new firebase.firestore.GeoPoint(user0.coordinates.latitude, user0.coordinates.longitude),
-//     createdAt: new Date(),
-//     messages: [],
-//     userObjects: [
-//       {
-//         _id: user0._id,
-//         name: user0.name,
-//         date_of_birth: user0Dob,
-//         gender: user0.gender,
-//         coordinates: user0.coordinates,
-//         sports: user0.sports,
-//         photo: user0.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
-//         getsNotifications: user0.getsNotifications,
-//         notificationToken: user0.notificationToken,
-//         profileText: user0.profileText
-//       },
-//       {
-//         _id: user1._id,
-//         name: user1.name,
-//         date_of_birth: user1Dob,
-//         gender: user1.gender,
-//         coordinates: user1.coordinates,
-//         sports: user1.sports,
-//         photo: user1.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
-//         getsNotifications: user1.getsNotifications,
-//         notificationToken: user1.notificationToken,
-//         profileText: user1.profileText
-//       }
-//     ]
-//   }
+  const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
+  const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
 
-//   try {
-//     const res1 = await firebase.firestore().collection("requests").doc(user1.id).delete();
-//     const docRef = await geocollection.add(newConvo);
-//     return docRef.id;
-//   }
-//   catch (e) {
-//     return false;
-//   }
-// }
+  const userObj1 = {
+    userAvatar: user0.photo,
+    userName: user0.name,
+    userId: user0._id
+  }
+
+  const userObj2 = {
+    _id: user1._id,
+    coordinates: user1.coordinates,
+    date_of_birth: user1.date_of_birth,
+    gender: user1.gender,
+    getsNotifications: user1.getsNotifications,
+    name: user1.name,
+    notificationToken: user1.notificationToken,
+    photo: user1.photo,
+    profileText: user1.profileText ? user1.profileText : "",
+    sports: user1.sports
+  }
+
+  console.log("hello 2");
+  let usersArr2 = [];
+  for (let i = 0; i < usersArr.length; i++) {
+    usersArr2.push(usersArr[i]);
+  }
+  // [...usersArr];
+  console.log("hello 3");
+
+  usersArr2.push(userObj1);
+
+  const userChat = {
+    chatId: user1.conversationId,
+    lastMessageCreatedAt: new Date(),
+    lastMessageFromId: user1._id,
+    lastMessageFromName: user1.name,
+    lastMessageText: "You joined the conversation. Say hi!",
+    readByReceiver: false,
+    usersArr: usersArr2
+  }
+
+  let promises = [];
+
+  // Step 1: Delete request
+  promises.push(firebase.firestore().collection("requests").doc(user1.id).delete());
+
+  // Step 2: Add userChat to new user (user1)
+  promises.push(firebase.firestore().collection("userChats").doc(user1._id).set({
+    [`${user1.conversationId}`]: userChat
+  }, { merge: true }));
+
+  console.log("usersArr.length : ", usersArr.length);
+
+  // Step 3: Update usersArr for existing users in chat
+  for (let i = 0; i < usersArr.length; i++) {
+    promises.push(firebase.firestore().collection("userChats").doc(usersArr[i].userId).update({
+      [`${user1.conversationId}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1)
+    }))
+  }
+
+  // Step 4: Update userObjects array for the conversation
+  promises.push(firebase.firestore().collection("conversations").doc(user1.conversationId).update({
+    userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
+  }));
+
+
+  try {
+    const res1 = await Promise.all(promises);
+    return user1.conversationId;
+  }
+  catch (e) {
+    console.log("accept requests convo error : ", e);
+    return false;
+  }
+}
 
 export const updateUser = async (update, userId, userLoc) => {
 
@@ -361,9 +464,10 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
 }
 
 export const declineRequest = async (itemId) => {
+  console.log("itemId : ", itemId);
   try {
     const res = await firebase.firestore().collection("requests").doc(itemId).delete();
-    return res.status === 200 ? true : false;
+    return true;
   }
   catch (e) {
     console.log("delete error : ", e);
@@ -444,8 +548,9 @@ export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => 
 
 
 
-export const createConvos = async () => { // not for production, only for testing
-  const firestore = firebase.firestore();
+export const createConvos = async (user) => { // not for production, only for testing
+  const u = firebase.auth().currentUser;
+  const uid = u.uid;
 
   // Create a GeoFirestore reference
   const geofirestore = new GeoFirestore(firebase.firestore());
@@ -689,8 +794,8 @@ export const createConvos = async () => { // not for production, only for testin
         createdAt: new Date(2020, 7, 9),
         text: "Hey, what's up?",
         user: {
-          _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
-          avatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+          _id: uid,
+          avatar: user.photo,
           name: "Scott"
         }
       },
@@ -707,15 +812,15 @@ export const createConvos = async () => { // not for production, only for testin
     ],
     userObjects: [
       {
-        _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
+        _id: uid,
         name: "Scott",
-        date_of_birth: new Date(1984, 3, 25),
-        gender: 0,
+        date_of_birth: new Date(1993, 3, 3),
+        gender: user.gender,
         coordinates: { latitude: 41.88043118753208, longitude: -87.63034075498481 },
         sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-        photo: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        photo: user.photo,
         getsNotifications: true,
-        notificationToken: "token",
+        notificationToken: user.notificationToken,
         profileText: "Looking to play baseball catch"
       },
       {
@@ -757,8 +862,8 @@ export const createConvos = async () => { // not for production, only for testin
         createdAt: new Date(2020, 7, 9),
         text: "Hey, what's up?",
         user: {
-          _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
-          avatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+          _id: uid,
+          avatar: user.photo,
           name: "Scott"
         }
       },
@@ -775,15 +880,15 @@ export const createConvos = async () => { // not for production, only for testin
     ],
     userObjects: [
       {
-        _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
+        _id: uid,
         name: "Scott",
         date_of_birth: new Date(1984, 3, 25),
         gender: 0,
         coordinates: { latitude: 41.88043118753208, longitude: -87.63034075498481 },
         sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-        photo: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        photo: user.photo,
         getsNotifications: true,
-        notificationToken: "token",
+        notificationToken: user.notificationToken,
         profileText: "Looking to play baseball catch"
       },
       {
@@ -830,9 +935,9 @@ export const createConvos = async () => { // not for production, only for testin
         userId: "myUserId11"
       },
       {
-        userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        userAvatar: user.photo,
         userName: "Scott",
-        userId: "01P4eORz41OmDL4HxHHegnrAIYu1"
+        userId: uid
       }
     ]
   }
@@ -850,9 +955,9 @@ export const createConvos = async () => { // not for production, only for testin
         userId: "myUserId6"
       },
       {
-        userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        userAvatar: user.photo,
         userName: "Scott",
-        userId: "01P4eORz41OmDL4HxHHegnrAIYu1"
+        userId: uid
       }
     ]
   }
@@ -1246,10 +1351,10 @@ export const createConvos = async () => { // not for production, only for testin
     userChat5.chatId = docId5;
     // console.log("res : ", res);
     // console.log("res2 : ", res2);
-    const res6 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
+    const res6 = await firebase.firestore().collection("userChats").doc(uid).set({
       [`${docId4}`]: userChat4
     }, { merge: true });
-    const res7 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
+    const res7 = await firebase.firestore().collection("userChats").doc(uid).set({
       [`${docId5}`]: userChat5
     }, { merge: true });
   }
@@ -1301,13 +1406,13 @@ export const addTestCloudFunctionsData = async () => {
         profileText: "Frank strong like bull"
       },
       {
-        _id: "01P4eORz41OmDL4HxHHegnrAIYu1",
+        _id: uid,
         name: "Scott",
         date_of_birth: new Date(1984, 3, 24),
         gender: 0,
         coordinates: { latitude: 41.195, longitude: -87.925 },
         sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-        photo: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        photo: user.photo,
         getsNotifications: true,
         notificationToken: "-1",
         profileText: "Looking for baseball catch"
@@ -1317,7 +1422,7 @@ export const addTestCloudFunctionsData = async () => {
 
   let userChat = {
     lastMessageCreatedAt: new Date(2020, 7, 9),
-    lastMessageFromId: "01P4eORz41OmDL4HxHHegnrAIYu1",
+    lastMessageFromId: uid,
     lastMessageFromName: "Scott",
     lastMessageText: "Jimminy Jillikins",
     readByReceiver: false,
@@ -1328,9 +1433,9 @@ export const addTestCloudFunctionsData = async () => {
         userId: "userId1"
       },
       {
-        userAvatar: "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F202088%2F01P4eORz41OmDL4HxHHegnrAIYu11599579141675?alt=media&token=bc788617-a291-4879-9622-719e0486b8e3",
+        userAvatar: user.photo,
         userName: "Scott",
-        userId: "01P4eORz41OmDL4HxHHegnrAIYu1"
+        userId: uid
       }
     ]
   }
@@ -1339,7 +1444,7 @@ export const addTestCloudFunctionsData = async () => {
     const res1 = await firebase.firestore().collection("requests").add(newReq1);
     const res2 = await geocollection.add(newConvo1);
     const docId = res2.id;
-    const res3 = await firebase.firestore().collection("userChats").doc("01P4eORz41OmDL4HxHHegnrAIYu1").set({
+    const res3 = await firebase.firestore().collection("userChats").doc(uid).set({
       [`${docId}`]: userChat
     }, { merge: true });
     const res4 = await firebase.firestore().collection("userChats").doc("userId4").set({
@@ -1487,7 +1592,11 @@ export const deleteOldConvosTest = () => {
   });
 }
 
-export const addRequestTest = () => {
+export const addRequestTest = (user) => {
+
+  const u = firebase.auth().currentUser;
+  const uid = u.uid;
+
   let req = {
     _id: "someId",
     createdAt: new Date(),
@@ -1500,11 +1609,37 @@ export const addRequestTest = () => {
     profileText: "Tis no man, but an eating machine.",
     photo: "https://randomuser.me/api/portraits/men/10.jpg",
     sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
-    toId: "01P4eORz41OmDL4HxHHegnrAIYu1"
+    toId: uid
   }
 
   req.existingConversation = false;
   req.conversationId = false;
+
+  firebase.firestore().collection("requests").add(req);
+}
+
+export const convoRequestTest = async () => {
+  const u = firebase.auth().currentUser;
+  const uid = u.uid;
+
+  console.log("convoRequestTest");
+
+  let req = {
+    _id: "someId2",
+    createdAt: new Date(),
+    date_of_birth: new Date(1990, 3, 3),
+    gender: 0,
+    getsNotifications: true,
+    coordinates: new firebase.firestore.GeoPoint(41.5, -87.5),
+    name: "Joey Joe Joe",
+    notificationToken: "-1",
+    profileText: "Tis no man, but an eating machine.",
+    photo: "https://randomuser.me/api/portraits/men/10.jpg",
+    sports: { Football: { interested: true, skill_level: "Can throw a spiral" }, Baseball: { interested: true, skill_level: "Played Little League" }, Frisbee: { interested: true, skill_level: "Absolute beginner" }},
+    toId: uid,
+    existingConversation: true,
+    conversationId: "fZpLbvkwkaijIbxiAPjZ"
+  }
 
   firebase.firestore().collection("requests").add(req);
 }

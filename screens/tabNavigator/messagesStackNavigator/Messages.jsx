@@ -1,11 +1,11 @@
 import React, { useEffect, useContext } from 'react';
-import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import { StoreContext } from '../../../contexts/storeContext';
 
-import { declineRequest, acceptRequest, removeFromConversation } from '../../../firebase.js';
+import { declineRequest, acceptRequestUser, acceptRequestConvo, removeFromConversation } from '../../../firebase.js';
 
 import MessagesEmpty from './MessagesEmpty';
 import UserConversationRow from './UserConversationRow';
@@ -21,6 +21,14 @@ const Messages = (props) => {
   const userPhoto = user.image;
   const requests0 = store.requests || [];
   const userChats = store.userChats || [];
+
+  userChats.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
+
+  for (let i = 0; i < requests0.length; i++) {
+    console.log("requests0 id : ", requests0[i].id);
+  }
+
+
   // const userConversations = userChats.concat(requests0);
   const userConversations = requests0.concat(userChats);
 
@@ -36,9 +44,18 @@ const Messages = (props) => {
   const remove = async (convo) => {
 
     const newArr = convo.usersArr.filter((item, i) => item.userId !== userId);
+    const userObj = convo.usersArr.filter((item, i) => item.userId === userId)
 
     try {
-      const res = await removeFromConversation(item, newArr);
+      const res = await removeFromConversation(convo, newArr, userObj);
+      // update the convoArr locally
+      const newUserChatsArr = userChats.length ? [...userChats] : [];
+
+      const newUserChatsArr2 = newUserChatsArr.filter((item, i) => item.id !== convo.id);
+
+      console.log("part 3 newUserChatsArr2.length : ", newUserChatsArr2.length);
+
+      store.setUserChats(newUserChatsArr2);
     }
     catch(e) {
       console.log("remove error : ", e);
@@ -58,56 +75,45 @@ const Messages = (props) => {
     }
   }
 
-  const accept = async (item) => {
+  const accept = async (request) => {
 
-    const userDob = user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : new Date(user.date_of_birth);
-    const itemDob = item.date_of_birth.seconds ? new Date(item.date_of_birth.seconds * 1000) : new Date(item.date_of_birth);
+    // Step 1: Get all current conversaitons via the store
+    let userChats0 = userChats.length ? [...userChats] : [];
+    console.log("userChats0 : ", userChats0);
+    console.log("request : ", request);
+    // Step 2: Filter through current conversations to get the one this user is requesting to join
+    const userChat = userChats0.filter((item, i) => item.chatId === request.conversationId);
+    console.log("userChat : ", userChat);
+    // Step 3: Get all current users in that conversation
+    const usersArr = userChat[0].usersArr;
+    // Step 4: Send it as an extra argument
 
-    let newConvo = {
-      coordinates: { latitude: user0.coordinates.latitude, longitude: user0.coordinates.longitude },
-      createdAt: new Date(),
-      messages: [],
-      userObjects: [
-        {
-          _id: user._id,
-          name: user.name,
-          date_of_birth: userDob,
-          gender: user.gender,
-          coordinates: user.coordinates,
-          sports: user.sports,
-          photo: user.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
-          getsNotifications: user.getsNotifications,
-          notificationToken: user.notificationToken,
-          profileText: user.profileText
-        },
-        {
-          _id: item._id,
-          name: item.name,
-          date_of_birth: itemDob,
-          gender: item.gender,
-          coordinates: item.coordinates,
-          sports: item.sports,
-          photo: item.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
-          getsNotifications: item.getsNotifications,
-          notificationToken: item.notificationToken,
-          profileText: item.profileText
-        }
-      ]
-    }
 
     try {
-      const docId = await acceptRequest(user, item);
-      if (docId) {
-        const newRequestsArr = [...store.requests];
-        const newRequestsArr2 = newRequestsArr.filter((request, i) => request.id !== item.id);
-        
-        // update the convoArr locally
-        newConvo.id = docId;
-        const newUserConvosArr = [...store.userConversations];
-        newUserConvosArr.unshift(newConvo);
+      console.log("hello 1")
+      const docId = request.existingConversation ? await acceptRequestConvo(user, request, usersArr) : await acceptRequestUser(user, request);
 
-        store.setUserChats(newUserConvosArr);
+      if (docId) {
+        let newRequestsArr = [];
+        console.log("hello 4");
+        
+        for (let i = 0; i < requests0.length; i++) {
+          newRequestsArr.push(requests0[i]);
+        }
+        // store.requests.length ? [...requests0] : [];
+        const newRequestsArr2 = newRequestsArr.filter((item, i) => item.id !== request.id);
+        // // update the convoArr locally
+        // newConvo.id = docId;
+        // const newUserConvosArr = store.userConversations ? [...store.userConversations] : [];
+        // newUserConvosArr.unshift(newConvo);
+
+        // console.log("part 3 newUserConvosArr.length : ", newUserConvosArr.length);
+
+        // store.setUserChats(newUserConvosArr);
         store.setRequests(newRequestsArr2);
+      }
+      else {
+        Alert.alert("", "There was an error. Please try again.");
       }
     }
     catch (e) {
@@ -131,7 +137,7 @@ const Messages = (props) => {
         stopLeftSwipe={ 200 }
         stopRightSwipe={ -200 }
         renderHiddenItem={ (data, rowMap) => (
-          <View key={data.item.id + Math.random().toString() } style={styles.rowBack}>
+          <View key={data.item.id } style={styles.rowBack}>
             <TouchableOpacity
               style={[styles.backRightBtn, styles.backRightBtnLeft]}
               onPress={ data.item.toId ? () => decline(data.item) : () => remove(data.item) }
@@ -140,9 +146,9 @@ const Messages = (props) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.backRightBtn, styles.backRightBtnRight]}
-              onPress={ data.item.toId ? () => accept(data.item) : () => props.navigation.navigate("Conversation", { convo: data.item}) }
+              onPress={ data.item.toId ? () => accept(data.item) : () => props.navigation.navigate("Conversation", { convo: data.item, remove }) }
             >
-                <Text style={styles.backTextWhite}>{ data.item.toId ? "Accept" : "Open" }</Text>
+              <Text style={styles.backTextWhite}>{ data.item.toId ? "Accept" : "Open" }</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -151,7 +157,13 @@ const Messages = (props) => {
         previewRowKey={'0'}
         previewOpenValue={-40}
         previewOpenDelay={3000}
-        renderItem={({ item }) => item.toId ? <RequestRow key={ item.id } request={ item } /> : <UserConversationRow key={item.lastMessageCreatedAt.seconds } convo={ item } userId={ userId } userName={ userName } userAvatar={ userPhoto } /> }
+        renderItem={({ item }) => {
+        if (item.toId) {
+          return <RequestRow key={ item._id.toString() } request={ item } />
+        }
+        else {
+          return <UserConversationRow key={ item.lastMessageCreatedAt ? item.lastMessageCreatedAt.seconds : Math.random().toString() } convo={ item } userId={ userId } userName={ userName } userAvatar={ userPhoto } remove={ remove } />
+        }}}
       /> }
       </View>
       <AdMobBanner

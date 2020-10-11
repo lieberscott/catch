@@ -54,14 +54,28 @@ const ReportModal = (props) => {
 
   const handleBlock = () => {
     Alert.alert("", "Are you sure you want to report this user?", [
-      { text: "Block & Report", onPress: () => props.handleBlock2() },
+      { text: "Block & Report", onPress: () => {
+        Animated.timing(animation.y, {
+          toValue: -250,
+          duration: 140,
+          useNativeDriver: false
+        }).start();
+        props.handleBlock2();
+      }},
       { text: "Cancel" }
     ]);
   }
 
   const handleUnmatch = () => {
     Alert.alert("", "Are you sure you want to unmatch?", [
-      { text: "Unmatch", onPress: () => props.handleUnmatch2() },
+      { text: "Unmatch", onPress: () => {
+        Animated.timing(animation.y, {
+          toValue: -250,
+          duration: 140,
+          useNativeDriver: false
+        }).start()
+        props.handleUnmatch2();
+      }},
       { text: "Cancel" }
     ]);
   }
