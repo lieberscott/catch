@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Animated, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import * as Facebook from 'expo-facebook';
 import * as firebase from 'firebase';
 
@@ -11,11 +12,7 @@ const turquoise = "#4ECDC4";
 
 const LandingPage = ({ navigation }) => {
 
-  console.log("landing page");
-
   const store = useContext(StoreContext);
-  // const deviceToken = store.deviceToken || "-1";
-  const deviceToken = "-1";
   const [animation, setAnimation] = useState(new Animated.Value(0));
 
   useEffect(() => {
@@ -41,6 +38,14 @@ const LandingPage = ({ navigation }) => {
     opacity: opacityAnimation
   }
 
+  const openTerms = async () => {
+    const result = await WebBrowser.openBrowserAsync('https://www.readoutconsult.com/terms');
+  }
+
+  const openPrivacy = async () => {
+    const result = await WebBrowser.openBrowserAsync('https://www.readoutconsult.com/privacy');
+  }
+
   const handleFacebook = async () => {
 
     try {
@@ -55,9 +60,7 @@ const LandingPage = ({ navigation }) => {
         const response = await fetch("https://graph.facebook.com/me?fields=id,name,birthday,email&access_token=" + token);
         const json = await response.json();
         const facebookId = json.id;
-        console.log("facebookId : ", facebookId);
         const u = await loginUser(facebookId);
-        console.log("u in LandingPage.jsx : ", u);
         // store.setAndSaveBasicUser(u); // only authId (FB ID or Phone number) and deviceToken
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         await firebase.auth().signInWithCredential(credential);
@@ -86,10 +89,10 @@ const LandingPage = ({ navigation }) => {
     <View style={ styles.container }>
       <StatusBar barStyle="dark-content" backgroundColor={ turquoise } />
       <View style={ styles.bottomLinks }>
-        <TouchableOpacity onPress={() => console.log("terms of service")}>
+        <TouchableOpacity onPress={ openTerms }>
           <Text style={ styles.bottomLinksText }>Terms of Service</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("privacy policy")}>
+        <TouchableOpacity onPress={ openPrivacy }>
           <Text style={ styles.bottomLinksText }>Privacy Policy</Text>
         </TouchableOpacity>
       </View>

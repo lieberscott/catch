@@ -37,11 +37,8 @@ function MyStack() {
       // Step 1: Get user
       (async () => {
         try {
-          console.log("Step 2: Get user auth object");
           // Step 2: Get user from auth object
           const uid = await getAuthUser();
-          console.log("uid : ", uid);
-          console.log("Step 3: Get user from users collection");
           // Step 3: Get user from users collection
           let u = await getDbUser(uid);
           u._id = uid;
@@ -62,11 +59,9 @@ function MyStack() {
     const userId = user._id;
     // Step 4: Set up listener for userChats from Firebase
     if (user.onboardingDone && !gotUserChats) {
-      console.log("Step 4: Set up listener for userChats");
       unsubscribe = firebase.firestore().collection("userChats").doc(userId)
       .onSnapshot((snapshot) => {
         let d = snapshot.data();
-        console.log("snapshot for userChats");
         d = d ? d : {};
 
         let chatArray2 = [];
@@ -118,7 +113,6 @@ function MyStack() {
 
     return () => {
       if (unsubscribe != undefined) {
-        console.log("userChats listener defined and unmounting");
         unsubscribe();
       }
     }
@@ -130,11 +124,9 @@ function MyStack() {
     let unsubscribe2;
     let arr = [];
     if (gotUserChats && !gotRequests) {
-      console.log("Step 5: Set up listener for requests");
       unsubscribe2 = firebase.firestore().collection("requests")
       .where("toId", "==", user._id)
       .onSnapshot((snapshot) => {
-        console.log("requests snapshot");
         snapshot.forEach((doc) => {
           let d = doc.data();
           d.id = doc.id;
@@ -163,11 +155,8 @@ function MyStack() {
     if (gotRequests && !allLoaded) {
       // Step 6: If user has completed onboarding, get other users based on geolocation
       (async () => {
-        console.log("Step 6: getAreaUsersAndConversations");
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-
-          console.log("arr[1].length : ", arr[1].length);
           
           // filter out blockedUsers from areaUsers
           const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
@@ -228,11 +217,6 @@ function MyStack() {
       })();
     }
   }, [gotRequests]);
-
-  
-
-  console.log("Step 2: re-render of StackNaviator.jsx after store.setUser (in IntroMaster.jsx)");
-
 
   return (
     <StoreContext.Provider value={{

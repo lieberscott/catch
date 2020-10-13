@@ -14,16 +14,13 @@ const LoadingScreen = ({ navigation }) => {
   }, [])
 
   const checkIfLoggedIn = () => {
-    console.log("check if logged in in Loading Screen second?");
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        console.log("navigate to TabNavigator");
     
         // Navigate to Master Component
         navigation.navigate("StackNavigator");
       }
       else {
-        console.log("navigate to LoginNavigator");
         navigation.navigate("LoginStackNavigator");
       }
     });

@@ -52,10 +52,10 @@ const Map = (props) => {
     }
     else {
       try {
-        // const token = await registerForPushNotifications();
-        // if (token) {
-        //   const res1 = await addPushNotification(user._id, token);
-        // }
+        const token = await registerForPushNotifications();
+        if (token) {
+          const res1 = await addPushNotification(user._id, token);
+        }
         const res2 = await sendRequest(user, item);
 
         const toToken = item._id ? item.notificationToken : item.userObjects[0].notificationToken;
@@ -80,7 +80,6 @@ const Map = (props) => {
               }
               return user;
             });
-            // console.log("newAreaUsers : ", newAreaUsers);
             store.setAreaUsers(newAreaUsers);
           }
           else {

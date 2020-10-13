@@ -85,7 +85,6 @@ const PhoneVerification = ({ navigation }) => {
   }
 
   const checkCode = async () => {
-    console.log("check code");
     try {
       const credential = firebase.auth.PhoneAuthProvider.credential(
         verificationId,
@@ -93,7 +92,6 @@ const PhoneVerification = ({ navigation }) => {
       );
       if (credential) {
         const bool = await loginUser(credential);
-        console.log("bool in Phone Verification after loginUser called : ", bool);
       }
     }
     

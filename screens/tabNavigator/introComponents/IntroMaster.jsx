@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { Alert, Dimensions, Image, Keyboard, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Alert, Dimensions, Image, Keyboard, SafeAreaView, StyleSheet, Text, View, ScrollView } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 import * as firebase from 'firebase';
 import { uploadImage, updateUser } from '../../../firebase.js';
@@ -74,7 +74,6 @@ const IntroMaster = ({ navigation }) => {
       setPage(3);
       try {
         const l = await getLocation();
-        console.log("l : ", l);
         if (l) {
           setLoc([l.coords.latitude, l.coords.longitude]);
         }
@@ -132,19 +131,16 @@ const IntroMaster = ({ navigation }) => {
 
     try {
       const res = await updateUser(update, userId, loc);
-      console.log("res in IntroMaster : ", res);
 
       if (res) {
         let newState = { ...store.user };
         const keys = Object.getOwnPropertyNames(update);
-        console.log("Step 1: keys in IntroMaster.jsx");
         for (let i = 0; i < keys.length; i++) {
           // newState["name"] = "Scott" (update["name"])
           newState[keys[i]] = update[keys[i]];
         }
         newState.coordinates = { latitude: loc[0], longitude: loc[1] };
         store.setUser(newState);
-        console.log("Step 2: after store.setUser in IntroMaster.jsx");
         // navigation.navigate("SignedIn");
       }
       else {

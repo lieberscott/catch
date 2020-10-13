@@ -11,14 +11,11 @@ import Map from './Map';
 import ProfileText from './ProfileText';
 import Reauthorization from './Reauthorization';
 
-console.log("Step 6A: ProfileStackNavigator 1");
 
 const Stack = createStackNavigator();
 
-console.log("Step 6B: ProfileStackNavigator 2");
 
 export default function ProfileStackNavigator() {
-  console.log("Step 6C ProfileStackNavigator 3");
   return (
     <Stack.Navigator headerMode="screen">
       <Stack.Screen name="Profile" component={Profile} options={{ headerShown: false }} />

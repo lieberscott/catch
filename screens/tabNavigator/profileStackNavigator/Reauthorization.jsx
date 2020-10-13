@@ -21,7 +21,6 @@ const { width } = Dimensions.get("window");
 const Reauthorization = (props) => {
 
   const photoUrl = props.route.params.photoUrl;
-  console.log("photoUrl : ", photoUrl);
 
   const recaptchaRef = useRef();
 

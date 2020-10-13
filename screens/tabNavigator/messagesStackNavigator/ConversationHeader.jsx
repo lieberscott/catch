@@ -1,8 +1,6 @@
 import React from 'react';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const { width } = Dimensions.get("window");
 
 const imageDimensions = 40;
 
@@ -33,8 +31,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flex: 1,
-    // width: width - 34,
-    // width: width,
     flexDirection: "row",
     backgroundColor: "transparent"
   },

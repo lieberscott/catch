@@ -52,7 +52,6 @@ const ProfileFull = (props) => {
   }, [loaded]);
 
   const handleMenu = () => {
-    console.log("handle menu");
     Keyboard.dismiss();
     setReportModal(true);
   }
@@ -72,7 +71,6 @@ const ProfileFull = (props) => {
 
       if (res1) {
         const newState2 = {...user0 };
-        console.log("newState2 : ", newState2);
         if (newState2.blockedUsers) {
           newState2.blockedUsers.push(userObj1);
         }

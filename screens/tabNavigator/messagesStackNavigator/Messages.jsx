@@ -53,7 +53,6 @@ const Messages = (props) => {
 
       const newUserChatsArr2 = newUserChatsArr.filter((item, i) => item.id !== convo.id);
 
-      console.log("part 3 newUserChatsArr2.length : ", newUserChatsArr2.length);
 
       store.setUserChats(newUserChatsArr2);
     }
@@ -103,8 +102,6 @@ const Messages = (props) => {
         // newConvo.id = docId;
         // const newUserConvosArr = store.userConversations ? [...store.userConversations] : [];
         // newUserConvosArr.unshift(newConvo);
-
-        // console.log("part 3 newUserConvosArr.length : ", newUserConvosArr.length);
 
         // store.setUserChats(newUserConvosArr);
         store.setRequests(newRequestsArr2);

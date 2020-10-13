@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, deleteUser, signOut, createConvos, getAuthUser, addTestCloudFunctionsData, testCloudFunctionsLocally, deleteOldConvosTest, convoRequestTest, addRequestTest } from '../../../firebase.js';
+import { updateUser, uploadImage, signOut, createConvos, convoRequestTest, addRequestTest } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';

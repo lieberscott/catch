@@ -28,8 +28,6 @@ const Sports = (props) => {
 
   */
 
-  console.log("Baseball len : ", s.Baseball.skill_level.length);
-
   const lenB = s.Baseball ? s.Baseball.skill_level.length : -1;
   const lenFo = s.Football ? s.Football.skill_level.length : -1;
   const lenFr = s.Frisbee ? s.Frisbee.skill_level.length : -1;

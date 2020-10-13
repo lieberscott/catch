@@ -30,19 +30,19 @@ export default function TabNavigator() {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
     
     return () => {
-      console.log("notifications listeners unmounting in App.jsx (but they're commented out)");
+      console.log("notifications listeners unmounting");
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
     }
   }, []);
 
-  const handleNotification = notification => {
-    console.log("handleNotification notification : ", notification);
-  };
+  // const handleNotification = notification => {
+  //   console.log("handleNotification notification : ", notification);
+  // };
 
-  const handleNotificationResponse = response => {
-    console.log("handleNotificationResponse response : ", response);
-  }
+  // const handleNotificationResponse = response => {
+  //   console.log("handleNotificationResponse response : ", response);
+  // }
   
   return (
     <Tab.Navigator initialRouteName="MapStackNavigator" tabBarOptions={{ activeTintColor: '#e91e63' }}>
