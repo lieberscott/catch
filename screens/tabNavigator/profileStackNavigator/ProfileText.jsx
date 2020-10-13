@@ -7,6 +7,14 @@ const ProfileText = (props) => {
   const p = props.route.params.profileText || "";
 
   const [aboutMe, setAboutMe] = useState(p);
+  const [disabled, setDisabled] = useState(false);
+
+  const update = () => {
+    if (!disabled) {
+      props.route.params.updateProfile({ profileText: aboutMe }, 3)
+    }
+    setDisabled(true);
+  }
 
   return (
     <View style={ styles.container }>
@@ -32,7 +40,7 @@ const ProfileText = (props) => {
               <Text style={ styles.textCount }>{ 500 }</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={ () => props.route.params.updateProfile({ profileText: aboutMe }, 3) } style={ styles.update }>
+        <TouchableOpacity onPress={ update } style={ styles.update }>
           <Text style={ styles.updateText }>Save</Text>
         </TouchableOpacity>
       </View>

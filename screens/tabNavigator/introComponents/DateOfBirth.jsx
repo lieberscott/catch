@@ -16,6 +16,8 @@ const DateOfBirth = (props) => {
   const [show, setShow] = useState(ios);
 
   const onChange = (event, selectedDate) => {
+    console.log("event : ", event);
+    console.log("selectedDate : ", selectedDate);
     const selectedDate2 = selectedDate || date;
     const userMilliseconds = selectedDate2.getTime();
     const _18years = 1000 * 60 * 60 * 24 * 365.25 * 18;
@@ -89,7 +91,9 @@ const DateOfBirth = (props) => {
       overflow: "hidden"
     },
     showSpinnerWrapper: {
-      marginBottom: 10
+      marginBottom: 10,
+      width: "90%",
+      alignSelf: "center"
     },
     subhead: {
       alignSelf: "center",

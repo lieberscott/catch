@@ -13,6 +13,14 @@ const Map = (props) => {
 
   const [coords, setCoords] = useState([l1, l2]);
   const [deltas, setDeltas] = useState([0.05, 0.05]);
+  const [disabled, setDisabled] = useState(false);
+
+  const update = () => {
+    if (!disabled) {
+      props.route.params.updateProfile({}, 3, coords);
+    }
+    setDisabled(true);
+  }
 
   return (
     <View style={ styles.container }>
@@ -37,7 +45,7 @@ const Map = (props) => {
           />
         </View>
       </View>
-      <TouchableOpacity onPress={ () => props.route.params.updateProfile({}, 3, coords) } style={ styles.update }>
+      <TouchableOpacity onPress={ update } style={ styles.update }>
         <Text style={ styles.updateText }>Save</Text>
       </TouchableOpacity>
     </View>

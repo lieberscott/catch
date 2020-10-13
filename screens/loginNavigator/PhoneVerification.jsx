@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useRef } from 'react';
-import { Dimensions, Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Dimensions, Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
@@ -31,6 +31,7 @@ const PhoneVerification = ({ navigation }) => {
   const [error2, setError2] = useState(false);
   const [resentMessage, setResentMessage] = useState(false);
   const [page1, setPage1] = useState(true);
+  const [disabled, setDisabled] = useState(false);
 
   const recaptchaRef = useRef();
   const scrollViewRef = useRef();
@@ -111,6 +112,13 @@ const PhoneVerification = ({ navigation }) => {
     setPage1(true);
   }
 
+  const pop = () => {
+    if (!disabled) {
+      navigation.pop();
+    }
+    setDisabled(true);
+  }
+
   return (
     <Fragment>
       <SafeAreaView style={ styles.flexZero } />
@@ -119,7 +127,7 @@ const PhoneVerification = ({ navigation }) => {
           ref={ recaptchaRef }
           firebaseConfig={ firebaseConfig }
         />
-        <TouchableOpacity activeOpacity={ 1 } onPress={ page1 ? () => navigation.pop() : () => scrollViewRef.current.scrollTo({ x: 0, animated: true })} style={ styles.chevron }>
+        <TouchableOpacity activeOpacity={ 1 } onPress={ page1 ? pop : () => scrollViewRef.current.scrollTo({ x: 0, animated: true })} style={ styles.chevron }>
           <Entypo name="chevron-left" size={ 20 } />
         </TouchableOpacity>
         <View style={ styles.imageWrapper }>

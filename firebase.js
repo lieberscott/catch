@@ -370,9 +370,6 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
   let areaUsers0 = [];
   let areaConversations0 = [];
 
-
-  const firestore = firebase.firestore();
-
   // Create a GeoFirestore reference
   const geofirestore = new GeoFirestore(firebase.firestore());
 
@@ -421,6 +418,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
 
     docs2.forEach((doc) => {
       let d = doc.data();
+      console.log("doc.id : ", doc.id);
       // _id is already a part of the object, so we are commenting out the below
       // d._id = doc.id;
       let notYetAConvo = true;
@@ -438,6 +436,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     // filter out users who aren't active
     const areaUsers1 = areaUsers0.filter((item, i) => {
       const timeOfActivation = item.timeOfActivation.seconds ? new Date(item.timeOfActivation.seconds * 1000) : new Date(item.timeOfActivation);
+      
       if (item.active && new Date(timeOfActivation) > new Date(sixHoursAgo)) {
         return true;
       }
@@ -446,8 +445,11 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       }
     });
 
+    // filter out own user from results
+    const areaUsers2 = areaUsers1.filter((item, i) => item._id !== userId);
+
     // calculate distance for users
-    const areaUsers2 = areaUsers1.map((item, i) => {
+    const areaUsers3 = areaUsers2.map((item, i) => {
       const distance0 = getDistance(userLoc, item.coordinates);
       const distance = Math.round(distance0 * 10) / 10;
 
@@ -456,9 +458,9 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     })
 
     // sort users by distance
-    areaUsers2.sort((a, b) => a.distance - b.distance);
+    areaUsers3.sort((a, b) => a.distance - b.distance);
 
-    return [areaUsers2, areaConversations1];
+    return [areaUsers3, areaConversations1];
   }
   catch (e) {
     console.log("geofirestore error : ", e);
@@ -490,10 +492,10 @@ export const sendRequest = async (user, item) => {
     coordinates: new firebase.firestore.GeoPoint(user.coordinates.latitude, user.coordinates.longitude),
     name: user.name,
     notificationToken: user.notificationToken,
-    profileText: user.profileText,
+    profileText: user.profileText ? user.profileText : "",
     photo: user.photo,
     sports: user.sports,
-    toId: item._id,
+    toId: item._id ? item._id : item.userObjects[0]._id
   }
 
   if (item.id) { // this means the item is an existing conversation rather than just a user

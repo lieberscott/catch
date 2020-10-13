@@ -50,7 +50,8 @@ const Conversation = (props) => {
   {/* Set Header */}
   useLayoutEffect(() => {
     props.navigation.setOptions({
-      headerTitle: () => <ConversationHeader otherPersonArray={ otherPersonArray }  userName={ userName } handleMenu={ handleMenu } openUsersList={ openUsersList } reportModal={ reportModal } setReportModal={ setReportModal } navigation={ props.navigation } />
+      headerTitle: () => <ConversationHeader otherPersonArray={ otherPersonArray }  userName={ userName } handleMenu={ handleMenu } openUsersList={ openUsersList } reportModal={ reportModal } setReportModal={ setReportModal } navigation={ props.navigation } />,
+      headerLeft: null
     });
   }, [loaded]);
 

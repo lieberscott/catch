@@ -18,10 +18,7 @@ const { width } = Dimensions.get("window");
 
 const Profile = (props) => {
 
-  console.log("Step 7A: Profile 1");
-
   const store = useContext(StoreContext);
-  console.log("Step 7B: Profile 2");
 
   useEffect(() => {
     (async () => {
@@ -35,7 +32,6 @@ const Profile = (props) => {
   const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
   const userName = user.name;
 
-  console.log("user.photo : ", user.photo);
 
    {/* Get active status */}
   const active0 = user.active;
@@ -108,6 +104,13 @@ const Profile = (props) => {
     ]);
   }
 
+  const signOut1 = () => {
+    Alert.alert("", "Are you sure you want to sign out?", [
+      { text: "Yes", onPress: () => signOut() },
+      { text: "No" }
+    ])
+  }
+
 
   return (
      <View style={ styles.container }>
@@ -146,7 +149,7 @@ const Profile = (props) => {
               />
             </View>
           </View>
-          <Text style={ styles.small }>Users will stay active for 6 hours. Conversations are cleared 6 hours after the most recent message.</Text>
+          <Text style={ styles.small }>Users will stay active for 6 hours. Conversations are cleared 24 hours after the most recent message.</Text>
         </View>
 
 
@@ -244,7 +247,7 @@ const Profile = (props) => {
             <Text style={ styles.header }>Danger Zone</Text>
           </View>
           <View style={ styles.buttonWrapper }>
-            <TouchableOpacity style={ styles.touchableOrange } onPress={() => signOut()}>
+            <TouchableOpacity style={ styles.touchableOrange } onPress={() => signOut1()}>
               <Text style={{ color: "orange" }}>Sign Out</Text>
               <MaterialIcons name="chevron-right" color="orange" size={ 23 } />
             </TouchableOpacity>

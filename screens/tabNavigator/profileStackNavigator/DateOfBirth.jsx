@@ -15,6 +15,7 @@ const DateOfBirth = (props) => {
   const [dateGood, setDateGood] = useState(true);
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(ios);
+  const [disabled, setDisabled] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const selectedDate2 = selectedDate || date;
@@ -33,6 +34,13 @@ const DateOfBirth = (props) => {
       setDate(selectedDate2);
     }
   };
+
+  const update = () => {
+    if (!disabled) {
+      props.route.params.updateProfile({ dateOfBirth: date }, 3);
+    }
+    setDisabled(true);
+  }
 
   return (
     <View style={ styles.container }>
@@ -58,7 +66,7 @@ const DateOfBirth = (props) => {
         { !ios ? <TouchableOpacity activeOpacity={ 1 } onPress={() => setShow(true) } style={ styles.showSpinnerWrapper }>
           <Text style={ styles.pickDate }>Pick Date</Text>
         </TouchableOpacity> : [] }
-        <TouchableOpacity activeOpacity={ dateGood ? 0.7 : 1 } onPress={ dateGood ? () => props.route.params.updateProfile({ dateOfBirth: date }, 3) : undefined } style={ dateGood ? styles.update : styles.updateDisabled }>
+        <TouchableOpacity activeOpacity={ dateGood ? 0.7 : 1 } onPress={ dateGood ? update : undefined } style={ dateGood ? styles.update : styles.updateDisabled }>
           <Text style={ dateGood ? styles.updateText : styles.updateTextDisabled }>Save</Text>
         </TouchableOpacity>
       </View>

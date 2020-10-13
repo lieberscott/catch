@@ -7,41 +7,65 @@ const turquoise = "#4ECDC4";
 const Sports = (props) => {
   
   const s = props.route.params.sports || {
-    Baseball: "Played Little League",
-    Football: "Can Throw A Pretty Good Spiral",
-    Frisbee: "Can Throw a Pretty Good Backhand"
+    Baseball: { interested: true, skill_level: "Played Little League" },
+    Football: { interested: true, skill_level: "Can throw a spiral" },
+    Frisbee: { interested: true, skill_level: "Good backhand thrower" }
   };
 
-  const [baseball, setBaseball] = useState(s.Baseball ? true : false);
-  const [baseballLevel, setBaseballLevel] = useState(1);
-  const [football, setFootball] = useState(s.Football ? true : false);
-  const [footballLevel, setFootballLevel] = useState(1);
-  const [frisbee, setFrisbee] = useState(s.Frisbee ? true : false);
-  const [frisbeeLevel, setFrisbeeLevel] = useState(1);
+  /*
 
-  console.log("baseball : ", baseball);
+  baseball 0: 17
+  baseball 1: 20
+  baseball 2: 21
+
+  football 0: 17
+  football 1: 18
+  football 2: 21
+
+  frisbee 0: 17
+  frisbee 1: 21
+  frisbee 3: 16
+
+  */
+
+  console.log("Baseball len : ", s.Baseball.skill_level.length);
+
+  const lenB = s.Baseball ? s.Baseball.skill_level.length : -1;
+  const lenFo = s.Football ? s.Football.skill_level.length : -1;
+  const lenFr = s.Frisbee ? s.Frisbee.skill_level.length : -1;
+
+  const [baseball, setBaseball] = useState(s.Baseball ? true : false);
+  const [baseballLevel, setBaseballLevel] = useState(lenB === 17 ? 0 : lenB === 20 ? 1 : 2);
+  const [football, setFootball] = useState(s.Football ? true : false);
+  const [footballLevel, setFootballLevel] = useState(lenFo === 17 ? 0 : lenFo === 18 ? 1 : 2);
+  const [frisbee, setFrisbee] = useState(s.Frisbee ? true : false);
+  const [frisbeeLevel, setFrisbeeLevel] = useState(lenFr === 17 ? 0 : lenFr === 21 ? 1 : 2);
+  const [disabled, setDisabled] = useState(false);
 
   const handleDone = () => {
     const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : "Pretty good HS Player";
     const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : "Pretty good HS Player";
     const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : "Play in a league";
 
-    props.route.params.updateProfile({
-      sports: {
-        Baseball: {
-          interested: baseball,
-          skill_level: baseballText
-        },
-        Football: {
-          interested: football,
-          skill_level: footballText
-        },
-        Frisbee: {
-          interested: frisbee,
-          skill_level: frisbeeText
+    if (!disabled) {
+      props.route.params.updateProfile({
+        sports: {
+          Baseball: {
+            interested: baseball,
+            skill_level: baseballText
+          },
+          Football: {
+            interested: football,
+            skill_level: footballText
+          },
+          Frisbee: {
+            interested: frisbee,
+            skill_level: frisbeeText
+          }
         }
-      }
-    }, 3);
+      }, 3);
+    }
+    setDisabled(true);
   }
 
   return (

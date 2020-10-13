@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const turquoise = "#4ECDC4";
 
 const Sports = (props) => {
+
+  const [doneDisabled, setDoneDisabled] = useState(false);
+
+  const donePressed = () => {
+    if (!doneDisabled) {
+      props.handleDone()
+    }
+    setDoneDisabled(true);
+  }
 
   return (
     <KeyboardAvoidingView style={[ styles.container, { width: props.width } ]}>
@@ -67,7 +76,7 @@ const Sports = (props) => {
           </View>
         </View>
         <View style={ styles.line } />
-        <TouchableOpacity activeOpacity={ 0.6 } onPress={ () => props.handleDone() } style={ styles.button }>
+        <TouchableOpacity activeOpacity={ 0.6 } onPress={ donePressed } style={ styles.button }>
           <Text style={ styles.white }>Show Me People Near Me</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={ 0.6 } onPress={ () => props.goBack() } style={ styles.button }>

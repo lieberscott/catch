@@ -52,25 +52,23 @@ const Map = (props) => {
     }
     else {
       try {
-        const token = await registerForPushNotifications();
-        if (token) {
-          const res1 = await addPushNotification(user._id, token);
-        }
+        // const token = await registerForPushNotifications();
+        // if (token) {
+        //   const res1 = await addPushNotification(user._id, token);
+        // }
         const res2 = await sendRequest(user, item);
 
-        const newUsersArray = usersArr.filter((item, i) => item._id !== userId && item.notificationToken !== "-1");
-        const tokensArr = newUsersArray.map((item, i) => item.notificationToken);
-        const notificationsArr = tokensArr.map((item, i) => {
-          return {
-            to: item,
+        const toToken = item._id ? item.notificationToken : item.userObjects[0].notificationToken;
+
+        const notification = {
+          to: item,
             sound: 'default',
             title: "You have received a new message!",
             // body,
             // data: { data: 'goes here' }
-          };
-        })
+        }
 
-        sendPushNotification(notificationsArr);
+        sendPushNotification([notification]);
 
         if (res2) {
           // add that outgoing request has been made to areaConversations locally so you don't request twice

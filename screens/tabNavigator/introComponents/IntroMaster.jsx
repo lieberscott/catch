@@ -219,7 +219,7 @@ const IntroMaster = ({ navigation }) => {
                 backgroundColor: '#fff',
                 image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/man-throwing-football.png')} style={ styles.image } /></View>,
                 title: "What's your game?",
-                subtitle: 'At Catch, we connect people who want to engage in the simple pleasure of a game of catch. We offer three different types of catch: Football, Baseball, or Frisbee. Personalize your profile to let others know what you want to play most, and what your skill level is.',
+                subtitle: 'At Catch, we connect people who want to engage in the simple pleasure of a game of catch. Personalize your profile and connect with people in your area.',
               },
               {
                 backgroundColor: '#fff',
@@ -264,12 +264,12 @@ const IntroMaster = ({ navigation }) => {
               goBack={ goBack }
             />
 
-            <MapPage
+            { page > 1 ? <MapPage
               setLoc={ setLoc }
               loc={ loc }
               goBack={ goBack }
               goRight={ goRight }
-            />
+            /> : [] }
             
             <Photo
               width={ width }

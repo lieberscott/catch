@@ -34,9 +34,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     // width: width - 34,
-    width: width,
+    // width: width,
     flexDirection: "row",
-    backgroundColor: "white"
+    backgroundColor: "transparent"
   },
   flexDirRow: {
     flexDirection: "row"
@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     position: "absolute",
-    left: 10
+    left: Platform.OS === 'android' ? -10 : 10 // hacky
   },
   icon: {
     position: "absolute",
-    right: 15
+    right: Platform.OS === 'android' ? -5 : 15 // hacky
   },
   image: {
     height: 40,

@@ -46,11 +46,13 @@ const ProfileFull = (props) => {
   {/* Set Header */}
   useLayoutEffect(() => {
     props.navigation.setOptions({
-      headerTitle: () => <ProfileHeader handleMenu={ handleMenu } reportModal={ reportModal } setReportModal={ setReportModal } navigation={ props.navigation } />
+      headerTitle: () => <ProfileHeader handleMenu={ handleMenu } reportModal={ reportModal } setReportModal={ setReportModal } navigation={ props.navigation } />,
+      headerLeft: null
     });
   }, [loaded]);
 
   const handleMenu = () => {
+    console.log("handle menu");
     Keyboard.dismiss();
     setReportModal(true);
   }

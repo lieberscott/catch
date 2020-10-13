@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, YellowBox, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as firebase from 'firebase/app';
@@ -9,12 +9,13 @@ import { StoreContext } from '../contexts/storeContext.js';
 
 import { getAuthUser, getDbUser, getAreaUsersAndConversations } from '../firebase.js';
 
-
 import TabNavigator from './tabNavigator/TabNavigator';
 import ProfileFull from './tabNavigator/shared/ProfileFull';
 import Conversation from './tabNavigator/messagesStackNavigator/Conversation';
 import UsersList from './tabNavigator/shared/UsersList';
 import IntroMaster from './tabNavigator/introComponents/IntroMaster';
+
+YellowBox.ignoreWarnings(['Setting a timer']);
 
 const Stack = createStackNavigator();
 
@@ -165,10 +166,11 @@ function MyStack() {
         console.log("Step 6: getAreaUsersAndConversations");
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
+
+          console.log("arr[1].length : ", arr[1].length);
           
           // filter out blockedUsers from areaUsers
           const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
-          console.log("blockedUsers : ", blockedUsers);
           let arr0 = arr[0].filter((item) => {
             let blocked = false;
             for (let i = 0; i < blockedUsers.length; i++) {
@@ -246,7 +248,7 @@ function MyStack() {
       setRequests
     }}>
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
-      : user.onboardingDone ? <Stack.Navigator>
+      : user.onboardingDone ? <Stack.Navigator headerMode="screen" >
         <Stack.Screen name="TabNavigator" component={ TabNavigator } options={{ headerShown: false, title: "" }}/>
         <Stack.Screen name="UsersList" component={UsersList} options={{ title: "" }}/>
         <Stack.Screen name="Conversation" component={Conversation} options={{ title: "" }}/>

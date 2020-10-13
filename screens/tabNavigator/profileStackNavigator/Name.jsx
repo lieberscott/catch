@@ -7,6 +7,14 @@ const Name = (props) => {
   const n = props.route.params.name;
 
   const [name, setName] = useState(n || "");
+  const [disabled, setDisabled] = useState(false);
+
+  const update = () => {
+    if (!disabled) {
+      props.route.params.updateProfile({ name }, 3)
+    }
+    setDisabled(true);
+  }
 
   return (
     <View style={ styles.container }>
@@ -33,7 +41,7 @@ const Name = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity onPress={ () => props.route.params.updateProfile({ name }, 3) } style={ styles.update }>
+        <TouchableOpacity onPress={ update } style={ styles.update }>
           <Text style={ styles.updateText }>Save</Text>
         </TouchableOpacity>
       </View>

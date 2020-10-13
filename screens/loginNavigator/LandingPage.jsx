@@ -84,7 +84,7 @@ const LandingPage = ({ navigation }) => {
 
   return (
     <View style={ styles.container }>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor={ turquoise } />
       <View style={ styles.bottomLinks }>
         <TouchableOpacity onPress={() => console.log("terms of service")}>
           <Text style={ styles.bottomLinksText }>Terms of Service</Text>
@@ -113,13 +113,7 @@ const LandingPage = ({ navigation }) => {
         <Image
           style={ styles.image }
           resizeMode="contain"
-          source={require('../../assets/ball-and-glove.png')}
-        />
-
-        <Image
-          style={ styles.image2 }
-          resizeMode="contain"
-          source={require('../../assets/catch-logo.png')}
+          source={require('../../assets/ball-and-glove-4.png')}
         />
       </View>
     </View>
@@ -170,6 +164,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    alignItems: "stretch",
     backgroundColor: turquoise,
     flexDirection: "column-reverse",
     paddingVertical: 40,
@@ -200,8 +195,8 @@ const styles = StyleSheet.create({
     marginTop: -290
   },
   imageWrapper: {
-    height: 200,
-    width: 200,
+    height: 300,
+    width: 300,
     alignSelf: "center",
     flexGrow: 4
   },

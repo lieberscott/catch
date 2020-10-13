@@ -20,10 +20,13 @@ const Name = (props) => {
           <TextInput
             // autoFocus={ true }
             placeholder="Your first name"
+            autoCorrect={ false }
+            spellCheck={false}
+            underlineColorAndroid="transparent"
             value={ props.name }
             onChangeText={ (text) => props.setName(text) }
             style={ styles.input }
-            />
+          />
         </View>
         <View style={ styles.bottomWrapper }>
           <Text style={ styles.small }>Your first name will be displayed to other users in your area.</Text>
@@ -81,10 +84,10 @@ const styles = StyleSheet.create({
     display:"flex",
     width:"100%",
     padding:0,
-    borderWidth:0,
     justifyContent: "center",
     paddingHorizontal: 3,
-    justifyContent: "center"
+    justifyContent: "center",
+    borderBottomColor: 'transparent'
   },
   inputWrapper: {
     flexDirection: "row",

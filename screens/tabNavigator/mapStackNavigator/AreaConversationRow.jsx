@@ -13,7 +13,7 @@ const AreaConversationRow = ({ users, distance, hours }) => {
   return (
     <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users })}>
       <Image style={ styles.image } source={{ uri: users[0].photo }} />
-      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
+      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text style={ styles.plusText }>+{ len - 1 }</Text></View> }
 
       <View style={ styles.textWrapper }>
         <View style={ styles.namesWrapper }>
@@ -44,7 +44,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: imageDimensions * 0.6,
     width: imageDimensions * 0.6,
-    left: imageDimensions * 0.6
+    left: imageDimensions * 0.6,
+    justifyContent: "center"
   },
   hoursAgoText: {
     height: 5,
@@ -76,6 +77,9 @@ const styles = StyleSheet.create({
   namesWrapper: {
     flexDirection: "row",
     alignItems: "center"
+  },
+  plusText: {
+    textAlign: "center"
   },
   textWrapper: {
     flexDirection: "column",
