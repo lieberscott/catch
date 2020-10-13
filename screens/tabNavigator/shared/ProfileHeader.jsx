@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
     // width: width - 34,
     // width: width,
     flexDirection: "row",
-    // height: 30,
     backgroundColor: "transparent"
   },
   headerLeft: {
