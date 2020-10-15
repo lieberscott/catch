@@ -4,14 +4,14 @@
     "slug": "catch",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ball-and-glove-3.png",
+    "icon": "./assets/ball-and-glove-5.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "notification": {
-      "icon": "./assets/ball-and-glove-3.png",
+      "icon": "./assets/ball-and-glove-5.png",
       "color": "#fff",
       "androidMode": "default"
     },
@@ -26,7 +26,9 @@
       "userInterfaceStyle": "light",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717"
-      }
+      },
+      "bundleIdentifier": "com.readoutconsult.catch",
+      "buildNumber": "1.0.0"
     },
     "userInterfaceStyle": "automatic",
     "android": {
@@ -34,7 +36,9 @@
       "userInterfaceStyle": "dark",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-8262004996000143~3139209246"
-      }
+      },
+      "package": "com.readoutconsult.catch",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
