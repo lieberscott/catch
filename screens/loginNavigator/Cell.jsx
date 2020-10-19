@@ -30,6 +30,7 @@ const Cell = (props) => {
           <Text style={ styles.plusOneText }>+1</Text>
         </View>
         <TextInput
+          ref={ props.textInputRef1 }
           autoFocus={ true }
           keyboardType="numeric"
           placeholder="1234567890"

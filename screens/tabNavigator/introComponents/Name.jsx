@@ -18,7 +18,7 @@ const Name = (props) => {
         <Text style={ styles.question }>First, tell us your name</Text>
         <View style={ styles.inputWrapper }>
           <TextInput
-            // autoFocus={ true }
+            autoFocus={ true }
             placeholder="Your first name"
             autoCorrect={ false }
             spellCheck={false}

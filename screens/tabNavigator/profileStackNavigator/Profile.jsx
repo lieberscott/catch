@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, signOut, createConvos, convoRequestTest, addRequestTest } from '../../../firebase.js';
+import { updateUser, uploadImage, signOut } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
@@ -29,7 +29,7 @@ const Profile = (props) => {
 
   const user = store.user;
   const userId = user._id;
-  const userPhoto = user.photo ? user.photo : "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png";
+  const userPhoto = user.photo ? user.photo : "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c";
   const userName = user.name;
 
 
@@ -259,20 +259,6 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
         </View>
-
-        
-        <TouchableOpacity onPress={ () => createConvos(user) } style={[ styles.signoutWrapper, { backgroundColor: "orange" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Create Convos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => addRequestTest(user) } style={[ styles.signoutWrapper, { backgroundColor: "turquoise" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Add Request Test</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ () => convoRequestTest() } style={[ styles.signoutWrapper, { backgroundColor: "pink" }] }>
-          <MaterialIcons name="exit-to-app" color="gray" size={ 29 } style={ styles.imageIcon } />
-          <Text style={ styles.signoutText }>Convo Request Test</Text>
-        </TouchableOpacity>
         <View style={ styles.bottomArea } />
       </ScrollView>
     </View>

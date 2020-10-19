@@ -36,13 +36,13 @@ export default function TabNavigator() {
     }
   }, []);
 
-  // const handleNotification = notification => {
-  //   console.log("handleNotification notification : ", notification);
-  // };
+  const handleNotification = notification => {
+    console.log("handleNotification notification : ", notification);
+  };
 
-  // const handleNotificationResponse = response => {
-  //   console.log("handleNotificationResponse response : ", response);
-  // }
+  const handleNotificationResponse = response => {
+    console.log("handleNotificationResponse response : ", response);
+  }
   
   return (
     <Tab.Navigator initialRouteName="MapStackNavigator" tabBarOptions={{ activeTintColor: '#e91e63' }}>

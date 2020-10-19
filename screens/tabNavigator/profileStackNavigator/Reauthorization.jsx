@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as Facebook from 'expo-facebook';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 
@@ -27,15 +28,66 @@ const Reauthorization = (props) => {
   const [code, setCode] = useState("");
   const [verificationId, setVerificationId] = useState();
   const [disabled, setDisabled] = useState(false);
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
     (async () => {
       const user = firebase.auth().currentUser;
-      const result = await user.reauthenticateWithPhoneNumber(user.phoneNumber, recaptchaRef.current);
-      setVerificationId(result);
+
+      // providerId either 'phone' or 'facebook.com'
+      const providerId = user.providerData[0].providerId;
+
+      Alert.alert("", "You must reauthenticate to delete your profile", [
+        { text: "OK", onPress: providerId === "phone" ? () => handlePhone() : () => handleFacebook() }
+      ])
+
+
     })()
   }, []);
 
+  const handlePhone = async () => {
+    const user = firebase.auth().currentUser;
+    const result = await user.reauthenticateWithPhoneNumber(user.phoneNumber, recaptchaRef.current);
+    setVerificationId(result);
+  }
+
+  const handleFacebook = async (uid) => {
+
+    try {
+      await Facebook.initializeAsync();
+
+      const options = {
+        permissions: ["public_profile"]
+      }
+      const { type, token } = await Facebook.logInWithReadPermissionsAsync(options);
+
+      if (type === "success") {
+        // const response = await fetch("https://graph.facebook.com/me?fields=id,name,birthday,email&access_token=" + token);
+        // const json = await response.json();
+        // const facebookId = json.id;
+        // const u = await loginUser(facebookId);
+        // store.setAndSaveBasicUser(u); // only authId (FB ID or Phone number) and deviceToken
+        const credential = firebase.auth.FacebookAuthProvider.credential(token);
+        if (credential) {
+          const user = firebase.auth().currentUser;
+          const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
+          if (photoUrl) {
+            const deleteRef = firebase.storage().refFromURL(photoUrl);
+            const res01 = await deleteRef.delete();
+          }
+          const res2 = await user.delete();
+        }
+      }
+
+      else {
+        Alert.alert("", "There was a problem. Please try again.");
+      }
+    }
+    catch (e) {
+      console.log("e : ", e);
+      Alert.alert("", e);
+    }
+  }
   
 
   const reauthorize = async () => {
@@ -61,6 +113,7 @@ const Reauthorization = (props) => {
 
   return (
     <View style={ styles.container }>
+
       <FirebaseRecaptchaVerifierModal
         ref={ recaptchaRef }
         firebaseConfig={ firebaseConfig }

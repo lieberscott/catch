@@ -1,10 +1,12 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const imageDimensions = 40;
 
 const turquoise = "#4ECDC4";
+
+const { width } = Dimensions.get("window");
 
 const ConversationHeader = (props) => {
 
@@ -32,7 +34,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    width: width
   },
   flexDirRow: {
     flexDirection: "row"
@@ -57,7 +60,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    right: Platform.OS === 'android' ? -5 : 15 // hacky
+    right: Platform.OS === 'android' ? -15 : 15 // hacky
   },
   image: {
     height: 40,

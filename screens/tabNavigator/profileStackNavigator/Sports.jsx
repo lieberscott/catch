@@ -32,18 +32,18 @@ const Sports = (props) => {
   const lenFo = s.Football ? s.Football.skill_level.length : -1;
   const lenFr = s.Frisbee ? s.Frisbee.skill_level.length : -1;
 
-  const [baseball, setBaseball] = useState(s.Baseball ? true : false);
-  const [baseballLevel, setBaseballLevel] = useState(lenB === 17 ? 0 : lenB === 20 ? 1 : 2);
-  const [football, setFootball] = useState(s.Football ? true : false);
-  const [footballLevel, setFootballLevel] = useState(lenFo === 17 ? 0 : lenFo === 18 ? 1 : 2);
-  const [frisbee, setFrisbee] = useState(s.Frisbee ? true : false);
-  const [frisbeeLevel, setFrisbeeLevel] = useState(lenFr === 17 ? 0 : lenFr === 21 ? 1 : 2);
+  const [baseball, setBaseball] = useState(s.Baseball && s.Baseball.interested ? true : false);
+  const [baseballLevel, setBaseballLevel] = useState(lenB === 17 ? 0 : lenB === 20 ? 1 : lenB === 21 ? 2 : -1);
+  const [football, setFootball] = useState(s.Football && s.Football.interested ? true : false);
+  const [footballLevel, setFootballLevel] = useState(lenFo === 17 ? 0 : lenFo === 18 ? 1 : lenFo === 21 ? 2 : -1);
+  const [frisbee, setFrisbee] = useState(s.Frisbee && s.Frisbee.interested ? true : false);
+  const [frisbeeLevel, setFrisbeeLevel] = useState(lenFr === 17 ? 0 : lenFr === 21 ? 1 : lenFr === 16 ? 2 : -1);
   const [disabled, setDisabled] = useState(false);
 
   const handleDone = () => {
-    const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : "Pretty good HS Player";
-    const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : "Pretty good HS Player";
-    const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : "Play in a league";
+    const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : baseballLevel === 2 ? "Pretty good HS Player" : "";
+    const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : footballLevel === 2 ? "Pretty good HS Player" : "";
+    const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : frisbeeLevel === 2 ? "Play in a league" : "";
 
     if (!disabled) {
       props.route.params.updateProfile({

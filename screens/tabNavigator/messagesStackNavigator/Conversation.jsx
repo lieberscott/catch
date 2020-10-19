@@ -160,7 +160,7 @@ const Conversation = (props) => {
 
     // Step 0: Compose message object
     const text = msg[0].text;
-    const chatId = convo.chatId;
+    // const chatId = convo.chatId;
 
     const message = {
       _id: "k" + Date.now() + Math.random(),
@@ -196,6 +196,7 @@ const Conversation = (props) => {
     })
 
 
+    console.log("chatId : ", chatId);
     try {
       const res = await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
       if (res) {

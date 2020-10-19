@@ -10,7 +10,7 @@ const RequestRow = ({ request }) => {
   const navigation = useNavigation();
 
   return (
-    <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("ProfileFull", { users: [request] })}>
+    <TouchableOpacity key={ request.id } activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("ProfileFull", { users: [request] })}>
       <Image
         style={ styles.image }
         source={{ uri: request.photo }}

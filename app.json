@@ -25,7 +25,8 @@
       "supportsTablet": true,
       "userInterfaceStyle": "light",
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717"
+        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717",
+        "googleMapsApiKey": "AIzaSyBH2dIP4kUuvhJn3llUOeT5aXiuF_dJ4Mo"
       },
       "bundleIdentifier": "com.readoutconsult.catch",
       "buildNumber": "1.0.0"
@@ -35,7 +36,10 @@
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "dark",
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~3139209246"
+        "googleMobileAdsAppId": "ca-app-pub-8262004996000143~3139209246",
+        "googleMaps": {
+          "apiKey": "AIzaSyDWnJyG81WmiOrcJm-rG6EvDxPlAVnfWDc"
+        }
       },
       "package": "com.readoutconsult.catch",
       "versionCode": 1

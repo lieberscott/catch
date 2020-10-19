@@ -39,7 +39,7 @@ const IntroMaster = ({ navigation }) => {
   const [frisbee, setFrisbee] = useState(true);
   const [frisbeeLevel, setFrisbeeLevel] = useState(1);
   const [photo, setPhoto] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoUrl, setPhotoUrl] = useState('');
   
   const [page, setPage] = useState(0);
   const [firstPartDone, setFirstPartDone] = useState(false);
@@ -101,9 +101,9 @@ const IntroMaster = ({ navigation }) => {
 
   const handleDone = async () => {
 
-    const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : "Pretty good HS Player";
-    const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : "Pretty good HS Player";
-    const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : "Play in a league";
+    const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : baseballLevel === 2 ? "Pretty good HS Player" : "";
+    const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : footballLevel === 2 ? "Pretty good HS Player" : "";
+    const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : frisbeeLevel === 2 ? "Play in a league" : "";
 
 
     // everything but loc, which needs to be specially formatted with geocollection (loc is passed separately and handled in firebase.js function)

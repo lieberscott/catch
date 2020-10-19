@@ -16,7 +16,7 @@ const Photo = (props) => {
           <Image
             // autoFocus={ true }
             resizeMode="contain"
-            source={{ uri: photo ? photoUrl : 'https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png' }}
+            source={{ uri: photo ? photoUrl : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c' }}
             style={ styles.image }
             />
         </TouchableOpacity>

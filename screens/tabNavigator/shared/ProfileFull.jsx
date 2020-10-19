@@ -110,7 +110,7 @@ const ProfileFull = (props) => {
         >
           <View style={ styles.scrollViewInner}>
             <Image
-              source={{ uri: user1.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png" }}
+              source={{ uri: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c" }}
               style={ styles.image }
             />
           </View>
@@ -127,10 +127,10 @@ const ProfileFull = (props) => {
             { sportsKeys.map((item, i) => {
               return (
                 <View key={ item } style={ styles.sport }>
-                  { item === "Football" ? <Image resizeMode="contain" source={require(`../../../assets/football.png`)} style={ styles.sportsImage } />
-                  : item === "Baseball" ? <Image resizeMode="contain" source={require(`../../../assets/ball-and-glove.png`)} style={ styles.sportsImage } />
-                  : <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } /> }
-                  <Text style={ styles.skillLevel }>{ user1.sports[item].skill_level }</Text>
+                  { item === "Football" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/football.png`)} style={ styles.sportsImage } />
+                  : item === "Baseball" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/ball-and-glove.png`)} style={ styles.sportsImage } />
+                  : item === "Frisbee" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } /> : [] }
+                  <Text style={ styles.skillLevel }>{ user1.sports[item].interested ? user1.sports[item].skill_level : "" }</Text>
                 </View>
               )
             })}

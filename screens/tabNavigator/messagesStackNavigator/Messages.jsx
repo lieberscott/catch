@@ -24,11 +24,6 @@ const Messages = (props) => {
 
   userChats.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
 
-  for (let i = 0; i < requests0.length; i++) {
-    console.log("requests0 id : ", requests0[i].id);
-  }
-
-
   // const userConversations = userChats.concat(requests0);
   const userConversations = requests0.concat(userChats);
 
@@ -122,7 +117,7 @@ const Messages = (props) => {
     { /* FlatList of Conversations */ }
     <View style={ styles.bottom }>
       { userConversations.length === 0 ? <MessagesEmpty userPhoto={ userPhoto } /> : <SwipeListView
-        keyExtractor={ (item, key) => item.chatId }
+        // keyExtractor={ (item, key) => item.chatId }
         previewRowKey={'0'}
         previewOpenValue={-100}
         previewOpenDelay={3000}
@@ -153,7 +148,8 @@ const Messages = (props) => {
         previewOpenDelay={3000}
         renderItem={({ item }) => {
         if (item.toId) {
-          return <RequestRow key={ item._id.toString() } request={ item } />
+          console.log("item.id : ", item.id);
+          return <RequestRow key={ item.id } request={ item } />
         }
         else {
           return <UserConversationRow key={ item.lastMessageCreatedAt ? item.lastMessageCreatedAt.seconds : Math.random().toString() } convo={ item } userId={ userId } userName={ userName } userAvatar={ userPhoto } remove={ remove } />

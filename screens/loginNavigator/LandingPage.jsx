@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Animated, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Facebook from 'expo-facebook';
 import * as firebase from 'firebase';
 
-// import { loginUser } from '../../utilsUser.js';
+import { loginUser } from '../../firebase.js';
 import { StoreContext } from '../../contexts/storeContext';
 
 const turquoise = "#4ECDC4";
@@ -57,31 +57,24 @@ const LandingPage = ({ navigation }) => {
       const { type, token } = await Facebook.logInWithReadPermissionsAsync(options);
 
       if (type === "success") {
-        const response = await fetch("https://graph.facebook.com/me?fields=id,name,birthday,email&access_token=" + token);
-        const json = await response.json();
-        const facebookId = json.id;
-        const u = await loginUser(facebookId);
+        // const response = await fetch("https://graph.facebook.com/me?fields=id,name,birthday,email&access_token=" + token);
+        // const json = await response.json();
+        // const facebookId = json.id;
+        // const u = await loginUser(facebookId);
         // store.setAndSaveBasicUser(u); // only authId (FB ID or Phone number) and deviceToken
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
-        await firebase.auth().signInWithCredential(credential);
+        if (credential) {
+          const bool = await loginUser(credential);
+        }
       }
 
       else {
-        // store.setAndSaveBasicUser({ userId: "", deviceToken: "" });
+        Alert.alert("", "There was a problem. Please try again.");
       }
-
-      // const response = await fetch("https://graph.facebook.com/me?access_token=" + token);
-      // const json = await response.json();
-
-      // save FB token and device_token to Storage?
-
-      // use the accessToken to make calls to the Facebook Graph API to get user data to save in Mongo such as
-      // const response = await fetch(`https://graph.facebook.com/me/?fields=id,name&access_token=${token}`); //<- use the token you got in your request
-      // const userInfo = await response.json();
-      // see Stack Overflow answer here: https://stackoverflow.com/questions/54735944/how-to-get-fb-access-token-with-expo
     }
     catch (e) {
       console.log("e : ", e);
+      Alert.alert("", e);
     }
   }
 

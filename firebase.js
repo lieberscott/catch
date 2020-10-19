@@ -89,7 +89,7 @@ export const acceptRequestUser = async (user0, user1) => {
         gender: user0.gender,
         coordinates: user0.coordinates,
         sports: user0.sports,
-        photo: user0.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
+        photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c",
         getsNotifications: user0.getsNotifications,
         notificationToken: user0.notificationToken,
         profileText: user0.profileText ? user0.profileText : ""
@@ -101,7 +101,7 @@ export const acceptRequestUser = async (user0, user1) => {
         gender: user1.gender,
         coordinates: user1.coordinates,
         sports: user1.sports,
-        photo: user1.photo || "https://www.neoarmenia.com/wp-content/uploads/generic-user-icon-19.png",
+        photo: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c",
         getsNotifications: user1.getsNotifications,
         notificationToken: user1.notificationToken,
         profileText: user1.profileText ? user1.profileText : ""
@@ -590,3 +590,4 @@ export const deleteUser = async (photoUrl) => {
     return false;
   }
 }
+

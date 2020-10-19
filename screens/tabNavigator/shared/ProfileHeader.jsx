@@ -1,6 +1,8 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get("window");
 
 const turquoise = "#4ECDC4";
 
@@ -21,7 +23,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    width: width
   },
   headerLeft: {
     position: "absolute",
@@ -29,7 +32,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    right: Platform.OS === 'android' ? -5 : 15 // hacky
+    right: Platform.OS === 'android' ? -15 : 15 // hacky
   },
 })
 
