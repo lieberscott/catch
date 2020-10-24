@@ -73,19 +73,20 @@ export const acceptRequestUser = async (user0, user1) => {
   const geofirestore = new GeoFirestore(firebase.firestore());
   const geocollection = geofirestore.collection('conversations');
 
-  const user0Dob = user0.date_of_birth.seconds ? new Date(user0.date_of_birth.seconds * 1000) : new Date(user0.date_of_birth);
-  const user1Dob = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
+  const user0Dob = user0.dateOfBirth.seconds ? new Date(user0.dateOfBirth.seconds * 1000) : new Date(user0.dateOfBirth);
+  const user1Dob = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
 
   let newConvo = {
     coordinates: new firebase.firestore.GeoPoint(user0.coordinates.latitude, user0.coordinates.longitude),
     createdAt: new Date(),
     messages: [],
     lastMessageTime: new Date(),
+    activeSport: user0.activeSport,
     userObjects: [
       {
         _id: user0._id,
         name: user0.name,
-        date_of_birth: user0Dob,
+        dateOfBirth: user0Dob,
         gender: user0.gender,
         coordinates: user0.coordinates,
         sports: user0.sports,
@@ -97,7 +98,7 @@ export const acceptRequestUser = async (user0, user1) => {
       {
         _id: user1._id,
         name: user1.name,
-        date_of_birth: user1Dob,
+        dateOfBirth: user1Dob,
         gender: user1.gender,
         coordinates: user1.coordinates,
         sports: user1.sports,
@@ -115,6 +116,7 @@ export const acceptRequestUser = async (user0, user1) => {
     lastMessageFromName: user1.name,
     lastMessageText: "You accepted " + user1.name + "'s request!",
     readByReceiver: false,
+    activeSport: user0.activeSport,
     usersArr: [
       {
         userAvatar: user0.photo,
@@ -135,6 +137,7 @@ export const acceptRequestUser = async (user0, user1) => {
     lastMessageFromName: user1.name,
     lastMessageText: user0.name + " accepted your request!",
     readByReceiver: false,
+    activeSport: user0.activeSport,
     usersArr: [
       {
         userAvatar: user0.photo,
@@ -170,16 +173,16 @@ export const acceptRequestUser = async (user0, user1) => {
 
 export const acceptRequestConvo = async (user0, user1, usersArr) => {
 
-  const userObj1 = {
+  const userObj1 = { // for userChats usersArr
     userAvatar: user1.photo,
     userName: user1.name,
     userId: user1._id
   }
 
-  const userObj2 = {
+  const userObj2 = { // for userObjects array in conversation
     _id: user1._id,
     coordinates: user1.coordinates,
-    date_of_birth: user1.date_of_birth,
+    dateOfBirth: user1.dateOfBirth,
     gender: user1.gender,
     getsNotifications: user1.getsNotifications,
     name: user1.name,
@@ -204,7 +207,8 @@ export const acceptRequestConvo = async (user0, user1, usersArr) => {
     lastMessageFromName: user1.name,
     lastMessageText: "You joined the conversation. Say hi!",
     readByReceiver: false,
-    usersArr: usersArr2
+    usersArr: usersArr2,
+    activeSport: request.activeSport
   }
 
   let promises = [];
@@ -446,6 +450,43 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
   }
 }
 
+export const getUserChatsAndRequests = async () => {
+  try {
+    const document = await firebase.firestore().collection("userChats").doc(userId).get();
+    const chats = document.data();
+    let chatArray = [];
+    let requestsArr = [];
+
+    Object.keys(chats).forEach((key) => {
+      chats[key].id = key;
+      chatArray.push(chats[key]);
+    });
+
+    const requests0 = await firebase.firestore().collection("requests").where("toId", "==", userId).get();
+    const requests1 = requests0.data();
+
+    requests1.forEach((doc) => {
+      let d = doc.data();
+      d.id = doc.id;
+      requestsArr.push(d);
+    });
+    // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
+    // so filter out duplicate requests here
+    let seen = {};
+    const requestsArr2 = requestsArr.filter((item) => {
+      const id = item._id;
+      return seen.hasOwnProperty(id) ? false : (seen[id] = true);
+    });
+
+    return [chatArray, requestsArr2];
+  }
+  catch (e) {
+    console.log("error in getUserChatsAndRequests : ", e);
+    return false;
+  }
+
+}
+
 export const declineRequest = async (itemId) => {
   try {
     const res = await firebase.firestore().collection("requests").doc(itemId).delete();
@@ -462,8 +503,9 @@ export const sendRequest = async (user, item) => {
   
   let req = {
     _id: user._id,
+    activeSport: item.activeSport,
     createdAt: new Date(),
-    date_of_birth: user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : new Date(user.date_of_birth),
+    dateOfBirth: user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth),
     gender: user.gender,
     getsNotifications: user.getsNotifications,
     coordinates: new firebase.firestore.GeoPoint(user.coordinates.latitude, user.coordinates.longitude),

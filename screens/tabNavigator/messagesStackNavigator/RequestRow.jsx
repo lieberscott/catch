@@ -8,6 +8,7 @@ const imageDimensions = 80;
 const RequestRow = ({ request }) => {
 
   const navigation = useNavigation();
+  const activeSport = request.activeSport;
 
   return (
     <TouchableOpacity key={ request.id } activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("ProfileFull", { users: [request] })}>
@@ -18,8 +19,11 @@ const RequestRow = ({ request }) => {
       <View style={ styles.textWrapper }>
         <View style={ styles.textWrapperInner }>
           <Text style={ styles.name }>{ request.name }</Text>
-          <Text style={ styles.requestText }>Catch Request</Text>
+          <Text style={ styles.requestText }>Game Request</Text>
         </View>
+      </View>
+      <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
+        <Image style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') : require('../../../assets/favicon.png') } />
       </View>
     </TouchableOpacity>
   )

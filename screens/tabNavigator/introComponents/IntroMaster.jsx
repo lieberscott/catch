@@ -38,6 +38,8 @@ const IntroMaster = ({ navigation }) => {
   const [footballLevel, setFootballLevel] = useState(1);
   const [frisbee, setFrisbee] = useState(true);
   const [frisbeeLevel, setFrisbeeLevel] = useState(1);
+  const [basketball, setBasketball] = useState(true);
+  const [basketballLevel, setBasketballLevel] = useState(1);
   const [photo, setPhoto] = useState(false);
   const [photoUrl, setPhotoUrl] = useState('');
   
@@ -104,12 +106,12 @@ const IntroMaster = ({ navigation }) => {
     const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : baseballLevel === 2 ? "Pretty good HS Player" : "";
     const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : footballLevel === 2 ? "Pretty good HS Player" : "";
     const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : frisbeeLevel === 2 ? "Play in a league" : "";
-
+    const basketballText = basketballLevel === 0 ? "Absolute beginner" : basketballLevel === 1 ? "Can dribble with both hands" : basketballLevel === 3 ? "Played HS ball" : "";
 
     // everything but loc, which needs to be specially formatted with geocollection (loc is passed separately and handled in firebase.js function)
     const update = {
       name,
-      date_of_birth: dob,
+      dateOfBirth: dob,
       gender,
       photo: photoUrl,
       sports: {
@@ -124,6 +126,10 @@ const IntroMaster = ({ navigation }) => {
         Frisbee: {
           interested: frisbee,
           skill_level: frisbeeText
+        },
+        Basketball: {
+          interested: basketball,
+          skill_level: basketballText
         }
       },
       onboardingDone: true
@@ -207,15 +213,15 @@ const IntroMaster = ({ navigation }) => {
               {
                 backgroundColor: '#fff',
                 image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/ball-and-glove.png')} style={ styles.image } /><Image style={ styles.image2 } resizeMode="contain" source={require('../../../assets/catch-logo.png')} /></View>,
-                title: 'Welcome to Catch',
-                subtitle: 'The best place for socially distanced, fun, outdoor activity',
+                title: 'Welcome to Pick Up',
+                subtitle: 'The best place for find a pickup game',
                 // imageContainerStyle: styles.imageWrapper
               },
               {
                 backgroundColor: '#fff',
                 image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/man-throwing-football.png')} style={ styles.image } /></View>,
                 title: "What's your game?",
-                subtitle: 'At Catch, we connect people who want to engage in the simple pleasure of a game of catch. Personalize your profile and connect with people in your area.',
+                subtitle: 'At Pick Up, we connect people who want to play pick up sports. Personalize your profile and connect with people in your area.',
               },
               {
                 backgroundColor: '#fff',
@@ -292,6 +298,10 @@ const IntroMaster = ({ navigation }) => {
               setFrisbee={ setFrisbee }
               frisbeeLevel={ frisbeeLevel }
               setFrisbeeLevel={ setFrisbeeLevel }
+              basketball={ basketball }
+              setBasketball={ setBasketball }
+              basketballLevel={ basketballLevel }
+              setBasketballLevel={ setBasketballLevel }
             />
 
             {/* Upload Profile Image Component */}

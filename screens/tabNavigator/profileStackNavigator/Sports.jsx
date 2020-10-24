@@ -26,11 +26,16 @@ const Sports = (props) => {
   frisbee 1: 21
   frisbee 3: 16
 
+  basketball 0: 17
+  basketball 1: 27
+  basketball 2: 14
+
   */
 
   const lenB = s.Baseball ? s.Baseball.skill_level.length : -1;
   const lenFo = s.Football ? s.Football.skill_level.length : -1;
   const lenFr = s.Frisbee ? s.Frisbee.skill_level.length : -1;
+  const lenBa = s.Basketball ? s.Basketball.skill_level.length : -1;
 
   const [baseball, setBaseball] = useState(s.Baseball && s.Baseball.interested ? true : false);
   const [baseballLevel, setBaseballLevel] = useState(lenB === 17 ? 0 : lenB === 20 ? 1 : lenB === 21 ? 2 : -1);
@@ -38,12 +43,15 @@ const Sports = (props) => {
   const [footballLevel, setFootballLevel] = useState(lenFo === 17 ? 0 : lenFo === 18 ? 1 : lenFo === 21 ? 2 : -1);
   const [frisbee, setFrisbee] = useState(s.Frisbee && s.Frisbee.interested ? true : false);
   const [frisbeeLevel, setFrisbeeLevel] = useState(lenFr === 17 ? 0 : lenFr === 21 ? 1 : lenFr === 16 ? 2 : -1);
+  const [basketball, setBasketball] = useState(s.Basketball && s.Basketball.interested ? true : false);
+  const [basketballLevel, setBasketballLevel] = useState(lenBa === 17 ? 0 : lenBa === 27 ? 1 : lenBa === 14 ? 2 : -1);
   const [disabled, setDisabled] = useState(false);
 
   const handleDone = () => {
     const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : baseballLevel === 2 ? "Pretty good HS Player" : "";
     const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : footballLevel === 2 ? "Pretty good HS Player" : "";
     const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : frisbeeLevel === 2 ? "Play in a league" : "";
+    const basketballText = basketballLevel === 0 ? "Absolute beginner" : basketballLevel === 1 ? "Can dribble with both hands" : basketballLevel === 2 ? "Played HS ball" : "";
 
     if (!disabled) {
       props.route.params.updateProfile({
@@ -59,6 +67,10 @@ const Sports = (props) => {
           Frisbee: {
             interested: frisbee,
             skill_level: frisbeeText
+          },
+          Basketball: {
+            interested: basketball,
+            skill_level: basketballText
           }
         }
       }, 3);
@@ -123,6 +135,24 @@ const Sports = (props) => {
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={ 0.92 } disabled={ !frisbee } onPress={ () => setFrisbeeLevel(2) } style={ frisbee && frisbeeLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
               <Text style={ styles.white }>Play in a league</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={ styles.line } />
+        <View style={ styles.choiceWrapper}>
+          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => setBasketball(prevState => !prevState) } style={ basketball ? styles.choiceButton : styles.choiceButtonDisabled }>
+            <Ionicons name="ios-basketball" size={ 20 } color={ "white" } />
+            <Text style={ styles.white }>   Basketball</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 20 }}>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(0) } style={ basketball && basketballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Absolute beginner</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(1) } style={ basketball && basketballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Can dribble with both hands</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(2) } style={ basketball && basketballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Played HS ball</Text>
             </TouchableOpacity>
           </View>
         </View>

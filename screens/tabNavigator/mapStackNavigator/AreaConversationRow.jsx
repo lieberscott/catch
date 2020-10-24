@@ -5,8 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 const imageMarginR = 16;
 const imageDimensions = 80;
 
-const AreaConversationRow = ({ users, distance, hours }) => {
+const AreaConversationRow = ({ users, distance, hours, activeSport }) => {
   const len = users.length;
+
+  console.log("activeSport : ", activeSport);
 
   const navigation = useNavigation();
 
@@ -24,6 +26,9 @@ const AreaConversationRow = ({ users, distance, hours }) => {
           <View style={ styles.hoursAgoText } />
           <Text style={ styles.active }> { hours } hours ago</Text>
         </View>
+      </View>
+      <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
+        <Image resizeMode="contain" style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') :require('../../../assets/favicon.png') } />
       </View>
     </TouchableOpacity>
   )
@@ -66,6 +71,11 @@ const styles = StyleSheet.create({
     height: imageDimensions * 0.6,
     width: imageDimensions * 0.6,
     left: imageDimensions * 0.6
+  },
+  image3: {
+    borderRadius: 50,
+    height: imageDimensions * 0.6,
+    width: imageDimensions * 0.6
   },
   name: {
     fontSize: 18,

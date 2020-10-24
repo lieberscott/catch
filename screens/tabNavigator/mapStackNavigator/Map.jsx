@@ -48,7 +48,7 @@ const Map = (props) => {
 
   const request = async (item) => {
     if (!user.active) {
-      Alert.alert("", "You must mark yourself as `active` on your profile page in order to request games of catch!");
+      Alert.alert("", "You must mark yourself as `active` on your profile page in order to request games!");
     }
     else {
       try {
@@ -102,7 +102,7 @@ const Map = (props) => {
   }
 
   const onRefresh = async () => {
-
+    setRefreshing(true);
     const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
     try {
       const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
@@ -121,9 +121,11 @@ const Map = (props) => {
       
       store.setAreaUsers(arr[0]);
       store.setAreaConversations(arr1);
+      setRefreshing(false);
     }
     catch (e) {
       console.log("get area users error : ", e);
+      setRefreshing(false);
     }
   }
 
@@ -172,7 +174,7 @@ const Map = (props) => {
                 <TouchableOpacity
                   activeOpacity={ 1 }
                   style={ [styles.backRightBtn, styles.backRightBtnRight] }
-                  onPress={ data.item.requestAlreadyMade ? () => Alert.alert("", "You have already requested a game of catch with this user. They are still considering your request.") : () => request(data.item) }
+                  onPress={ data.item.requestAlreadyMade ? () => Alert.alert("", "You have already made a request to this user.") : () => request(data.item) }
                 >
                     <Text style={styles.backTextWhite}>Request To Join</Text>
                 </TouchableOpacity>
@@ -204,11 +206,11 @@ const Map = (props) => {
 
               if (item.userObjects) {
                 const conversation = item.userObjects.length > 1 ? true : false;
-              return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } />
+              return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } />
               }
               else {
                 // this will always only be one user, but in an array [{ }] so you can reuse the AreaConversationRow component
-                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } />
+                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } />
               }
             }}
             ListFooterComponent={() => areaConversations.length ?  <View style={ styles.body }>
@@ -258,7 +260,7 @@ const Map = (props) => {
           return (
             <Marker
               pinColor={ i === 0 ? "green" : "red" }
-              key={ "pin" + convo.id }
+              key={ convo.id ? "pin" + convo.id : "pin" + convo._id }
               coordinate={{ latitude: convo.coordinates.latitude, longitude: convo.coordinates.longitude }}
               // title={ pin.name }
               // description={ pin.profile_text }

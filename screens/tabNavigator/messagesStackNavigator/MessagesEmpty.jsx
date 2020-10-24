@@ -9,7 +9,7 @@ const MessagesEmpty = (props) => {
       <View style={ styles.card } />
       <View style={ styles.textWrapper }>
         <Text style={ styles.title }>Start Requesting</Text>
-        <Text style={ styles.text }>If you request a game of catch with an active user, your connections will appear here.</Text>
+        <Text style={ styles.text }>If you request a game with an active user, your connections will appear here.</Text>
       </View>
     </View>
   )

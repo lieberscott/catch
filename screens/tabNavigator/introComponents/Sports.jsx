@@ -76,6 +76,24 @@ const Sports = (props) => {
           </View>
         </View>
         <View style={ styles.line } />
+        <View style={ styles.choiceWrapper}>
+          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => setBasketball(prevState => !prevState) } style={ basketball ? styles.choiceButton : styles.choiceButtonDisabled }>
+            <Ionicons name="ios-basketball" size={ 20 } color={ "white" } />
+            <Text style={ styles.white }>   Basketball</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 20 }}>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(0) } style={ basketball && basketballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Absolute beginner</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(1) } style={ basketball && basketballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Can dribble with both hands</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(2) } style={ basketball && basketballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+              <Text style={ styles.white }>Played HS ball</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={ styles.line } />
         <TouchableOpacity activeOpacity={ 0.6 } onPress={ donePressed } style={ styles.button }>
           <Text style={ styles.white }>Show Me People Near Me</Text>
         </TouchableOpacity>

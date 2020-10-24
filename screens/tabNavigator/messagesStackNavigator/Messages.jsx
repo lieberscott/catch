@@ -1,5 +1,5 @@
-import React, { useEffect, useContext } from 'react';
-import { Alert, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useContext, useState } from 'react';
+import { Alert, Platform, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
@@ -27,12 +27,15 @@ const Messages = (props) => {
   // const userConversations = userChats.concat(requests0);
   const userConversations = requests0.concat(userChats);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     (async () => {
       // Set global test device ID
       await setTestDeviceIDAsync('EMULATOR');
     })()
   }, []);
+  
 
 
   // remove user from conversation
@@ -111,13 +114,58 @@ const Messages = (props) => {
     }
   }
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
+    try {
+      const arr = await getUserChatsAndRequests(userId); // [userChats, requestsArr]
+
+      if (arr) {
+        // filter out blockedUsers from userChats
+        let arr0 = arr[0].filter((item) => {
+          let blocked = false;
+          for (let i = 0; i < blockedUsers.length; i++) {
+            const index = item.userArr.findIndex((u) => u.userId === blockedUsers[i].userId)
+            if (index !== -1) {
+              blocked = true;
+            }
+          }
+          return !blocked;
+        });
+
+        // filter out blockedUsers from requests
+        let arr1 = arr[1].filter((item) => {
+          let blocked = false;
+          for (let i = 0; i < blockedUsers.length; i++) {
+            const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+            if (index !== -1) {
+              blocked = true;
+            }
+          }
+          return !blocked;
+        });
+        
+        store.setUserChats(arr0);
+        store.setRequests(arr1);
+        setRefreshing(false);
+      }
+    }
+    catch (e) {
+      console.log("get area users error : ", e);
+      setRefreshing(false);
+    }
+  }
+
   return (
     <SafeAreaView style={ styles.body }>
-
     { /* FlatList of Conversations */ }
     <View style={ styles.bottom }>
+      <Text style={ styles.topText }>Conversations are deleted every 24 hours to make sure people are ready and willing to participate.</Text>
       { userConversations.length === 0 ? <MessagesEmpty userPhoto={ userPhoto } /> : <SwipeListView
         // keyExtractor={ (item, key) => item.chatId }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
+        }
         previewRowKey={'0'}
         previewOpenValue={-100}
         previewOpenDelay={3000}
@@ -204,6 +252,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: "red"
+  },
+  topText: {
+    textAlign: "center"
   }
 });
 

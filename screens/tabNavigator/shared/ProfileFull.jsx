@@ -22,7 +22,7 @@ const ProfileFull = (props) => {
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
 
   const today = new Date();
-  const birthDate = user1.date_of_birth.seconds ? new Date(user1.date_of_birth.seconds * 1000) : new Date(user1.date_of_birth);
+  const birthDate = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
   let user1Age = today.getFullYear() - birthDate.getFullYear();
   let m = today.getMonth() - birthDate.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -129,7 +129,9 @@ const ProfileFull = (props) => {
                 <View key={ item } style={ styles.sport }>
                   { item === "Football" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/football.png`)} style={ styles.sportsImage } />
                   : item === "Baseball" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/ball-and-glove.png`)} style={ styles.sportsImage } />
-                  : item === "Frisbee" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } /> : [] }
+                  : item === "Frisbee" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } />
+                  : item === "Basketball" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/basketball.png`)} style={ styles.sportsImage } />
+                  : [] }
                   <Text style={ styles.skillLevel }>{ user1.sports[item].interested ? user1.sports[item].skill_level : "" }</Text>
                 </View>
               )

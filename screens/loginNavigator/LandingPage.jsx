@@ -109,7 +109,7 @@ const LandingPage = ({ navigation }) => {
         <Image
           style={ styles.image }
           resizeMode="contain"
-          source={require('../../assets/ball-and-glove-4.png')}
+          source={require('../../assets/new-logo.png')}
         />
       </View>
     </View>

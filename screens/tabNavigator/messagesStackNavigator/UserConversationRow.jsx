@@ -9,6 +9,7 @@ const imageDimensions = 80;
 const UserConversationRow = (props) => {
 
   const { convo, userId } = props;
+  const activeSport = convo.activeSport;
   const usersObj = convo.usersArr;
   let usersArr = [];
   Object.keys(usersObj).forEach((key) => {
@@ -43,6 +44,9 @@ const UserConversationRow = (props) => {
         <View style={ [styles.textWrapper, { width: width - imageDimensions - imageMarginR }] }>
           <Text style={ styles.name }>{ usersArr[firstOtherUserIndex].userName } { usersLen > 2 ? "+" + (usersLen - 2).toString() : "" }</Text>
           <Text ellipsizeMode="tail" numberOfLines={ 1 } style={ styles.message }>{ convo.lastMessageText }</Text>
+        </View>
+        <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
+          <Image style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') : require('../../../assets/favicon.png') } />
         </View>
       </TouchableOpacity>
   )

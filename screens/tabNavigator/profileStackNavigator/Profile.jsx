@@ -45,14 +45,28 @@ const Profile = (props) => {
 
   const [active, setActive] = useState(a);
 
-  const updateActive = (bool) => {
+  const updateActive1 = (bool) => {
+    if (bool) {
+      Alert.alert("", "Which Activity do you want to play?", [
+        { text: "Baseball", onPress: () => updateActive2(true, 0) },
+        { text: "Football", onPress: () => updateActive2(true, 1) },
+        { text: "Frisbee", onPress: () => updateActive2(true, 2) },
+        { text: "Basketball", onPress: () => updateActive2(true, 3) }
+      ])
+    }
+    else {
+      updateActive2(false, -1);
+    }
+  }
+
+  const updateActive2 = (bool, activeSportNum) => {
     setActive(bool);
-    updateProfile({ active: bool, timeOfActivation: new Date() }, 1)
+    updateProfile({ active: bool, activeSport: activeSportNum, timeOfActivation: new Date() }, 1)
   }
 
   {/* Get age */}
   // const today = new Date(); // today is declared above
-  const userDOB = user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : new Date(user.date_of_birth);
+  const userDOB = user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth);
   const milliseconds = userDOB.getTime();
   const birthday = new Date(milliseconds);
   let userAge = today.getFullYear() - birthday.getFullYear();
@@ -90,7 +104,12 @@ const Profile = (props) => {
     if (result) {
       // update locally
       const key = Object.keys(update);
-      store.setUser(prevState => ({...prevState, [key]: update[key] }))
+      if (key.length > 1) {
+        store.setUser(prevState => ({...prevState, [key[0]]: update[key[0]], [key[1]]: update[key[1]], [key[2]]: update[key[2]] }))
+      }
+      else {
+        store.setUser(prevState => ({...prevState, [key]: update[key] }))
+      }
     }
     if (num > 2) {
       props.navigation.pop();
@@ -144,12 +163,13 @@ const Profile = (props) => {
                 trackColor={{ false: "#e4e4e4", true: "green" }}
                 thumbColor="white"
                 ios_backgroundColor="#efefef"
-                onValueChange={ (bool) => updateActive(bool) }
+                onValueChange={ (bool) => updateActive1(bool) }
                 value={ active }
               />
             </View>
           </View>
-          <Text style={ styles.small }>Users will stay active for 6 hours. Conversations are cleared 24 hours after the most recent message.</Text>
+          <Text style={ active && user.activeSport < 4 && user.activeSport > -1 ? styles.activeSportText : styles.activeSportText2 }>{ user.activeSport === 0 ? "Baseball" : user.activeSport === 1 ? "Football" : user.activeSport === 2 ? "Frisbee" : user.activeSport === 3 ? "Basketball" : "Not currently active" }</Text>
+          <Text style={ styles.small }>Users will stay active for 6 hours.</Text>
         </View>
 
 
@@ -210,7 +230,7 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
-            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: user.date_of_birth.seconds ? new Date(user.date_of_birth.seconds * 1000) : user.date_of_birth, updateProfile })}>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : user.dateOfBirth, updateProfile })}>
               <Text>{ userAge || "Age" }</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
@@ -266,6 +286,20 @@ const Profile = (props) => {
 }
 
 const styles = StyleSheet.create({
+  activeSportText: {
+    backgroundColor: "green",
+    padding: 5,
+    color: "white",
+    textAlign: "center",
+    marginVertical: 4
+  },
+  activeSportText2: {
+    backgroundColor: "#efefef",
+    padding: 5,
+    color: "black",
+    textAlign: "center",
+    marginVertical: 4
+  },
   body: {
   	backgroundColor: "#fdfdfd",
     flexGrow: 1,

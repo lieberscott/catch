@@ -6,7 +6,7 @@ admin.initializeApp();
 require("dotenv").config();
 
 
-exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *')
+exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 1 * * *')
 .timeZone('America/New_York') // default is America/Los_Angeles
 .onRun((context) => {
   
@@ -19,9 +19,9 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 12 1-31/2 * *'
 
   let promises = [];
 
-  // Step 1: Get all conversations where last message is older than 24 hours
+  // Step 1: Get all conversations older than 24 hours
   database.collection("conversations")
-  .where("lastMessageTime", "<", _24HoursAgo)
+  .where("createdAt", "<", _24HoursAgo)
   .get()
   .then((oldConvos) => {
     oldConvos.forEach((doc) => {
