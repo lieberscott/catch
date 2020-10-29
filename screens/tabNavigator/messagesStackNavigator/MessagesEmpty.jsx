@@ -1,17 +1,23 @@
-import React from 'react';
-import { StyleSheet, Text, View  } from 'react-native';
+import React, { useState } from 'react';
+import { RefreshControl, StyleSheet, ScrollView, Text, View  } from 'react-native';
 
 const MessagesEmpty = (props) => {
 
+  const [refreshing, setRefreshing] = useState(false);
 
   return (
-    <View style={ styles.container }>
+    <ScrollView
+      contentContainerStyle={ styles.container }
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={ () => props.onRefresh() } />
+      }
+    >
       <View style={ styles.card } />
       <View style={ styles.textWrapper }>
         <Text style={ styles.title }>Start Requesting</Text>
         <Text style={ styles.text }>If you request a game with an active user, your connections will appear here.</Text>
       </View>
-    </View>
+    </ScrollView>
   )
 }
 

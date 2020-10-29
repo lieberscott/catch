@@ -10,12 +10,13 @@ const { width } = Dimensions.get("window");
 
 const ConversationHeader = (props) => {
 
+
   const otherPersonArray = props.otherPersonArray;
   const len = otherPersonArray.length;
 
   return (
     <View style={ styles.container }>
-      <MaterialIcons name="chevron-left" size={ 30 } style={ styles.headerLeft } onPress={() => props.navigation.pop() } />
+      <MaterialIcons name="chevron-left" size={ 30 } style={ styles.headerLeft } onPress={() => props.navigation.canGoBack() ? props.navigation.pop() : undefined } />
       <TouchableOpacity  onPress={() => props.openUsersList() } style={ styles.wrapper }>
         <View style={ styles.flexDirRow }>
           <Image source={{ uri: otherPersonArray[0].userAvatar }} style={ styles.image } />
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    right: Platform.OS === 'android' ? -15 : 15 // hacky
+    right: Platform.OS === 'android' ? 20 : 15 // hacky
   },
   image: {
     height: 40,

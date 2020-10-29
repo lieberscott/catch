@@ -97,8 +97,14 @@ const Conversation = (props) => {
     const userBlockedArr = otherPersonArray;
     // const convo = convo; // already defined above
 
-    const newUsersArray = convo.usersArr.filter((item, i) => item.userId !== userId);
+    const newUsersArray = convo.usersArr.filter((item, i) => item._id !== userId);
     
+    const currentUserObj = {
+      userId: userId,
+      userAvatar: userAvatar,
+      userName: userName
+    }
+
     let promises = [];
 
       // add users to blocked users
@@ -109,7 +115,7 @@ const Conversation = (props) => {
 
         // add current user to OTHER users' blocked users (so this user doesn't show up for them either)
         promises.push(firebase.firestore().collection("users").doc(newUsersArray[i].userId).update({
-          blockedUsers: firebase.firestore.FieldValue.arrayUnion(userId)
+          blockedUsers: firebase.firestore.FieldValue.arrayUnion(currentUserObj)
         }))
       }
 
@@ -126,6 +132,11 @@ const Conversation = (props) => {
       });
 
       const newState2 = {...user };
+      
+      if (!newState2.blockedUsers) {
+        newState2.blockedUsers = [];
+      }
+
       for (let i = 0; i < newUsersArray.length; i++) {
         newState2.blockedUsers.push(newUsersArray[i]);
       }

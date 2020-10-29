@@ -5,7 +5,7 @@ import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import { StoreContext } from '../../../contexts/storeContext';
 
-import { declineRequest, acceptRequestUser, acceptRequestConvo, removeFromConversation } from '../../../firebase.js';
+import { declineRequest, acceptRequestUser, acceptRequestConvo, getUserChatsAndRequests, removeFromConversation } from '../../../firebase.js';
 
 import MessagesEmpty from './MessagesEmpty';
 import UserConversationRow from './UserConversationRow';
@@ -73,7 +73,6 @@ const Messages = (props) => {
   }
 
   const accept = async (request) => {
-    console.log("accept request : ", request);
 
     let usersArr;
 
@@ -81,7 +80,7 @@ const Messages = (props) => {
       // Step 1: Get all current conversaitons via the store
       let userChats0 = userChats.length ? [...userChats] : [];
       // Step 2: Filter through current conversations to get the one this user is requesting to join
-      const userChat = userChats0.filter((item, i) => item.chatId === request.conversationId);
+      const userChat = userChats0.filter((item, i) => item.id === request.conversationId);
       // Step 3: Get all current users in that conversation
       usersArr = userChat[0].usersArr;
       // Step 4: Send it as an extra argument
@@ -161,7 +160,7 @@ const Messages = (props) => {
     { /* FlatList of Conversations */ }
     <View style={ styles.bottom }>
       <Text style={ styles.topText }>Conversations are deleted every 24 hours to make sure people are ready and willing to participate.</Text>
-      { userConversations.length === 0 ? <MessagesEmpty userPhoto={ userPhoto } /> : <SwipeListView
+      { userConversations.length === 0 ? <MessagesEmpty onRefresh={ onRefresh } /> : <SwipeListView
         // keyExtractor={ (item, key) => item.chatId }
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />

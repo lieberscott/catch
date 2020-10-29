@@ -24,6 +24,7 @@ const Reauthorization = (props) => {
   const photoUrl = props.route.params.photoUrl;
 
   const recaptchaRef = useRef();
+  const inputRef = useRef();
 
   const [code, setCode] = useState("");
   const [verificationId, setVerificationId] = useState();
@@ -40,7 +41,7 @@ const Reauthorization = (props) => {
       Alert.alert("", "You must reauthenticate to delete your profile", [
         { text: "OK", onPress: providerId === "phone" ? () => handlePhone() : () => handleFacebook() }
       ])
-
+      return;
 
     })()
   }, []);
@@ -142,10 +143,24 @@ const Reauthorization = (props) => {
           <Text style={ styles.text }>{ code.length > 5 ? code[5] : "" }</Text>
         </View>
       </View>
+      <View style={ styles.showKeyboardWrapper }>
+        <Text style={ styles.white }>Show Keyboard</Text>
+        <TextInput
+          keyboardType="numeric"
+          value={ code }
+          onChangeText={ (text) => {
+            if (text.length <= 6) {
+              setCode(text);
+            }
+          }}
+          style={ [styles.input, { position: "absolute" } ]}
+        />
+      </View>
       <TouchableOpacity disabled={ disabled } onPress={ code.length === 6 ? () => reauthorize() : undefined } style={ code.length === 6 ? styles.button : styles.button2 }>
         <Text style={ styles.white }>Delete</Text>
       </TouchableOpacity>
       <TextInput
+        ref={ inputRef }
         autoFocus={ true }
         keyboardType="numeric"
         value={ code }
@@ -205,8 +220,8 @@ const styles = StyleSheet.create({
     flexDirection: "row"
   },
   input: {
-    fontSize: 0.5,
-    width: 0,
+    fontSize: 0,
+    width: "100%"
   },
   question: {
     fontSize: 23,
@@ -226,10 +241,19 @@ const styles = StyleSheet.create({
   resendText: {
     color: "#666"
   },
+  showKeyboardWrapper: {
+    width: "100%",
+    borderRadius: 40,
+    backgroundColor: "green",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    marginTop: 10
+  },
   text: {
     textAlign: "center",
     height: 25,
-    fontSize: 25,
+    fontSize: 23,
     marginBottom: 12
   },
   top: {

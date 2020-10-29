@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -24,15 +24,22 @@ const UserConversationRow = (props) => {
   const count = usersArr.length - 1;
   const lastOtherUserIndex = index >= 0 ? count - index : index;
   const [width, setWidth] = useState(0);
+  const [first, setFirst] = useState(true);
   const navigation = useNavigation();
 
   const dot = !convo.readByReceiver && convo.lastMessageFromId !== userId;
 
+  const handleWidth = (w) => {
+    setWidth(w);
+    setFirst(false);
+  }
 
      return (
-      <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("Conversation", { convo, dot, remove: props.remove })} onLayout={(e) => {
+      <TouchableOpacity activeOpacity={ 1 } style={[ styles.body ]} onPress={() => navigation.navigate("Conversation", { convo, dot, remove: props.remove })} onLayout={(e) => {
         const w = e.nativeEvent.layout.width;
-        setWidth(w);
+        if (first) {
+          handleWidth(w);
+        }
       }}>
         { dot ? <View style={ styles.newMessage } /> : [] }
         <Image
@@ -41,12 +48,12 @@ const UserConversationRow = (props) => {
         />
         { usersLen === 2 ? [] : usersLen >= 3 ? <Image style={ styles.image2 } source={{ uri: usersArr[lastOtherUserIndex].userAvatar }} /> : <View style={ styles.groupChatAvatar }><Text>+{ usersLen }</Text></View> }
 
-        <View style={ [styles.textWrapper, { width: width - imageDimensions - imageMarginR }] }>
+        <View style={ styles.textWrapper }>
           <Text style={ styles.name }>{ usersArr[firstOtherUserIndex].userName } { usersLen > 2 ? "+" + (usersLen - 2).toString() : "" }</Text>
           <Text ellipsizeMode="tail" numberOfLines={ 1 } style={ styles.message }>{ convo.lastMessageText }</Text>
         </View>
         <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
-          <Image style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') : require('../../../assets/favicon.png') } />
+          <Image resizeMode="contain" style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') : require('../../../assets/favicon.png') } />
         </View>
       </TouchableOpacity>
   )
@@ -59,7 +66,8 @@ const styles = StyleSheet.create({
   body: {
     flexDirection: "row",
     paddingVertical: 8,
-    backgroundColor: "white"
+    backgroundColor: "white",
+    flex: 1
   },
   groupChatAvatar: {
     backgroundColor: "#eee",
@@ -73,7 +81,8 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     height: imageDimensions,
     width: imageDimensions,
-    marginRight: imageMarginR
+    marginRight: imageMarginR,
+    flex: 1
   },
   image2: {
     position: "absolute",
@@ -81,6 +90,11 @@ const styles = StyleSheet.create({
     height: imageDimensions * 0.6,
     width: imageDimensions * 0.6,
     left: imageDimensions * 0.6
+  },
+  image3: {
+    borderRadius: 50,
+    height: imageDimensions * 0.6,
+    width: imageDimensions * 0.6
   },
   message: {
     textAlign: "left",
@@ -102,12 +116,12 @@ const styles = StyleSheet.create({
     height: 15,
     width: 15,
     borderColor: "white",
-    borderWidth: 2,
     backgroundColor: "red"
   },
   textWrapper: {
     flexDirection: "column",
-    justifyContent: "center"
+    justifyContent: "center",
+    flex: 2
   }
 });
 

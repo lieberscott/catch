@@ -212,7 +212,7 @@ const IntroMaster = ({ navigation }) => {
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/ball-and-glove.png')} style={ styles.image } /><Image style={ styles.image2 } resizeMode="contain" source={require('../../../assets/catch-logo.png')} /></View>,
+                image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/new-logo.png')} style={ styles.image } /></View>,
                 title: 'Welcome to Pick Up',
                 subtitle: 'The best place for find a pickup game',
                 // imageContainerStyle: styles.imageWrapper

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const turquoise = "#4ECDC4";
@@ -17,6 +17,7 @@ const Sports = (props) => {
 
   return (
     <KeyboardAvoidingView style={[ styles.container, { width: props.width } ]}>
+      <ScrollView>
       <View style={ styles.top }>
         <Text style={ styles.subhead }>Pick your games</Text>
         <Text style={ styles.middleText }>( Please be honest about your skill level )</Text>
@@ -77,18 +78,18 @@ const Sports = (props) => {
         </View>
         <View style={ styles.line } />
         <View style={ styles.choiceWrapper}>
-          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => setBasketball(prevState => !prevState) } style={ basketball ? styles.choiceButton : styles.choiceButtonDisabled }>
+          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => props.setBasketball(prevState => !prevState) } style={ props.basketball ? styles.choiceButton : styles.choiceButtonDisabled }>
             <Ionicons name="ios-basketball" size={ 20 } color={ "white" } />
             <Text style={ styles.white }>   Basketball</Text>
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 20 }}>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(0) } style={ basketball && basketballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(0) } style={ props.basketball && props.basketballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
               <Text style={ styles.white }>Absolute beginner</Text>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(1) } style={ basketball && basketballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(1) } style={ props.basketball && props.basketballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
               <Text style={ styles.white }>Can dribble with both hands</Text>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !basketball } onPress={ () => setBasketballLevel(2) } style={ basketball && basketballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
+            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(2) } style={ props.basketball && props.basketballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
               <Text style={ styles.white }>Played HS ball</Text>
             </TouchableOpacity>
           </View>
@@ -102,6 +103,7 @@ const Sports = (props) => {
         </TouchableOpacity>
         <Text style={ styles.small }>Please be honest about your skill level.</Text>
       </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   )
 }

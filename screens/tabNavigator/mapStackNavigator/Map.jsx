@@ -118,8 +118,19 @@ const Map = (props) => {
         }
         return !blocked;
       });
+
+      // filter out blockedUsers from areaUsers
+      let arr0 = arr[0].filter((item) => {
+        let blocked = false;
+        for (let i = 0; i < blockedUsers.length; i++) {
+          if (item._id === blockedUsers[i].userId) {
+            blocked = true;
+          }
+        }
+        return !blocked;
+      });
       
-      store.setAreaUsers(arr[0]);
+      store.setAreaUsers(arr0);
       store.setAreaConversations(arr1);
       setRefreshing(false);
     }

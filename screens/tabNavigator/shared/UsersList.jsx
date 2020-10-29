@@ -7,7 +7,6 @@ const imageDimensions = 80;
 const UsersList = (props) => {
 
  const users = props.route.params.users;
- console.log("users : ", users);
 
   return (
     <View style={ styles.container }>

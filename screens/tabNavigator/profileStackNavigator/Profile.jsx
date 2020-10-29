@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Alert, Animated, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Dimensions, Image, Platform, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
@@ -36,27 +36,38 @@ const Profile = (props) => {
    {/* Get active status */}
   const active0 = user.active;
   const timeOfActivation0 = user.timeOfActivation || new Date();
-  const timeOfActivation = timeOfActivation0.seconds ? new Date(timeOfActivation0.seconds) : new Date(timeOfActivation0);
+  const timeOfActivation = timeOfActivation0.seconds ? new Date(timeOfActivation0.seconds * 1000) : new Date(timeOfActivation0);
   const today = new Date();
-  const milliseconds0 = Math.abs(today - timeOfActivation);
-  const hours = milliseconds0 / 36e5;
+  const hours = Math.abs(today - timeOfActivation) / 36e5;
 
   const a = active0 && hours < 6 ? true : false;
 
   const [active, setActive] = useState(a);
 
   const updateActive1 = (bool) => {
+
+    const ios = Platform.OS === "ios";
+
     if (bool) {
       Alert.alert("", "Which Activity do you want to play?", [
         { text: "Baseball", onPress: () => updateActive2(true, 0) },
         { text: "Football", onPress: () => updateActive2(true, 1) },
-        { text: "Frisbee", onPress: () => updateActive2(true, 2) },
-        { text: "Basketball", onPress: () => updateActive2(true, 3) }
+        { text: ios ? "Frisbee" : "Show Others", onPress: ios ? () => updateActive2(true, 2) : () => updateActiveAndroid2(bool) }, // since Android can only show 3 max options, this is needed for that case
+        { text: "Basketball", onPress: () => updateActive2(true, 3) }, // again, since Android can only show 3 max options, this does not need a conditional since it will show on ios and simply won't on Android
+        { text: "Close" }
       ])
     }
     else {
       updateActive2(false, -1);
     }
+  }
+
+  const updateActiveAndroid2 = (bool) => {
+    Alert.alert("", "Which Activity do you want to play?", [
+      { text: "Frisbee", onPress: () => updateActive2(true, 2) },
+      { text: "Basketball", onPress: () => updateActive2(true, 3) },
+      { text: "Close" }
+    ])
   }
 
   const updateActive2 = (bool, activeSportNum) => {
@@ -168,7 +179,7 @@ const Profile = (props) => {
               />
             </View>
           </View>
-          <Text style={ active && user.activeSport < 4 && user.activeSport > -1 ? styles.activeSportText : styles.activeSportText2 }>{ user.activeSport === 0 ? "Baseball" : user.activeSport === 1 ? "Football" : user.activeSport === 2 ? "Frisbee" : user.activeSport === 3 ? "Basketball" : "Not currently active" }</Text>
+          <Text style={ active && user.activeSport < 4 && user.activeSport > -1 ? styles.activeSportText : styles.activeSportText2 }>{ active && user.activeSport === 0 ? "Baseball" : active && user.activeSport === 1 ? "Football" : active && user.activeSport === 2 ? "Frisbee" : active && user.activeSport === 3 ? "Basketball" : "Not currently active" }</Text>
           <Text style={ styles.small }>Users will stay active for 6 hours.</Text>
         </View>
 
