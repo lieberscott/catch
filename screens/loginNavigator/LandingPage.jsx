@@ -49,7 +49,7 @@ const LandingPage = ({ navigation }) => {
   const handleFacebook = async () => {
 
     try {
-      await Facebook.initializeAsync();
+      await Facebook.initializeAsync("768821137213291");
 
       const options = {
         permissions: ["public_profile"]

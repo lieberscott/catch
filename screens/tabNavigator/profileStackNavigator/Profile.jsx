@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Alert, Animated, Dimensions, Image, Platform, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Dimensions, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-import { updateUser, uploadImage, signOut } from '../../../firebase.js';
+import { createConvo, updateUser, uploadImage, signOut } from '../../../firebase.js';
 import { addPhoto } from '../../../utils.js';
+import Map from './Map';
 
 import { StoreContext } from '../../../contexts/storeContext.js';
 const mHorizontal = 20; // body margin
@@ -20,6 +21,11 @@ const Profile = (props) => {
 
   const store = useContext(StoreContext);
 
+  const [activeSport, setActiveSport] = useState(-1);
+  const [locationModal, setLocationModal] = useState(false);
+  const [sportLoc, setSportLoc] = useState([]);
+  const [sportLevel, setSportLevel] = useState(-1);
+
   useEffect(() => {
     (async () => {
       // Set global test device ID
@@ -33,16 +39,6 @@ const Profile = (props) => {
   const userName = user.name;
 
 
-   {/* Get active status */}
-  const active0 = user.active;
-  const timeOfActivation0 = user.timeOfActivation || new Date();
-  const timeOfActivation = timeOfActivation0.seconds ? new Date(timeOfActivation0.seconds * 1000) : new Date(timeOfActivation0);
-  const today = new Date();
-  const hours = Math.abs(today - timeOfActivation) / 36e5;
-
-  const a = active0 && hours < 6 ? true : false;
-
-  const [active, setActive] = useState(a);
 
   const updateActive1 = (bool) => {
 
@@ -71,12 +67,15 @@ const Profile = (props) => {
   }
 
   const updateActive2 = (bool, activeSportNum) => {
-    setActive(bool);
-    updateProfile({ active: bool, activeSport: activeSportNum, timeOfActivation: new Date() }, 1)
+    setActiveSport(activeSportNum);
+    setLocationModal(true);
   }
 
+
+  
+
   {/* Get age */}
-  // const today = new Date(); // today is declared above
+  const today = new Date();
   const userDOB = user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth);
   const milliseconds = userDOB.getTime();
   const birthday = new Date(milliseconds);
@@ -141,6 +140,28 @@ const Profile = (props) => {
     ])
   }
 
+  const handleLoc = (coords) => {
+    setSportLoc(coords);
+    Alert.alert("", "What is the skill level?", [
+      { text: "Intermediate", onPress: () => create(1) },
+      { text: "Advanced", onPress: () => create(2) },
+      { text: "Cancel", onPress: () => setLocationModal(false) }
+    ])
+  }
+
+  const create = async (skillLevel) => {
+    try {
+      const res1 = await createConvo(user, activeSport, sportLoc, skillLevel);
+      Alert.alert("", "Your game was created!");
+      setLocationModal(false);
+    }
+    catch (e) {
+      console.log("create error : ", e);
+      Alert.alert("", "Error. Please try again.");
+      setLocationModal(false);
+    }
+  }
+
 
   return (
      <View style={ styles.container }>
@@ -166,22 +187,9 @@ const Profile = (props) => {
             <Text style={ styles.location }>{ user.location }</Text>
           </View>
         </View>
-        <View style={ styles.oneSection}>
-          <View style={ styles.buttonWrapper }>
-            <View style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
-              <Text>Active</Text>
-              <Switch
-                trackColor={{ false: "#e4e4e4", true: "green" }}
-                thumbColor="white"
-                ios_backgroundColor="#efefef"
-                onValueChange={ (bool) => updateActive1(bool) }
-                value={ active }
-              />
-            </View>
-          </View>
-          <Text style={ active && user.activeSport < 4 && user.activeSport > -1 ? styles.activeSportText : styles.activeSportText2 }>{ active && user.activeSport === 0 ? "Baseball" : active && user.activeSport === 1 ? "Football" : active && user.activeSport === 2 ? "Frisbee" : active && user.activeSport === 3 ? "Basketball" : "Not currently active" }</Text>
-          <Text style={ styles.small }>Users will stay active for 6 hours.</Text>
-        </View>
+        <TouchableOpacity style={ styles.createGame } onPress={ () => updateActive1(true) }>
+          <Text>Create New Game</Text>
+        </TouchableOpacity>
 
 
 
@@ -292,25 +300,27 @@ const Profile = (props) => {
         </View>
         <View style={ styles.bottomArea } />
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={ locationModal }
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+        }}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <Map createGame={ true } handleLoc={ handleLoc } coordinates={ user.coordinates } />
+        </SafeAreaView>
+      </Modal>
+
+
+
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  activeSportText: {
-    backgroundColor: "green",
-    padding: 5,
-    color: "white",
-    textAlign: "center",
-    marginVertical: 4
-  },
-  activeSportText2: {
-    backgroundColor: "#efefef",
-    padding: 5,
-    color: "black",
-    textAlign: "center",
-    marginVertical: 4
-  },
   body: {
   	backgroundColor: "#fdfdfd",
     flexGrow: 1,
@@ -327,6 +337,16 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     backgroundColor: "#fdfdfd"
+  },
+  createGame: {
+    marginHorizontal: mHorizontal,
+    marginVertical: 10,
+    alignItems: "center",
+    borderWidth: 0.5,
+    borderColor: "#efefef",
+    borderRadius: 20,
+    paddingVertical: 10,
+    backgroundColor: "pink"
   },
   flexZero: {
     flex: 0

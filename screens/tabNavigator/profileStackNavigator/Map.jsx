@@ -7,7 +7,8 @@ const { width } = Dimensions.get("window");
 
 const Map = (props) => {
   
-  const c = props.route.params.coordinates;
+  const createGame = props.createGame ? true : false; // bool, true if this Map is being used to set new game location, false if it's to change user location (using same component for each)
+  const c = props.coordinates ? props.coordinates : props.route.params.coordinates; // props.coordinates is for when it's creating a game (since it's a Modal, not its own Stack page), otherwise it's in the props.route.params object
   const l1 = c.latitude;
   const l2 = c.longitude;
 
@@ -22,11 +23,18 @@ const Map = (props) => {
     setDisabled(true);
   }
 
+  const next = () => {
+    if (!disabled) {
+      props.handleLoc(coords);
+    }
+    setDisabled(true);
+  }
+
   return (
     <View style={ styles.container }>
       <View style={ styles.headerWrapper }>
         <MaterialIcons name="my-location" size={ 23 } color="gray" />
-        <Text style={ styles.header }>Choose your location</Text>
+        <Text style={ styles.header }>{ createGame ? "SET YOUR NEW GAME'S LOCATION" : "Choose your location" }</Text>
       </View>
       <View style={ styles.mapContainer }>
         <MapView
@@ -45,8 +53,8 @@ const Map = (props) => {
           />
         </View>
       </View>
-      <TouchableOpacity onPress={ update } style={ styles.update }>
-        <Text style={ styles.updateText }>Save</Text>
+      <TouchableOpacity onPress={ createGame ? next : update } style={ styles.update }>
+        <Text style={ styles.updateText }>{ createGame ? "Next" : "Save" }</Text>
       </TouchableOpacity>
     </View>
   )

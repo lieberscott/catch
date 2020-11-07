@@ -11,17 +11,18 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 1 * * *')
 .onRun((context) => {
   
   const database = admin.firestore();
-  let _24HoursAgo = new Date();
-  _24HoursAgo.setHours(_24HoursAgo.getHours() - 24);
+  let _72HoursAgo = new Date();
+  _72HoursAgo.setHours(_72HoursAgo.getHours() - 72);
+  console.log("_72HoursAgo : ", _72HoursAgo);
 
   // const deleteConvos = [];
   // let deleteUserChat = [];
 
   let promises = [];
 
-  // Step 1: Get all conversations older than 24 hours
+  // Step 1: Get all conversations older than 72 hours
   database.collection("conversations")
-  .where("createdAt", "<", _24HoursAgo)
+  .where("lastMessageTime", "<", _72HoursAgo)
   .get()
   .then((oldConvos) => {
     oldConvos.forEach((doc) => {
@@ -42,7 +43,7 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 1 * * *')
     });
 
     // Step 4: Get old requests to delete as well
-    return database.collection("requests").where("createdAt", "<", _24HoursAgo).get();
+    return database.collection("requests").where("createdAt", "<", _72HoursAgo).get();
   })
   .then((oldRequests) => {
     oldRequests.forEach((doc) => {
@@ -58,7 +59,7 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 1 * * *')
     return Promise.all(promises);
   })
   .then(() => {
-    console.log("Deleted conversations older than 24 hours and requests older than 24 hours at " + new Date());
+    console.log("Deleted conversations older than 72 hours and requests older than 72 hours at " + new Date());
     return true;
   })
   .catch((err) => {

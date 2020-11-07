@@ -1,10 +1,10 @@
-import React, { Fragment, useState, useEffect, useContext, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { Alert, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
-import { sendRequest, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
+import { joinConvo, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
 
 import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
 
@@ -21,7 +21,6 @@ const imageDimensions = 80;
 const Map = (props) => {
 
   const store = useContext(StoreContext);
-  const mapRef = useRef();
 
   const user = store.user;
   const blockedUsers = user.blockedUsers;
@@ -46,58 +45,37 @@ const Map = (props) => {
     })()
   }, []);
 
-  const request = async (item) => {
-    if (!user.active) {
-      Alert.alert("", "You must mark yourself as `active` on your profile page in order to request games!");
+  const join = async (item) => {
+    try {
+      const token = await registerForPushNotifications();
+      if (token) {
+        const res1 = await addPushNotification(user._id, token);
+      }
+      const res2 = await joinConvo(user, item);
+
+      const toToken = item._id ? item.notificationToken : item.userObjects[0].notificationToken;
+
+      const notification = {
+        to: item,
+          sound: 'default',
+          title: "You have received a new message!",
+          // body,
+          // data: { data: 'goes here' }
+      }
+
+      sendPushNotification([notification]);
+
+      if (res2) {
+        // add that user has joined areaConversations locally so you don't join twice
+        
+        let newAreaConversations = areaConversations0.map((convo, i) => convo._id !== item._id)
+        store.setAreaConversations(newAreaConversations);
+        Alert.alert("", "You have joined this game!");
+      }
+
     }
-    else {
-      try {
-        const token = await registerForPushNotifications();
-        if (token) {
-          const res1 = await addPushNotification(user._id, token);
-        }
-        const res2 = await sendRequest(user, item);
-
-        const toToken = item._id ? item.notificationToken : item.userObjects[0].notificationToken;
-
-        const notification = {
-          to: item,
-            sound: 'default',
-            title: "You have received a new message!",
-            // body,
-            // data: { data: 'goes here' }
-        }
-
-        sendPushNotification([notification]);
-
-        if (res2) {
-          // add that outgoing request has been made to areaConversations locally so you don't request twice
-          
-          if (item.createdAt) { // createdAt is a property on the pure user object, but is not included in the areaConversation "user" object
-            let newAreaUsers = areaUsers.map((user, i) => {
-              if (user._id == item._id) {
-                user.requestAlreadyMade = true;
-              }
-              return user;
-            });
-            store.setAreaUsers(newAreaUsers);
-          }
-          else {
-            let newAreaConversations = areaConversations0.map((convo, i) => {
-              if (convo._id == item._id) {
-                convo.requestAlreadyMade = true;
-              }
-              return convo;
-            });
-            store.setAreaConversations(newAreaConversations);
-          }
-          Alert.alert("", "Your request has been sent!");
-        }
-
-      }
-      catch(e) {
-        console.log("request error : ", e);
-      }
+    catch(e) {
+      console.log("request error : ", e);
     }
   }
 
@@ -108,7 +86,7 @@ const Map = (props) => {
       const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
 
       // filter out blockedUsers from areaConversations
-      let arr1 = arr[1].filter((item) => {
+      let arr1 = arr.filter((item) => {
         let blocked = false;
         for (let i = 0; i < blockedUsers.length; i++) {
           const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
@@ -118,19 +96,7 @@ const Map = (props) => {
         }
         return !blocked;
       });
-
-      // filter out blockedUsers from areaUsers
-      let arr0 = arr[0].filter((item) => {
-        let blocked = false;
-        for (let i = 0; i < blockedUsers.length; i++) {
-          if (item._id === blockedUsers[i].userId) {
-            blocked = true;
-          }
-        }
-        return !blocked;
-      });
       
-      store.setAreaUsers(arr0);
       store.setAreaConversations(arr1);
       setRefreshing(false);
     }
@@ -177,17 +143,14 @@ const Map = (props) => {
                 timeOfActivation = data.item.timeOfActivation.seconds ? new Date(data.item.timeOfActivation.seconds) : new Date(data.item.timeOfActivation);
               }
 
-              // convo.active indicates this is a user, so check if they are active, else it is an active converastion
-              const active = data.item.active ? data.item.active && new Date(timeOfActivation) > new Date(_12HoursAgo) : true;
-
               return (
-              <View key={data.item.id ? data.item.id.toString() : data.item._id.toString() } style={active ? styles.rowBack : styles.rowBackInactive }>
+              <View key={data.item.id ? data.item.id.toString() : data.item._id.toString() } style={ styles.rowBack }>
                 <TouchableOpacity
                   activeOpacity={ 1 }
                   style={ [styles.backRightBtn, styles.backRightBtnRight] }
-                  onPress={ data.item.requestAlreadyMade ? () => Alert.alert("", "You have already made a request to this user.") : () => request(data.item) }
+                  onPress={ data.item.requestAlreadyMade ? () => Alert.alert("", "You have already joined") : () => join(data.item) }
                 >
-                    <Text style={styles.backTextWhite}>Request To Join</Text>
+                    <Text style={styles.backTextWhite}>Join Game</Text>
                 </TouchableOpacity>
               </View>
             )}}
@@ -235,7 +198,6 @@ const Map = (props) => {
         </View>
         <MapView
           style={ styles.mapStyle }
-          ref={ mapRef }
           provider={PROVIDER_GOOGLE}
           camera={{ center: { latitude: userLat, longitude: userLng }, pitch: 1, heading: 0, altitude: 5, zoom: 10 }}
           pitchEnabled={ false }
@@ -381,12 +343,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: "blue"
-  },
-  rowBackInactive: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: "gray"
   },
   textWrapper: {
     justifyContent: "center",

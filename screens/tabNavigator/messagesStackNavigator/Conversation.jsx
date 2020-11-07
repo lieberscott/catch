@@ -9,14 +9,13 @@ import firestore from 'firebase/firestore';
 import { StoreContext } from '../../../contexts/storeContext';
 
 import { registerForPushNotifications, sendPushNotification } from '../../../utils.js';
-import { addPushNotification } from '../../../firebase.js';
+import { addPushNotification, sendMessage, sendMessageAndOverwrite } from '../../../firebase.js';
 
 const turquoise = "#4ECDC4";
 
 const { height } = Dimensions.get("window");
 
 import ConversationHeader from './ConversationHeader';
-import { sendMessage } from '../../../firebase.js';
 
 const Conversation = (props) => {
 
@@ -31,7 +30,10 @@ const Conversation = (props) => {
   const dot = props.route.params.dot;
   const chatId = convo.chatId ? convo.chatId : convo.id;
 
-  const otherPersonArray = convo.usersArr.filter((item, i) => item.userId !== userId);
+  let otherPersonArray = convo.usersArr.filter((item, i) => item.userId !== userId);
+  if (otherPersonArray.length === 0) {
+    otherPersonArray = convo.usersArr.slice();
+  }
   const otherPersonIdsArray = otherPersonArray.map((item, i) => {
     if (item.notificationToken !== "-1") {
       return item._id;
@@ -90,58 +92,24 @@ const Conversation = (props) => {
   }
 
 
-  const handleBlock2 = async () => {
+  const handleReport2 = async () => {
 
-    const userInitiatingBlock = userId;
-    const userInitiatingBlockName = userName;
-    const userBlockedArr = otherPersonArray;
+    const userInitiatingReport = userId;
+    const userInitiatingReportName = userName;
     // const convo = convo; // already defined above
-
-    const newUsersArray = convo.usersArr.filter((item, i) => item._id !== userId);
-    
-    const currentUserObj = {
-      userId: userId,
-      userAvatar: userAvatar,
-      userName: userName
-    }
-
-    let promises = [];
-
-      // add users to blocked users
-      for (let i = 0; i < newUsersArray.length; i++) {
-        promises.push(firebase.firestore().collection("users").doc(userId).update({
-          blockedUsers: firebase.firestore.FieldValue.arrayUnion(newUsersArray[i])
-        }));
-
-        // add current user to OTHER users' blocked users (so this user doesn't show up for them either)
-        promises.push(firebase.firestore().collection("users").doc(newUsersArray[i].userId).update({
-          blockedUsers: firebase.firestore.FieldValue.arrayUnion(currentUserObj)
-        }))
-      }
 
     try {
       const res1 = await props.route.params.remove(convo);
-      const res2 = await Promise.all(promises);
       const res3 = fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: JSON.stringify({ userInitiatingBlock, userInitiatingBlockName, userBlockedArr, messages })
+        body: JSON.stringify({ userInitiatingReport, userInitiatingReportName, userBlockedArr: [], messages })
       });
 
-      const newState2 = {...user };
-      
-      if (!newState2.blockedUsers) {
-        newState2.blockedUsers = [];
-      }
-
-      for (let i = 0; i < newUsersArray.length; i++) {
-        newState2.blockedUsers.push(newUsersArray[i]);
-      }
-      store.setUser(newState2);
-      Alert.alert("", "Thanks. We'll take it from here.", [
+      Alert.alert("", "Thanks. Conversation reported.", [
         { text: "OK", onPress: () => {
           setReportModal(false);
           props.navigation.pop()
@@ -164,6 +132,11 @@ const Conversation = (props) => {
       console.log("handleUnmatch error : ", e);
       Alert.alert("", "There was an error. Please try again.");
     }
+  }
+
+  const showOnMap = () => {
+    setReportModal(false);
+    props.navigation.navigate("MapLoc", { userLat: user.coordinates.latitude, userLng: user.coordinates.longitude });
   }
 
 
@@ -204,12 +177,22 @@ const Conversation = (props) => {
         // body,
         // data: { data: 'goes here' }
       };
-    })
+    });
 
+    // Step 0.3: Check length of current messages array. If larger than 250, then delete last 40 messages and override the array with the new one
+    // If less than 250, then just add message to array
+    let overwrite = false;
+    let newMessagesArr = [];
 
-    console.log("chatId : ", chatId);
+    if (messages.length >= 250) { // <-- this is the messages array in state
+      overwrite = true;
+
+      // slice out the previous 20 items
+      newMessagesArr = messages.slice(0, 200);
+    }
+
     try {
-      const res = await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
+      const res = overwrite ? await sendMessageAndOverwrite(chatId, newMessagesArr, userChatUpdate, convo.usersArr) : await sendMessage(chatId, message, userChatUpdate, convo.usersArr);
       if (res) {
         // setMessages(prevState => GiftedChat.append(prevState, [message]));
         setComposerText("");
@@ -231,11 +214,17 @@ const Conversation = (props) => {
 
   const openUsersList = () => {
     if (otherPersonArray.length > 1) {
-      const newUsersArray = usersArr.filter((item, i) => item._id !== userId);
+      let newUsersArray = usersArr.filter((item, i) => item._id !== userId);
+      if (newUsersArray.length === 0) {
+        newUsersArray = usersArr;
+      }
       props.navigation.navigate("UsersList", { users: newUsersArray });
     }
     else {
-      const newUsersArray = usersArr.filter((item, i) => item._id !== userId);
+      let newUsersArray = usersArr.filter((item, i) => item._id !== userId);
+      if (newUsersArray.length === 0) {
+        newUsersArray = usersArr;
+      }
       props.navigation.navigate("ProfileFull", { users: newUsersArray });
     }
   }
@@ -275,10 +264,11 @@ const Conversation = (props) => {
       />
 
       { reportModal && <ReportModal
+        showOnMap={ showOnMap } 
         len={ otherPersonArray.length }
         reportModal={ reportModal }
         setReportModal={ setReportModal }
-        handleBlock2={ handleBlock2 }
+        handleReport2={ handleReport2 }
         handleUnmatch2={ handleUnmatch2 }
         height={ height }
       /> }

@@ -1,7 +1,6 @@
 // if drag touch starts in bottom half of card, angle should tilt upward instead of downward
 import React, {  useLayoutEffect, useEffect, useState, useContext } from 'react';
 import { Alert, Dimensions, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import ReportModalProfile from './ReportModalProfile';
 import ProfileHeader from './ProfileHeader';
@@ -20,6 +19,7 @@ const ProfileFull = (props) => {
   const user0 = store.user;
   
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
+  console.log("user1 : ", user1);
 
   const today = new Date();
   const birthDate = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
@@ -137,21 +137,6 @@ const ProfileFull = (props) => {
               )
             })}
           </View>
-          <MapView
-            style={ styles.mapStyle }
-            provider={PROVIDER_GOOGLE}
-            camera={{ center: { latitude: user1.coordinates.latitude, longitude: user1.coordinates.longitude }, pitch: 0, heading: 1, altitude: 11, zoom: 11 }}
-            pitchEnabled={ false }
-            minZoomLevel={ 7 }
-            maxZoomLevel={ 19 }
-            pitchEnabled={ false }
-            rotateEnabled={ false }
-          >
-            <Marker
-              pinColor="red"
-              coordinate={{ latitude: user1.coordinates.latitude, longitude: user1.coordinates.longitude }}
-            />
-          </MapView>
         <View style={ styles.bottom } />
       </ScrollView>
       { reportModal && <ReportModalProfile
@@ -167,7 +152,7 @@ const ProfileFull = (props) => {
 const styles = StyleSheet.create({
   bottom: {
     height: 600,
-    backgroundColor: "#f5f5f5"
+    backgroundColor: "white"
   },
   distanceText: {
     fontSize: 13

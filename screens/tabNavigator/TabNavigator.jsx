@@ -4,8 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Notifications from 'expo-notifications';
 
 import Profile from './profileStackNavigator/ProfileStackNavigator';
-import MapStackNavigator from './mapStackNavigator/MapStackNavigator';
-import Messages from './messagesStackNavigator/MessagesStackNavigator';
+import Map from './mapStackNavigator/Map';
+import Messages from './messagesStackNavigator/Messages';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -45,7 +45,7 @@ export default function TabNavigator() {
   }
   
   return (
-    <Tab.Navigator initialRouteName="MapStackNavigator" tabBarOptions={{ activeTintColor: '#e91e63' }}>
+    <Tab.Navigator initialRouteName="Map" tabBarOptions={{ activeTintColor: '#e91e63' }}>
       <Tab.Screen
         name="Profile"
         component={ Profile }
@@ -58,7 +58,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="MapStackNavigator"
-        component={ MapStackNavigator }
+        component={ Map }
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ color, size }) => (

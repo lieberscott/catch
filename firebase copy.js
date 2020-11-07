@@ -68,23 +68,21 @@ export const removeFromConversation = async (item, newArr, userObj) => {
   }
 }
 
-export const createConvo = async (user0, sport, loc, skillLevel) => {
-
-  // loc should be an obj: { latitude: 41, longitude -87 }
+export const acceptRequestUser = async (user0, user1) => {
 
   // Create a GeoFirestore reference
   const geofirestore = new GeoFirestore(firebase.firestore());
   const geocollection = geofirestore.collection('conversations');
 
   const user0Dob = user0.dateOfBirth.seconds ? new Date(user0.dateOfBirth.seconds * 1000) : new Date(user0.dateOfBirth);
+  const user1Dob = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
 
   let newConvo = {
-    coordinates: new firebase.firestore.GeoPoint(loc[0], loc[1]),
+    coordinates: new firebase.firestore.GeoPoint(user0.coordinates.latitude, user0.coordinates.longitude),
     createdAt: new Date(),
     messages: [],
     lastMessageTime: new Date(),
-    activeSport: sport,
-    skillLevel: skillLevel,
+    activeSport: user0.activeSport,
     userObjects: [
       {
         _id: user0._id,
@@ -97,44 +95,84 @@ export const createConvo = async (user0, sport, loc, skillLevel) => {
         getsNotifications: user0.getsNotifications,
         notificationToken: user0.notificationToken,
         profileText: user0.profileText ? user0.profileText : ""
+      },
+      {
+        _id: user1._id,
+        name: user1.name,
+        dateOfBirth: user1Dob,
+        gender: user1.gender,
+        coordinates: user1.coordinates,
+        sports: user1.sports,
+        photo: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c",
+        getsNotifications: user1.getsNotifications,
+        notificationToken: user1.notificationToken,
+        profileText: user1.profileText ? user1.profileText : ""
       }
     ]
   }
 
   let userChat = {
     lastMessageCreatedAt: new Date(),
-    lastMessageFromId: user0._id,
-    lastMessageFromName: user0.name,
-    lastMessageText: "Awaiting players...",
-    coordinates: loc,
+    lastMessageFromId: user1._id,
+    lastMessageFromName: user1.name,
+    lastMessageText: "You accepted " + user1.name + "'s request!",
     readByReceiver: false,
-    activeSport: sport,
-    skillLevel: skillLevel,
+    activeSport: user0.activeSport,
     usersArr: [
       {
         userAvatar: user0.photo,
         userName: user0.name,
         userId: user0._id
+      },
+      {
+        userAvatar: user1.photo,
+        userName: user1.name,
+        userId: user1._id
+      }
+    ]
+  }
+
+  let userChat2 = {
+    lastMessageCreatedAt: new Date(),
+    lastMessageFromId: user1._id,
+    lastMessageFromName: user1.name,
+    lastMessageText: user0.name + " accepted your request!",
+    readByReceiver: false,
+    activeSport: user0.activeSport,
+    usersArr: [
+      {
+        userAvatar: user0.photo,
+        userName: user0.name,
+        userId: user0._id
+      },
+      {
+        userAvatar: user1.photo,
+        userName: user1.name,
+        userId: user1._id
       }
     ]
   }
 
   try {
+    const res1 = await firebase.firestore().collection("requests").doc(user1.id).delete();
     const docRef = await geocollection.add(newConvo);
     const docRefId = docRef.id;
     const res2 = await firebase.firestore().collection("userChats").doc(user0._id).set({
       [`${docRefId}`]: userChat
     }, { merge: true });
+    const res3 = await firebase.firestore().collection("userChats").doc(user1._id).set({
+      [`${docRefId}`]: userChat2
+    }, { merge: true });
     return docRefId;
   }
   catch (e) {
-    console.log("createConvo error : ", e);
+    console.log("acceptRequest error : ", e);
     return false;
   }
 }
 
 
-export const joinConvo = async (user0, user1, usersArr) => {
+export const acceptRequestConvo = async (user0, user1, usersArr) => {
 
   const userObj1 = { // for userChats usersArr
     userAvatar: user1.photo,
@@ -176,6 +214,9 @@ export const joinConvo = async (user0, user1, usersArr) => {
 
   let promises = [];
 
+  // Step 1: Delete request
+  promises.push(firebase.firestore().collection("requests").doc(user1.id).delete());
+
   // Step 2: Add userChat to new user (user1)
   promises.push(firebase.firestore().collection("userChats").doc(user1._id).set({
     [`${user1.conversationId}`]: userChat
@@ -185,12 +226,7 @@ export const joinConvo = async (user0, user1, usersArr) => {
   // Step 3: Update usersArr for existing users in chat
   for (let i = 0; i < usersArr.length; i++) {
     promises.push(firebase.firestore().collection("userChats").doc(usersArr[i].userId).update({
-      [`${user1.conversationId}.usersArr`]: usersArr2,
-      [`${user1.conversationId}.lastMessageText`]: user0.name + " has joined",
-      [`${user1.conversationId}.lastMessageCreatedAt`]: new Date(),
-      [`${user1.conversationId}.readByReceiver`]: false,
-      [`${user1.conversationId}.lastMessageFromName`]: user0.name,
-      [`${user1.conversationId}.lastMessageFromId`]: user0._id
+      [`${user1.conversationId}.usersArr`]: usersArr2
     }))
   }
 
@@ -315,6 +351,7 @@ export const getDbUser = async (uid) => {
 
 export const getAreaUsersAndConversations = async (userId, userLoc) => {
 
+  let areaUsers0 = [];
   let areaConversations0 = [];
 
   // Create a GeoFirestore reference
@@ -322,6 +359,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
 
   // Create a GeoCollection reference
   const geocollection = geofirestore.collection('conversations');
+  const geocollection2 = geofirestore.collection("users");
 
   try {
     // get areaConversations - not a listener, just a get
@@ -353,8 +391,59 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
     // sort conversations by distance
     areaConversations1.sort((a, b) => a.distance - b.distance);
 
+    let sixHoursAgo = new Date();
+    sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
 
-    return areaConversations1;
+    const docs2 = await geocollection2.near({
+      center: new firebase.firestore.GeoPoint(userLoc.latitude, userLoc.longitude),
+      radius: 32 // km converts to 20 miles
+    })
+    .get();
+
+    docs2.forEach((doc) => {
+      let d = doc.data();
+      // _id is already a part of the object, so we are commenting out the below
+      // d._id = doc.id;
+      let notYetAConvo = true;
+      // if an area user already has a conversation going, filter them out (make user request a join to the existing coversation)
+      for (let i = 0; i < areaConversations0.length; i++) {
+        if (areaConversations0[i].userObjects[0]._id === d._id) {
+          notYetAConvo = false;
+        }
+      }
+      if (notYetAConvo) {
+        areaUsers0.push(d);
+      }
+    });
+
+    // filter out users who aren't active
+    const areaUsers1 = areaUsers0.filter((item, i) => {
+      const timeOfActivation = item.timeOfActivation.seconds ? new Date(item.timeOfActivation.seconds * 1000) : new Date(item.timeOfActivation);
+      
+      if (item.active && new Date(timeOfActivation) > new Date(sixHoursAgo)) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    });
+
+    // filter out own user from results
+    const areaUsers2 = areaUsers1.filter((item, i) => item._id !== userId);
+
+    // calculate distance for users
+    const areaUsers3 = areaUsers2.map((item, i) => {
+      const distance0 = getDistance(userLoc, item.coordinates);
+      const distance = Math.round(distance0 * 10) / 10;
+
+      item.distance = distance;
+      return item;
+    })
+
+    // sort users by distance
+    areaUsers3.sort((a, b) => a.distance - b.distance);
+
+    return [areaUsers3, areaConversations1];
   }
   catch (e) {
     console.log("geofirestore error : ", e);
@@ -362,7 +451,7 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
   }
 }
 
-export const getUserChatsAndRequests = async (userId) => { // NOTE: Removed requests 11/6/20
+export const getUserChatsAndRequests = async (userId) => {
   try {
     const document = await firebase.firestore().collection("userChats").doc(userId).get();
     const chats = document.data();
@@ -374,7 +463,22 @@ export const getUserChatsAndRequests = async (userId) => { // NOTE: Removed requ
       chatArray.push(chats[key]);
     });
 
-    return chatArray;
+    const requests0 = await firebase.firestore().collection("requests").where("toId", "==", userId).get();
+
+    requests0.forEach((doc) => {
+      let d = doc.data();
+      d.id = doc.id;
+      requestsArr.push(d);
+    });
+    // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
+    // so filter out duplicate requests here
+    let seen = {};
+    const requestsArr2 = requestsArr.filter((item) => {
+      const id = item._id;
+      return seen.hasOwnProperty(id) ? false : (seen[id] = true);
+    });
+
+    return [chatArray, requestsArr2];
   }
   catch (e) {
     console.log("error in getUserChatsAndRequests : ", e);
@@ -383,6 +487,54 @@ export const getUserChatsAndRequests = async (userId) => { // NOTE: Removed requ
 
 }
 
+export const declineRequest = async (itemId) => {
+  try {
+    const res = await firebase.firestore().collection("requests").doc(itemId).delete();
+    return true;
+  }
+  catch (e) {
+    console.log("delete error : ", e);
+    return false;
+  }
+}
+
+
+export const sendRequest = async (user, item) => {
+  
+  let req = {
+    _id: user._id,
+    activeSport: item.activeSport,
+    createdAt: new Date(),
+    dateOfBirth: user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth),
+    gender: user.gender,
+    getsNotifications: user.getsNotifications,
+    coordinates: new firebase.firestore.GeoPoint(user.coordinates.latitude, user.coordinates.longitude),
+    name: user.name,
+    notificationToken: user.notificationToken,
+    profileText: user.profileText ? user.profileText : "",
+    photo: user.photo,
+    sports: user.sports,
+    toId: item._id ? item._id : item.userObjects[0]._id
+  }
+
+  if (item.id) { // this means the item is an existing conversation rather than just a user
+    req.existingConversation = true;
+    req.conversationId = item.id;
+  }
+  else {
+    req.existingConversation = false;
+    req.conversationId = false;
+  }
+
+  try {
+    const res = await firebase.firestore().collection("requests").add(req);
+    return true;
+  }
+  catch(e) {
+    console.log("sendRequest error : ", e);
+    return false;
+  }
+}
 
 
 export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => {
@@ -505,17 +657,6 @@ export const deleteUser = async (photoUrl) => {
   }
   catch (e) {
     console.log("delete User error : ", e);
-    return false;
-  }
-}
-
-export const deleteConvo = async (convoId) => {
-  try {
-    const res = await firebase.firestore.collection("conversations").doc(convoId).delete();
-    return true;
-  }
-  catch(e) {
-    console.log("deleteConvo error : ", e);
     return false;
   }
 }

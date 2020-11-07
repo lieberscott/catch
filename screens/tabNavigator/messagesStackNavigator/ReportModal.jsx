@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-const modalHeight = 250;
+const modalHeight = 300;
 
 const ReportModal = (props) => {
 
@@ -52,23 +52,23 @@ const ReportModal = (props) => {
     }).start(() => props.setReportModal(false));
   }
 
-  const handleBlock = () => {
-    Alert.alert("", "Are you sure you want to report this user?", [
-      { text: "Block & Report", onPress: () => {
+  const handleReport = () => {
+    Alert.alert("", "Are you sure you want to report these users?", [
+      { text: "Report", onPress: () => {
         Animated.timing(animation.y, {
           toValue: -250,
           duration: 140,
           useNativeDriver: false
         }).start();
-        props.handleBlock2();
+        props.handleReport2();
       }},
       { text: "Cancel" }
     ]);
   }
 
   const handleUnmatch = () => {
-    Alert.alert("", "Are you sure you want to unmatch?", [
-      { text: "Unmatch", onPress: () => {
+    Alert.alert("", "Are you sure you want to leave?", [
+      { text: "Leave", onPress: () => {
         Animated.timing(animation.y, {
           toValue: -250,
           duration: 140,
@@ -80,6 +80,16 @@ const ReportModal = (props) => {
     ]);
   }
 
+  const showOnMap = () => {
+    Animated.timing(animation.y, {
+      toValue: -250,
+      duration: 140,
+      useNativeDriver: false
+    }).start(() => {
+      props.showOnMap();
+    })
+  }
+
   return (
     <Modal visible={ show } transparent={ true } presentationSytle="fullScreen">
       <AnimatedTouchableOpacity activeOpacity={ 1 } onPress={ handleClose } style={[ styles.outerModal, animatedOpacityStyle ]} />
@@ -87,7 +97,11 @@ const ReportModal = (props) => {
         <View style={ styles.line }>
           <Text style={ styles.title }>Safety Toolkit</Text>
         </View>
-        <TouchableOpacity style={ styles.line } onPress={ handleBlock }>
+        <TouchableOpacity style={ styles.line } onPress={ showOnMap }>
+          <MaterialCommunityIcons name="map" size={ 24 } color="green" />
+          <Text style={ styles.text }>  View On Map</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={ styles.line } onPress={ handleReport }>
           <MaterialCommunityIcons name="flag" size={ 24 } color="red" />
           <Text style={ styles.text }>  Report { len > 1 ? "These Users" : "This User" }</Text>
         </TouchableOpacity>

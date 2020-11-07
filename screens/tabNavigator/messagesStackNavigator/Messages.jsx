@@ -5,7 +5,9 @@ import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import { StoreContext } from '../../../contexts/storeContext';
 
-import { declineRequest, acceptRequestUser, acceptRequestConvo, getUserChatsAndRequests, removeFromConversation } from '../../../firebase.js';
+import { deleteConvo, getUserChatsAndRequests, removeFromConversation } from '../../../firebase.js';
+
+import { getDistance } from '../../../utils.js';
 
 import MessagesEmpty from './MessagesEmpty';
 import UserConversationRow from './UserConversationRow';
@@ -19,13 +21,18 @@ const Messages = (props) => {
   const userId = user._id;
   const userName = user.name;
   const userPhoto = user.image;
-  const requests0 = store.requests || [];
-  const userChats = store.userChats || [];
+  const userConversations0 = store.userChats || [];
 
-  userChats.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
+  const userConversations = userConversations0.map((item) => {
+    const dist = getDistance({ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude }, { latitude: item.coordinates[0], longitude: item.coordinates[1] });
+    item.distance = Math.floor(dist);
+    return item;
+  })
 
-  // const userConversations = userChats.concat(requests0);
-  const userConversations = requests0.concat(userChats);
+
+  userConversations.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
+
+
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -46,8 +53,11 @@ const Messages = (props) => {
 
     try {
       const res = await removeFromConversation(convo, newArr, userObj);
+      if (convo.usersArr.length === 1) { // only person left in convo, so delete it entirely
+        const res2 = await deleteConvo(convo.id);
+      }
       // update the convoArr locally
-      const newUserChatsArr = userChats.length ? [...userChats] : [];
+      const newUserChatsArr = userConversations.length ? [...userConversations] : [];
 
       const newUserChatsArr2 = newUserChatsArr.filter((item, i) => item.id !== convo.id);
 
@@ -59,60 +69,6 @@ const Messages = (props) => {
     }
   }
 
-  const decline = async (item) => {
-    try {
-      const res = await declineRequest(item.id);
-      const newState = [...requests0];
-      const newState2 = newState.filter((request, i) => request.id !== item.id);
-      // update the convoArr locally
-      store.setRequests(newState2);
-    }
-    catch(e) {
-      console.log("decline request error : ", e);
-    }
-  }
-
-  const accept = async (request) => {
-
-    let usersArr;
-
-    if (request.conversationId) {
-      // Step 1: Get all current conversaitons via the store
-      let userChats0 = userChats.length ? [...userChats] : [];
-      // Step 2: Filter through current conversations to get the one this user is requesting to join
-      const userChat = userChats0.filter((item, i) => item.id === request.conversationId);
-      // Step 3: Get all current users in that conversation
-      usersArr = userChat[0].usersArr;
-      // Step 4: Send it as an extra argument
-    }
-    else {
-      usersArr = [];
-    }
-
-    try {
-      const docId = request.existingConversation ? await acceptRequestConvo(user, request, usersArr) : await acceptRequestUser(user, request);
-
-      if (docId) {
-        let newRequestsArr = requests0.length ? [...requests0] : [];
-        const newRequestsArr2 = newRequestsArr.filter((item, i) => item.id !== request.id);
-        // // update the convoArr locally
-        // newConvo.id = docId;
-        // const newUserConvosArr = store.userConversations ? [...store.userConversations] : [];
-        // newUserConvosArr.unshift(newConvo);
-
-        // store.setUserChats(newUserConvosArr);
-        store.setRequests(newRequestsArr2);
-      }
-      else {
-        Alert.alert("", "There was an error. Please try again.");
-      }
-    }
-    catch (e) {
-      console.log("accept request error : ", e);
-      Alert.alert("", "There was an error. Please try again.");
-    }
-  }
-
   const onRefresh = async () => {
     setRefreshing(true);
     const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
@@ -121,10 +77,10 @@ const Messages = (props) => {
 
       if (arr) {
         // filter out blockedUsers from userChats
-        let arr0 = arr[0].filter((item) => {
+        let arr0 = arr.filter((item) => {
           let blocked = false;
           for (let i = 0; i < blockedUsers.length; i++) {
-            const index = item.userArr.findIndex((u) => u.userId === blockedUsers[i].userId)
+            const index = item.usersArr.findIndex((u) => u.userId === blockedUsers[i].userId)
             if (index !== -1) {
               blocked = true;
             }
@@ -132,20 +88,8 @@ const Messages = (props) => {
           return !blocked;
         });
 
-        // filter out blockedUsers from requests
-        let arr1 = arr[1].filter((item) => {
-          let blocked = false;
-          for (let i = 0; i < blockedUsers.length; i++) {
-            const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
-            if (index !== -1) {
-              blocked = true;
-            }
-          }
-          return !blocked;
-        });
         
         store.setUserChats(arr0);
-        store.setRequests(arr1);
         setRefreshing(false);
       }
     }
@@ -155,11 +99,12 @@ const Messages = (props) => {
     }
   }
 
+
   return (
     <SafeAreaView style={ styles.body }>
     { /* FlatList of Conversations */ }
     <View style={ styles.bottom }>
-      <Text style={ styles.topText }>Conversations are deleted every 24 hours to make sure people are ready and willing to participate.</Text>
+      <Text style={ styles.topText }>Old conversations may be deleted periodically</Text>
       { userConversations.length === 0 ? <MessagesEmpty onRefresh={ onRefresh } /> : <SwipeListView
         // keyExtractor={ (item, key) => item.chatId }
         refreshControl={
@@ -176,13 +121,13 @@ const Messages = (props) => {
           <View key={data.item.id } style={styles.rowBack}>
             <TouchableOpacity
               style={[styles.backRightBtn, styles.backRightBtnLeft]}
-              onPress={ data.item.toId ? () => decline(data.item) : () => remove(data.item) }
+              onPress={ () => remove(data.item) }
             >
               <Text style={styles.backTextWhite}>{ data.item.toId ? "Decline" : "Remove" }</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.backRightBtn, styles.backRightBtnRight]}
-              onPress={ data.item.toId ? () => accept(data.item) : () => props.navigation.navigate("Conversation", { convo: data.item, remove }) }
+              onPress={ () => props.navigation.navigate("Conversation", { convo: data.item, remove }) }
             >
               <Text style={styles.backTextWhite}>{ data.item.toId ? "Accept" : "Open" }</Text>
             </TouchableOpacity>
@@ -193,14 +138,7 @@ const Messages = (props) => {
         previewRowKey={'0'}
         previewOpenValue={-40}
         previewOpenDelay={3000}
-        renderItem={({ item }) => {
-        if (item.toId) {
-          console.log("item.id : ", item.id);
-          return <RequestRow key={ item.id } request={ item } />
-        }
-        else {
-          return <UserConversationRow key={ item.lastMessageCreatedAt ? item.lastMessageCreatedAt.seconds : Math.random().toString() } convo={ item } userId={ userId } userName={ userName } userAvatar={ userPhoto } remove={ remove } />
-        }}}
+        renderItem={({ item }) => <UserConversationRow key={ item.lastMessageCreatedAt ? item.lastMessageCreatedAt.seconds : Math.random().toString() } convo={ item } userId={ userId } userName={ userName } userAvatar={ userPhoto } remove={ remove } /> }
       /> }
       </View>
       <AdMobBanner

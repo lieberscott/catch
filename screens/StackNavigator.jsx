@@ -14,6 +14,7 @@ import ProfileFull from './tabNavigator/shared/ProfileFull';
 import Conversation from './tabNavigator/messagesStackNavigator/Conversation';
 import UsersList from './tabNavigator/shared/UsersList';
 import IntroMaster from './tabNavigator/introComponents/IntroMaster';
+import Map from './tabNavigator/messagesStackNavigator/Map';
 
 YellowBox.ignoreWarnings(['Setting a timer']);
 
@@ -23,10 +24,8 @@ function MyStack() {
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
-  const [areaUsers, setAreaUsers] = useState([]);
   const [areaConversations, setAreaConversations] = useState([]);
   const [userChats, setUserChats] = useState([]);
-  const [requests, setRequests] = useState([]);
   const [gotAreaConversations, setGotAreaConversations] = useState(false);
   const [gotUserChats, setGotUserChats] = useState(false);
   const [gotRequests, setGotRequests] = useState(false);
@@ -71,6 +70,7 @@ function MyStack() {
           chatArray2.push(d[key]);
         });
 
+
         let chatArray3 = [];
 
         // filter out blockedUsers
@@ -82,7 +82,7 @@ function MyStack() {
           for (let i = 0; i < chatArrLen; i++) {
 
             let blocked = false;
-            const usersLen = chatArray2[i].usersArr.length;
+            const usersLen = chatArray2[i].usersArr ? chatArray2[i].usersArr.length : 0;
 
             for (let j = 0; j < usersLen; j++) {
               // check blockedUsers list against the usersArr
@@ -124,30 +124,8 @@ function MyStack() {
     let unsubscribe2;
     let arr = [];
     if (gotUserChats && !gotRequests) {
-      unsubscribe2 = firebase.firestore().collection("requests")
-      .where("toId", "==", user._id)
-      .onSnapshot((snapshot) => {
-        snapshot.forEach((doc) => {
-          let d = doc.data();
-          d.id = doc.id;
-          arr.push(d);
-        });
-        // although I save locally that a request has been made to someone (and so to prevent duplicate requests) the system is not perfect (if app refreshes, local data may be lost)
-        // so filter out duplicate requests here
-        let seen = {};
-        const uniqueArr = arr.filter((item) => {
-          const id = item._id;
-          return seen.hasOwnProperty(id) ? false : (seen[id] = true);
-        });
-        setRequests(uniqueArr);
-        setGotRequests(true);
-      });
+      setGotRequests(true);
     }
-    return () => {
-      if (unsubscribe2 != undefined) {
-        console.log("requests listener defined and unmounting");
-        unsubscribe2();
-      }    }
   }, [gotUserChats]);
 
 
@@ -157,21 +135,9 @@ function MyStack() {
       (async () => {
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-          
-          // filter out blockedUsers from areaUsers
-          const blockedUsers = user.blockedUsers ? user.blockedUsers : [];
-          let arr0 = arr[0].filter((item) => {
-            let blocked = false;
-            for (let i = 0; i < blockedUsers.length; i++) {
-              if (item._id === blockedUsers[i].userId) {
-                blocked = true;
-              }
-            }
-            return !blocked;
-          });
 
           // filter out blockedUsers from areaConversations
-          let arr1 = arr[1].filter((item) => {
+          let arr1 = arr.filter((item) => {
             let blocked = false;
             for (let i = 0; i < blockedUsers.length; i++) {
               const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
@@ -181,33 +147,7 @@ function MyStack() {
             }
             return !blocked;
           });
-
-          // filter out requests from areaUsers
-          let arr02 = arr0.filter((item) => {
-            let req = false;
-            for (let i = 0; i < requests.length; i++) {
-              if (item._id === requests[i]._id) {
-                req = true;
-              }
-            }
-            return !req;
-          });
-
-          // filter out userChats from areaUsers
-          let arr03 = arr02.filter((item) => {
-            let userChat = false;
-            for (let i = 0; i < userChats.length; i++) {
-              for (let j = 0; j < userChats[i].usersArr.length; j++) {
-                if (item._id === userChats[i].usersArr[j].userId) {
-                  userChat = true;
-                }
-              }
-            }
-            return !userChat;
-          });
-
           
-          setAreaUsers(arr03);
           setAreaConversations(arr1);
           setAllLoaded(true);
         }
@@ -221,15 +161,11 @@ function MyStack() {
   return (
     <StoreContext.Provider value={{
       user,
-      areaUsers,
       areaConversations,
       userChats,
-      requests,
       setUser,
       setUserChats,
       setAreaConversations,
-      setAreaUsers,
-      setRequests
     }}>
       { loading ? <View style={ styles.container }><ActivityIndicator /></View>
       : user.onboardingDone ? <Stack.Navigator headerMode="screen" >
@@ -237,6 +173,7 @@ function MyStack() {
         <Stack.Screen name="UsersList" component={UsersList} options={{ title: "" }}/>
         <Stack.Screen name="Conversation" component={Conversation} options={{ title: "" }}/>
         <Stack.Screen name="ProfileFull" component={ProfileFull} options={{ title: "" }}/>
+        <Stack.Screen name="MapLoc" component={Map} options={{ title: "" }}/>
       </Stack.Navigator>
       : <IntroMaster /> }
     </StoreContext.Provider>
