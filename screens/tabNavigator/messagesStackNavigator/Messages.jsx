@@ -11,7 +11,6 @@ import { getDistance } from '../../../utils.js';
 
 import MessagesEmpty from './MessagesEmpty';
 import UserConversationRow from './UserConversationRow';
-import RequestRow from './RequestRow';
 
 const Messages = (props) => {
 
@@ -24,7 +23,11 @@ const Messages = (props) => {
   const userConversations0 = store.userChats || [];
 
   const userConversations = userConversations0.map((item) => {
-    const dist = getDistance({ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude }, { latitude: item.coordinates[0], longitude: item.coordinates[1] });
+    const user0Loc = user.coordinates.latitude ? { latitude: user.coordinates.latitude, longitude: user.coordinates.longitude } : { latitude: user.coordinates[0], longitude: user.coordinates[1] };
+    const user1Loc = item.coordinates.latitude ? { latitude: item.coordinates.latitude, longitude: item.coordinates.longitude } : { latitude: item.coordinates[0], longitude: item.coordinates[1] };
+
+
+    const dist = getDistance(user0Loc, user1Loc);
     item.distance = Math.floor(dist);
     return item;
   })
@@ -53,7 +56,7 @@ const Messages = (props) => {
 
     try {
       const res = await removeFromConversation(convo, newArr, userObj);
-      if (convo.usersArr.length === 1) { // only person left in convo, so delete it entirely
+      if (convo.usersArr.length <= 1) { // only person left in convo, so delete it entirely
         const res2 = await deleteConvo(convo.id);
       }
       // update the convoArr locally

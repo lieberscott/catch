@@ -134,75 +134,84 @@ export const createConvo = async (user0, sport, loc, skillLevel) => {
 }
 
 
-export const joinConvo = async (user0, user1, usersArr) => {
+export const joinConvo = async (user0, user1) => {
+
+  const userObjects = user1.userObjects;
+  let usersArr2 = [];
+
+  // create the usersArr for the new user's userChat
+  for (let i = 0; i < userObjects.length; i++) {
+    const obj = {
+      userAvatar: userObjects[i].photo,
+      userName: userObjects[i].name,
+      userId: userObjects[i]._id
+    }
+    usersArr2.push(obj);
+  }
 
   const userObj1 = { // for userChats usersArr
-    userAvatar: user1.photo,
-    userName: user1.name,
-    userId: user1._id
+    userAvatar: user0.photo,
+    userName: user0.name,
+    userId: user0._id
   }
+
+  usersArr2.push(userObj1); // <- for new user (me), userChat's usersArr is now ready
 
   const userObj2 = { // for userObjects array in conversation
-    _id: user1._id,
-    coordinates: user1.coordinates,
-    dateOfBirth: user1.dateOfBirth,
-    gender: user1.gender,
-    getsNotifications: user1.getsNotifications,
-    name: user1.name,
-    notificationToken: user1.notificationToken,
-    photo: user1.photo,
-    profileText: user1.profileText ? user1.profileText : "",
-    sports: user1.sports
+    _id: user0._id,
+    coordinates: user0.coordinates,
+    dateOfBirth: user0.dateOfBirth,
+    gender: user0.gender,
+    getsNotifications: user0.getsNotifications,
+    name: user0.name,
+    notificationToken: user0.notificationToken,
+    photo: user0.photo,
+    profileText: user0.profileText ? user0.profileText : "",
+    sports: user0.sports
   }
 
-  // let usersArr2 = [];
-  // for (let i = 0; i < usersArr.length; i++) {
-  //   usersArr2.push(usersArr[i]);
-  // }
-  let usersArr2 = [...usersArr];
-
-  usersArr2.push(userObj1);
-
   const userChat = {
-    chatId: user1.conversationId,
+    chatId: user1.id,
     lastMessageCreatedAt: new Date(),
-    lastMessageFromId: user1._id,
-    lastMessageFromName: user1.name,
+    lastMessageFromId: user0._id,
+    lastMessageFromName: user0.name,
     lastMessageText: "You joined the conversation. Say hi!",
     readByReceiver: false,
-    usersArr: usersArr2,
-    activeSport: user1.activeSport
+    usersArr: usersArr2, // <-- here is where usersArr2 is used, all that code above for just one little value in the userChat object
+    activeSport: user1.activeSport,
+    skillLevel: user1.skillLevel,
+    coordinates: user1.coordinates
   }
 
   let promises = [];
 
-  // Step 2: Add userChat to new user (user1)
-  promises.push(firebase.firestore().collection("userChats").doc(user1._id).set({
-    [`${user1.conversationId}`]: userChat
+  // Step 2: Add userChat to new user (user0)
+  promises.push(firebase.firestore().collection("userChats").doc(user0._id).set({
+    [`${user1.id}`]: userChat
   }, { merge: true }));
 
 
   // Step 3: Update usersArr for existing users in chat
-  for (let i = 0; i < usersArr.length; i++) {
-    promises.push(firebase.firestore().collection("userChats").doc(usersArr[i].userId).update({
-      [`${user1.conversationId}.usersArr`]: usersArr2,
-      [`${user1.conversationId}.lastMessageText`]: user0.name + " has joined",
-      [`${user1.conversationId}.lastMessageCreatedAt`]: new Date(),
-      [`${user1.conversationId}.readByReceiver`]: false,
-      [`${user1.conversationId}.lastMessageFromName`]: user0.name,
-      [`${user1.conversationId}.lastMessageFromId`]: user0._id
+  for (let i = 0; i < userObjects.length; i++) {
+    promises.push(firebase.firestore().collection("userChats").doc(userObjects[i]._id).update({
+      [`${user1.id}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1),
+      [`${user1.id}.lastMessageText`]: user0.name + " has joined",
+      [`${user1.id}.lastMessageCreatedAt`]: new Date(),
+      [`${user1.id}.readByReceiver`]: false,
+      [`${user1.id}.lastMessageFromName`]: user0.name,
+      [`${user1.id}.lastMessageFromId`]: user0._id
     }))
   }
 
   // Step 4: Update userObjects array for the conversation
-  promises.push(firebase.firestore().collection("conversations").doc(user1.conversationId).update({
+  promises.push(firebase.firestore().collection("conversations").doc(user1.id).update({
     userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
   }));
 
 
   try {
     const res1 = await Promise.all(promises);
-    return user1.conversationId;
+    return user1.id;
   }
   catch (e) {
     console.log("accept requests convo error : ", e);
@@ -367,7 +376,6 @@ export const getUserChatsAndRequests = async (userId) => { // NOTE: Removed requ
     const document = await firebase.firestore().collection("userChats").doc(userId).get();
     const chats = document.data();
     let chatArray = [];
-    let requestsArr = [];
 
     Object.keys(chats).forEach((key) => {
       chats[key].id = key;
@@ -509,9 +517,9 @@ export const deleteUser = async (photoUrl) => {
   }
 }
 
-export const deleteConvo = async (convoId) => {
+export const deleteConvo = async (convoId) => { // deletes in Conversation.jsx if userChats usersArr is only === 1 when the user removes him/herself from it, (so there's no one left in the chat)
   try {
-    const res = await firebase.firestore.collection("conversations").doc(convoId).delete();
+    const res = await firebase.firestore().collection("conversations").doc(convoId).delete();
     return true;
   }
   catch(e) {

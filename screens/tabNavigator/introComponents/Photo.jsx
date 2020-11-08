@@ -16,7 +16,7 @@ const Photo = (props) => {
           <Image
             // autoFocus={ true }
             resizeMode="contain"
-            source={{ uri: photo ? photoUrl : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c' }}
+            source={{ uri: photo ? photoUrl : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020107%2Fblank_user.png?alt=media&token=87de8260-b1ba-4e91-8a28-2d6d97bca166' }}
             style={ styles.image }
             />
         </TouchableOpacity>

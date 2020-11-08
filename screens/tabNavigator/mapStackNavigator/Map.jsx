@@ -29,9 +29,11 @@ const Map = (props) => {
   const userLng = user.coordinates ? user.coordinates.longitude : -87.6298;
 
   const areaConversations0 = store.areaConversations || [];
-  const areaUsers = store.areaUsers || [];
-  const areaConversations = areaConversations0.concat(areaUsers);
-  areaConversations.unshift(user);
+  areaConversations0.unshift(user);
+
+  const areaConversations = areaConversations0.filter((item, pos, self) => {
+    return self.indexOf(item) == pos;
+})
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
@@ -96,7 +98,7 @@ const Map = (props) => {
         }
         return !blocked;
       });
-      
+
       store.setAreaConversations(arr1);
       setRefreshing(false);
     }
@@ -105,6 +107,9 @@ const Map = (props) => {
       setRefreshing(false);
     }
   }
+
+  // console.log("areaConversations : ", areaConversations);
+  // console.log("areaConversations.length : ", areaConversations.length);
 
   return (
     <View style={ styles.flexOne }>
@@ -120,7 +125,7 @@ const Map = (props) => {
         { /* FlatList of Conversations */ }
         <View style={ styles.top }>
           { areaConversations.length === 1 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
-            keyExtractor={ (item, key) => item.userObjects ? item.id.toString() : item._id.toString() }
+            keyExtractor={ (item, key) => item === true || item === false ? Math.random().toString() : item.userObjects ? item.id.toString() : item._id.toString() }
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={ onRefresh } />
             }
@@ -134,13 +139,17 @@ const Map = (props) => {
             ItemSeparatorComponent={() => <View style={ styles.alignCenter }><View style={ styles.separator } /></View> }
             renderHiddenItem={ (data, rowMap) => {
 
+              if (data.item === true || data.item === false) {
+                return;
+              }
+
               let timeOfActivation;
         
               if (data.item.lastMessageTime) {
-                timeOfActivation = new Date();
+                timeOfActivation = new Date(data.item.lastMessageTime.seconds * 1000);
               }
               else {
-                timeOfActivation = data.item.timeOfActivation.seconds ? new Date(data.item.timeOfActivation.seconds) : new Date(data.item.timeOfActivation);
+                timeOfActivation = new Date();
               }
 
               return (
@@ -163,6 +172,9 @@ const Map = (props) => {
               if (index === 0) {
                 return <View />;
               }
+              else if (item._id) {
+                return <View />;
+              }
               let timeOfActivation;
               let now = new Date();
               let hours;
@@ -173,18 +185,21 @@ const Map = (props) => {
                 hours = Math.round(milliseconds / 36e5);
               }
               else {
-                timeOfActivation = item.timeOfActivation.seconds ? new Date(item.timeOfActivation.seconds * 1000) : new Date(item.timeOfActivation);
+                timeOfActivation = new Date();
                 const milliseconds = Math.abs(now - timeOfActivation);
                 hours = Math.round(milliseconds / 36e5);
               }
 
               if (item.userObjects) {
                 const conversation = item.userObjects.length > 1 ? true : false;
-              return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } />
+                return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } skillLevel={ item.skillLevel } />
+              }
+              else if (item === true || item === false) {
+                return <View key={ Math.random().toString() } />;
               }
               else {
                 // this will always only be one user, but in an array [{ }] so you can reuse the AreaConversationRow component
-                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } />
+                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } skillLevel={ item.skillLevel } />
               }
             }}
             ListFooterComponent={() => areaConversations.length ?  <View style={ styles.body }>
@@ -208,6 +223,14 @@ const Map = (props) => {
         >
         { areaConversations.length ? areaConversations.map((convo, i) => {
 
+          if (convo === true) {
+            return;
+          }
+
+          if (convo === false) {
+            return;
+          }
+
           let timeOfActivation;
           let now = new Date();
           let hours;
@@ -218,23 +241,25 @@ const Map = (props) => {
             hours = Math.round(milliseconds / 36e5);
           }
           else {
-            timeOfActivation = convo.timeOfActivation.seconds ? new Date(convo.timeOfActivation.seconds * 1000) : new Date(convo.timeOfActivation);
-            const milliseconds = Math.abs(now - timeOfActivation);
-            hours = Math.round(milliseconds / 36e5);
+            timeOfActivation = new Date();
+          }
+
+          let userLoc;
+          if (convo.coordinates && convo.coordinates.latitude) {
+            userLoc = { latitude: convo.coordinates.latitude, longitude: convo.coordinates.longitude };
+          }
+          else {
+            userLoc = { latitude: convo.coordinates[0], longitude: convo.coordinates[1] }
           }
 
           const users = convo.userObjects ? convo.userObjects : [convo];
           const len = users.length;
 
-          let sixHoursAgo = new Date();
-          sixHoursAgo.setHours(sixHoursAgo.getHours() - 6);
-
-
           return (
             <Marker
               pinColor={ i === 0 ? "green" : "red" }
               key={ convo.id ? "pin" + convo.id : "pin" + convo._id }
-              coordinate={{ latitude: convo.coordinates.latitude, longitude: convo.coordinates.longitude }}
+              coordinate={ userLoc }
               // title={ pin.name }
               // description={ pin.profile_text }
               // onCalloutPress={ () => navigation.navigate("ProfileFull", { user: pin }) }
@@ -242,7 +267,7 @@ const Map = (props) => {
               <Callout onPress={ i === 0 ? undefined : () => props.navigation.navigate("UsersList", { users }) }>
                 <Image style={ styles.image } source={{ uri: users[0].photo }} />
                 { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
-                { i === 0 ?<Text style={ styles.centerText }>{ convo.active && new Date(timeOfActivation) > new Date(sixHoursAgo) ? "Active" : "Inactive" }</Text> : <Fragment><View style={ styles.centerText }>
+                { i === 0 ? [] : <Fragment><View style={ styles.centerText }>
                   <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
                 </View>
                 <View>

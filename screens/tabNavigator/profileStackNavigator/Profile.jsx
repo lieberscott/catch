@@ -152,13 +152,16 @@ const Profile = (props) => {
   const create = async (skillLevel) => {
     try {
       const res1 = await createConvo(user, activeSport, sportLoc, skillLevel);
-      Alert.alert("", "Your game was created!");
-      setLocationModal(false);
+      Alert.alert("", "Your game was created!", [
+        { text: "OK", onPress: () => setLocationModal(false) }
+      ]);
+
     }
     catch (e) {
       console.log("create error : ", e);
-      Alert.alert("", "Error. Please try again.");
-      setLocationModal(false);
+      Alert.alert("", "Error. Please try again.", [
+        { text: "OK", onPress: () => setLocationModal(false) }
+      ]);
     }
   }
 
@@ -199,7 +202,7 @@ const Profile = (props) => {
             <Text style={ styles.header }>Location</Text>
           </View>
           <View style={ styles.mapContainer }>
-          <MapView
+            <MapView
               style={ styles.mapStyle }
               // showsUserLocation={ true }
               // followsUserLocation={ true }

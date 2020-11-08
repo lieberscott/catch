@@ -135,7 +135,8 @@ function MyStack() {
       (async () => {
         try {
           const arr = await getAreaUsersAndConversations(user._id, user.coordinates);
-
+          
+          let blockedUsers = user.blockedUsers ? user.blockedUsers : [];
           // filter out blockedUsers from areaConversations
           let arr1 = arr.filter((item) => {
             let blocked = false;

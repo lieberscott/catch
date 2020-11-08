@@ -45,7 +45,7 @@ export default function TabNavigator() {
   }
   
   return (
-    <Tab.Navigator initialRouteName="Map" tabBarOptions={{ activeTintColor: '#e91e63' }}>
+    <Tab.Navigator initialRouteName="MapStackNavigator" tabBarOptions={{ activeTintColor: '#e91e63' }}>
       <Tab.Screen
         name="Profile"
         component={ Profile }
