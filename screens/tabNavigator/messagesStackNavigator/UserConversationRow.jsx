@@ -28,24 +28,12 @@ const UserConversationRow = (props) => {
   const index = reversedArr.findIndex((item, i) => item.userId !== userId);
   const count = usersArr.length - 1;
   const lastOtherUserIndex = index >= 0 ? count - index : index;
-  const [width, setWidth] = useState(0);
-  const [first, setFirst] = useState(true);
   const navigation = useNavigation();
 
   const dot = !convo.readByReceiver && convo.lastMessageFromId !== userId;
 
-  const handleWidth = (w) => {
-    setWidth(w);
-    setFirst(false);
-  }
-
      return (
-      <TouchableOpacity activeOpacity={ 1 } style={[ styles.body ]} onPress={() => navigation.navigate("Conversation", { convo, dot, remove: props.remove })} onLayout={(e) => {
-        const w = e.nativeEvent.layout.width;
-        if (first) {
-          handleWidth(w);
-        }
-      }}>
+      <TouchableOpacity activeOpacity={ 1 } style={styles.body} onPress={() => navigation.navigate("Conversation", { convo, dot, remove: props.remove })}>
         { dot ? <View style={ styles.newMessage } /> : [] }
         <Image
           style={ styles.image }

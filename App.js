@@ -17,7 +17,7 @@ const firebaseConfig = {
   measurementId: "G-13LKM32VEW"
 };
 if (!firebase.apps.length) {
-   firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
 }
 
 const MyNavigator = createSwitchNavigator({
@@ -30,7 +30,5 @@ const AppContainer = createAppContainer(MyNavigator);
 
 export default function App() {
 
-  return (
-    <AppContainer />
-  );
+  return <AppContainer />
 }

@@ -23,8 +23,6 @@ const Map = (props) => {
   const store = useContext(StoreContext);
 
   const user = store.user;
-  const blockedUsers = user.blockedUsers;
-  const userPhoto = user.photo;
   const userLat = user.coordinates ? user.coordinates.latitude : 41.87818;
   const userLng = user.coordinates ? user.coordinates.longitude : -87.6298;
 
@@ -33,7 +31,8 @@ const Map = (props) => {
 
   const areaConversations = areaConversations0.filter((item, pos, self) => {
     return self.indexOf(item) == pos;
-})
+  });
+  // console.log("areaConversations : ", areaConversations);
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
@@ -70,7 +69,7 @@ const Map = (props) => {
       if (res2) {
         // add that user has joined areaConversations locally so you don't join twice
         
-        let newAreaConversations = areaConversations0.map((convo, i) => convo._id !== item._id)
+        let newAreaConversations = areaConversations.filter((convo, i) => convo._id !== item._id)
         store.setAreaConversations(newAreaConversations);
         Alert.alert("", "You have joined this game!");
       }
@@ -141,15 +140,6 @@ const Map = (props) => {
 
               if (data.item === true || data.item === false) {
                 return;
-              }
-
-              let timeOfActivation;
-        
-              if (data.item.lastMessageTime) {
-                timeOfActivation = new Date(data.item.lastMessageTime.seconds * 1000);
-              }
-              else {
-                timeOfActivation = new Date();
               }
 
               return (

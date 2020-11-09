@@ -23,8 +23,6 @@ const Profile = (props) => {
 
   const [activeSport, setActiveSport] = useState(-1);
   const [locationModal, setLocationModal] = useState(false);
-  const [sportLoc, setSportLoc] = useState([]);
-  const [sportLevel, setSportLevel] = useState(-1);
 
   useEffect(() => {
     (async () => {
@@ -141,17 +139,16 @@ const Profile = (props) => {
   }
 
   const handleLoc = (coords) => {
-    setSportLoc(coords);
     Alert.alert("", "What is the skill level?", [
-      { text: "Intermediate", onPress: () => create(1) },
-      { text: "Advanced", onPress: () => create(2) },
-      { text: "Cancel", onPress: () => setLocationModal(false) }
+      { text: "Intermediate", onPress: () => create(coords, 1) },
+      { text: "Advanced", onPress: () => create(coords, 2) },
+      { text: "Cancel", onPress: () => setLocationModal(coords, false) }
     ])
   }
 
-  const create = async (skillLevel) => {
+  const create = async (gameCoords, skillLevel) => {
     try {
-      const res1 = await createConvo(user, activeSport, sportLoc, skillLevel);
+      const res1 = await createConvo(user, activeSport, gameCoords, skillLevel);
       Alert.alert("", "Your game was created!", [
         { text: "OK", onPress: () => setLocationModal(false) }
       ]);

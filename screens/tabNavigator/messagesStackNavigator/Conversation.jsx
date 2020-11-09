@@ -34,11 +34,6 @@ const Conversation = (props) => {
   if (otherPersonArray.length === 0) {
     otherPersonArray = convo.usersArr.slice();
   }
-  const otherPersonIdsArray = otherPersonArray.map((item, i) => {
-    if (item.notificationToken !== "-1") {
-      return item._id;
-    }
-  });
 
   let unsubscribe;
 
@@ -48,6 +43,7 @@ const Conversation = (props) => {
   const [messages, setMessages] = useState([]);
   const [reportModal, setReportModal] = useState(false);
   const [usersArr, setUsersArr] = useState([]);
+  const [gameLoc, setGameLoc] = useState({});
 
   {/* Set Header */}
   useLayoutEffect(() => {
@@ -68,20 +64,39 @@ const Conversation = (props) => {
 
         setUsersArr(d.userObjects);
         setMessages(messages0);
+        setGameLoc(d.coordinates);
         setLoaded(true);
       }
-    });
+      else {
+        // conversation has been deleted, but listener went down
+        Alert.alert("", "This conversation no longer exists", [
+          {text: "OK", onPress: () => {
+            // Step 1: Delete from userChat locally
+            const userChats0 = store.userChats.slice();
+            const userChats1 = userChats0.filter((item) => item.id !== chatId);
+            store.setUserChats(userChats1);
 
-    if (dot) {
-      firebase.firestore().collection("userChats").doc(userId).update({
-        [`${chatId}.readByReceiver`]: true
-      });
-    }
+            // Step 2: pop()
+            props.navigation.pop();
+          }}
+        ])
+      }
+    });
 
     return () => {
       unsubscribe !== undefined ? unsubscribe() : console.log("chatId " + chatId + " listener unloaded before being fully initialized");
     }
   }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      if (dot) {
+        firebase.firestore().collection("userChats").doc(userId).update({
+          [`${chatId}.readByReceiver`]: true
+        });
+      }
+    }
+  }, [loaded]);
 
 
   {/* Functions */}
@@ -126,7 +141,7 @@ const Conversation = (props) => {
   const handleUnmatch2 = async () => {
     try {
       const res1 = await props.route.params.remove(convo);
-      props.navigation.pop();
+      // props.navigation.pop();
     }
     catch(e) {
       console.log("handleUnmatch error : ", e);
@@ -136,7 +151,7 @@ const Conversation = (props) => {
 
   const showOnMap = () => {
     setReportModal(false);
-    props.navigation.navigate("MapLoc", { userLat: user.coordinates.latitude, userLng: user.coordinates.longitude });
+    props.navigation.navigate("MapLoc", { userLat: gameLoc.latitude, userLng: gameLoc.longitude });
   }
 
 

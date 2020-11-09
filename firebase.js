@@ -36,15 +36,15 @@ export const removeFromConversation = async (item, newArr, userObj) => {
   let promises = [];
 
   // Step 1: Remove chat from user's userChats
-  promises.push(firebase.firestore().collection("userChats").doc(uid).set({
+  promises.push(firebase.firestore().collection("userChats").doc(uid).update({
     [`${item.id}`]: firebase.firestore.FieldValue.delete()
-  }, { merge: true }));
+  }));
 
   // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
   if (newArr.length === 1) {
-    promises.push(firebase.firestore().collection("userChats").doc(newArr[0].userId).set({
+    promises.push(firebase.firestore().collection("userChats").doc(newArr[0].userId).update({
       [`${item.id}`]: firebase.firestore.FieldValue.delete()
-    }, { merge: true }));
+    }));
 
     promises.push(firebase.firestore().collection("conversations").doc(item.id).delete());
   }
@@ -52,9 +52,9 @@ export const removeFromConversation = async (item, newArr, userObj) => {
   // Step 3: Else, remove user from userChats array, and from conversation usersArray (actually they'll stay in conversation usersArray, too difficult to match a whole object to remove from an array in firestore)
   else {
     for (let i = 0; i < newArr.length; i++) {
-      promises.push(firebase.firestore().collection("userChats").doc(newArr[i].userId).set({
-        [`${itemId}`.usersArr]: firebase.firestore.FieldValue.arrayRemove(userObj[0])
-      }, { merge: true }));
+      promises.push(firebase.firestore().collection("userChats").doc(newArr[i].userId).update({
+        [`${itemId}.usersArr`]: firebase.firestore.FieldValue.arrayRemove(userObj[0])
+      }));
     }
   }
 
@@ -210,8 +210,16 @@ export const joinConvo = async (user0, user1) => {
 
 
   try {
-    const res1 = await Promise.all(promises);
-    return user1.id;
+
+    // First check if the document still exists. Since areaConversations are not on a listener, it could have been deleted but still be on another user's screen.
+    const res0 = await firebase.firestore().collection("conversations").doc(user1.id).get();
+
+    if (!res0.exists) {
+      return false;
+    } else {
+      const res1 = await Promise.all(promises);
+      return user1.id;
+    }
   }
   catch (e) {
     console.log("accept requests convo error : ", e);

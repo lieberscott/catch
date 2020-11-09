@@ -20,6 +20,7 @@ const Messages = (props) => {
   const userId = user._id;
   const userName = user.name;
   const userPhoto = user.image;
+
   const userConversations0 = store.userChats || [];
 
   const userConversations = userConversations0.map((item) => {
@@ -30,11 +31,9 @@ const Messages = (props) => {
     const dist = getDistance(user0Loc, user1Loc);
     item.distance = Math.floor(dist);
     return item;
-  })
+  });
 
-
-  userConversations.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
-
+  userConversations.sort((a, b) => a.lastMessageCreatedAt.seconds + b.lastMessageCreatedAt.seconds);
 
 
   const [refreshing, setRefreshing] = useState(false);
@@ -45,6 +44,7 @@ const Messages = (props) => {
       await setTestDeviceIDAsync('EMULATOR');
     })()
   }, []);
+
   
 
 
@@ -52,7 +52,8 @@ const Messages = (props) => {
   const remove = async (convo) => {
 
     const newArr = convo.usersArr.filter((item, i) => item.userId !== userId);
-    const userObj = convo.usersArr.filter((item, i) => item.userId === userId)
+    const userObj = convo.usersArr.filter((item, i) => item.userId === userId);
+
 
     try {
       const res = await removeFromConversation(convo, newArr, userObj);
@@ -79,20 +80,20 @@ const Messages = (props) => {
       const arr = await getUserChatsAndRequests(userId); // [userChats, requestsArr]
 
       if (arr) {
-        // filter out blockedUsers from userChats
-        let arr0 = arr.filter((item) => {
-          let blocked = false;
-          for (let i = 0; i < blockedUsers.length; i++) {
-            const index = item.usersArr.findIndex((u) => u.userId === blockedUsers[i].userId)
-            if (index !== -1) {
-              blocked = true;
-            }
-          }
-          return !blocked;
-        });
+      //   // filter out blockedUsers from userChats
+      //   let arr0 = arr.filter((item) => {
+      //     let blocked = false;
+      //     for (let i = 0; i < blockedUsers.length; i++) {
+      //       const index = item.usersArr.findIndex((u) => u.userId === blockedUsers[i].userId)
+      //       if (index !== -1) {
+      //         blocked = true;
+      //       }
+      //     }
+      //     return !blocked;
+      //   });
 
         
-        store.setUserChats(arr0);
+        store.setUserChats(arr);
         setRefreshing(false);
       }
     }

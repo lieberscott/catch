@@ -63,7 +63,7 @@ const ActiveUsersEmpty = (props) => {
           />
         </View>
         <View style={ styles.title }>
-          <Text style={ styles.text }>There are no active users in your area. Try again later or pull down to refresh.</Text>
+          <Text style={ styles.text }>There are no active users in your area. Try again later or pull down to refresh, or start your own game by going to your Profile page.</Text>
         </View>
     </ScrollView>
   )

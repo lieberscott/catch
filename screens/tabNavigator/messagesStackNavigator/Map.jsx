@@ -18,7 +18,7 @@ const Map = (props) => {
           provider={PROVIDER_GOOGLE}
           camera={{ center: { latitude: userLat, longitude: userLng }, pitch: 1, heading: 0, altitude: 5, zoom: 10 }}
           pitchEnabled={ false }
-          minZoomLevel={ 14 }
+          minZoomLevel={ 12 }
           maxZoomLevel={ 17 }
           pitchEnabled={ false }
           rotateEnabled={ false }

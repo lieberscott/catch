@@ -24,11 +24,14 @@ const Map = (props) => {
   }
 
   const next = () => {
+    console.log("coords in next : ", coords);
     if (!disabled) {
       props.handleLoc(coords);
     }
     setDisabled(true);
   }
+
+  console.log("coords in component : ", coords);
 
   return (
     <View style={ styles.container }>

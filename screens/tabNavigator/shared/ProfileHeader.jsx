@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    right: Platform.OS === 'android' ? -15 : 15 // hacky
+    // right: Platform.OS === 'android' ? -15 : 15 // hacky
+    right: 15
   },
 })
 

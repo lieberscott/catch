@@ -11,6 +11,7 @@ const ReportModalProfile = (props) => {
 
   const height = props.height;
   const show = props.reportModal;
+  const isUser0 = props.isUser0;
 
   const [animation, setAnimation] = useState(new Animated.ValueXY({ x: 0, y: -250 }));
 
@@ -72,10 +73,10 @@ const ReportModalProfile = (props) => {
         <View style={ styles.line }>
           <Text style={ styles.title }>Safety Toolkit</Text>
         </View>
-        <TouchableOpacity style={ styles.line } onPress={ handleBlock }>
+        { isUser0 ? [] : <TouchableOpacity style={ styles.line } onPress={ handleBlock }>
           <MaterialCommunityIcons name="flag" size={ 24 } color="red" />
           <Text style={ styles.text }>  Block This User</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> }
         <TouchableOpacity onPress={ handleClose } style={ styles.lineBottom }>
           <MaterialCommunityIcons name="close-circle-outline" size={ 24 } color="purple"  style={ styles.cancelIcon }/>
           <Text style={ styles.text }>  Cancel</Text>

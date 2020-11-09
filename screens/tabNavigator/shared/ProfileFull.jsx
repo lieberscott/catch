@@ -19,7 +19,6 @@ const ProfileFull = (props) => {
   const user0 = store.user;
   
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
-  console.log("user1 : ", user1);
 
   const today = new Date();
   const birthDate = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
@@ -70,12 +69,12 @@ const ProfileFull = (props) => {
       const res1 = await blockUser(user0, user1);
 
       if (res1) {
-        const newState2 = {...user0 };
+        let newState2 = {...user0 };
         if (newState2.blockedUsers) {
           newState2.blockedUsers.push(userObj1);
         }
         else {
-          newState.blockedUsers = [userObj1];
+          newState2.blockedUsers = [userObj1];
         }
         store.setUser(newState2);
         
@@ -140,10 +139,11 @@ const ProfileFull = (props) => {
         <View style={ styles.bottom } />
       </ScrollView>
       { reportModal && <ReportModalProfile
-          reportModal={ reportModal }
-          setReportModal={ setReportModal }
-          handleBlock2={ handleBlock2 }
-          height={ height }
+        reportModal={ reportModal }
+        setReportModal={ setReportModal }
+        handleBlock2={ handleBlock2 }
+        height={ height }
+        isUser0={ user1._id === user0._id } // check if this is user0 -- if so, don't display the "Block User" option in Report Modal
       /> }
     </View>
   )
