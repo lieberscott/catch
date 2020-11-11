@@ -109,8 +109,8 @@ const Conversation = (props) => {
 
   const handleReport2 = async () => {
 
-    const userInitiatingReport = userId;
-    const userInitiatingReportName = userName;
+    const userInitiatingBlock = userId;
+    const userInitiatingBlockName = userName;
     // const convo = convo; // already defined above
 
     try {
@@ -121,7 +121,7 @@ const Conversation = (props) => {
           'Content-Type': 'application/json'
         },
         method: "POST",
-        body: JSON.stringify({ userInitiatingReport, userInitiatingReportName, userBlockedArr: [], messages })
+        body: JSON.stringify({ userInitiatingBlock, userInitiatingBlockName, userBlockedArr: [], messages })
       });
 
       Alert.alert("", "Thanks. Conversation reported.", [

@@ -83,12 +83,14 @@ const transporter = nodeMailer.createTransport({
   //   privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, "\n")
   // }
   auth: {
-    user: process.env.GMAIL_ADDRESS,
-    pass: process.env.GMAIL_PASS
+    user: functions.config().gmail.address,
+    pass: functions.config().gmail.pass
   }
 });
 
 exports.sendEmail = functions.https.onRequest((req, res) => {
+
+  console.log("req.body : ", req.body);
 
   const userInitiatingBlock = req.body.userInitiatingBlock;
   const userInitiatingBlockName = req.body.userInitiatingBlockName;
@@ -121,8 +123,8 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
   html += "</p>";
 
   const mailOptions = {
-    from: process.env.GMAIL_ADDRESS,
-    to: process.env.GMAIL_ADDRESS,
+    from: functions.config().gmail.address,
+    to: functions.config().gmail.address,
     subject: "User " + userInitiatingBlockName  + " has reported another User",
     // text: req.body.text
     html: html

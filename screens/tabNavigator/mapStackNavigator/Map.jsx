@@ -52,26 +52,23 @@ const Map = (props) => {
       if (token) {
         const res1 = await addPushNotification(user._id, token);
       }
-      const res2 = await joinConvo(user, item);
 
-      const toToken = item._id ? item.notificationToken : item.userObjects[0].notificationToken;
+      if (item.userObjects.length < 200) {
+        const res2 = await joinConvo(user, item);
 
-      const notification = {
-        to: item,
-          sound: 'default',
-          title: "You have received a new message!",
-          // body,
-          // data: { data: 'goes here' }
+        if (res2) {
+          // add that user has joined areaConversations locally so you don't join twice
+          
+          let newAreaConversations = areaConversations.filter((convo, i) => convo._id !== item._id)
+          store.setAreaConversations(newAreaConversations);
+          Alert.alert("", "You have joined this game!");
+        }
+        else {
+          Alert.alert("", "This game no longer exists. Refresh the page to get current list of games.");
+        }
       }
-
-      sendPushNotification([notification]);
-
-      if (res2) {
-        // add that user has joined areaConversations locally so you don't join twice
-        
-        let newAreaConversations = areaConversations.filter((convo, i) => convo._id !== item._id)
-        store.setAreaConversations(newAreaConversations);
-        Alert.alert("", "You have joined this game!");
+      else {
+        Alert.alert("", "This game is maxed out with 200 players. You can start your own game if you are interested.")
       }
 
     }

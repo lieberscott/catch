@@ -103,7 +103,7 @@ const ReportModal = (props) => {
         </TouchableOpacity>
         <TouchableOpacity style={ styles.line } onPress={ handleReport }>
           <MaterialCommunityIcons name="flag" size={ 24 } color="red" />
-          <Text style={ styles.text }>  Report { len > 1 ? "These Users" : "This User" }</Text>
+          <Text style={ styles.text }>  Report this Conversation</Text>
         </TouchableOpacity>
         <TouchableOpacity style={ styles.line } onPress={ handleUnmatch }>
           <MaterialCommunityIcons name="block-helper" size={ 18 } color="orange" />

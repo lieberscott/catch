@@ -6,7 +6,7 @@ import { getDistance } from './utils.js';
 
 export const deleteAccount = async (userId) => {
   try {
-    await firebase.firestore().collection("users").doc(userId).delete();
+    const res1 = await firebase.firestore().collection("users").doc(userId).delete();
     return true;
   }
   catch(e) {
@@ -17,7 +17,7 @@ export const deleteAccount = async (userId) => {
 
 export const addPushNotification = async (userId, notificationToken) => {
   try {
-    firebase.firestore().collection("users").doc(userId).update({
+    const res1 = await firebase.firestore().collection("users").doc(userId).update({
       getsNotifications: true,
       notificationToken: notificationToken
     })
@@ -33,33 +33,29 @@ export const removeFromConversation = async (item, newArr, userObj) => {
   const uid = user.uid;
   const itemId = item.id;
 
-  let promises = [];
-
-  // Step 1: Remove chat from user's userChats
-  promises.push(firebase.firestore().collection("userChats").doc(uid).update({
-    [`${item.id}`]: firebase.firestore.FieldValue.delete()
-  }));
-
-  // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
-  if (newArr.length === 1) {
-    promises.push(firebase.firestore().collection("userChats").doc(newArr[0].userId).update({
-      [`${item.id}`]: firebase.firestore.FieldValue.delete()
-    }));
-
-    promises.push(firebase.firestore().collection("conversations").doc(item.id).delete());
-  }
-
-  // Step 3: Else, remove user from userChats array, and from conversation usersArray (actually they'll stay in conversation usersArray, too difficult to match a whole object to remove from an array in firestore)
-  else {
-    for (let i = 0; i < newArr.length; i++) {
-      promises.push(firebase.firestore().collection("userChats").doc(newArr[i].userId).update({
-        [`${itemId}.usersArr`]: firebase.firestore.FieldValue.arrayRemove(userObj[0])
-      }));
-    }
-  }
-
   try {
-    const res1 = await Promise.all(promises);
+    // Step 1: Remove chat from user's userChats
+    const res1 = await firebase.firestore().collection("userChats").doc(uid).update({
+      [`${item.id}`]: firebase.firestore.FieldValue.delete()
+    });
+
+    // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
+    if (newArr.length < 1) {
+      const res2 = await firebase.firestore().collection("userChats").doc(newArr[0].userId).update({
+        [`${item.id}`]: firebase.firestore.FieldValue.delete()
+      });
+
+      const res3 = await firebase.firestore().collection("conversations").doc(item.id).delete();
+    }
+
+    // Step 3: Else, remove user from userChats array, and from conversation usersArray (actually they'll stay in conversation usersArray, too difficult to match a whole object to remove from an array in firestore)
+    else {
+      for (let i = 0; i < newArr.length; i++) {
+        const res4 = await firebase.firestore().collection("userChats").doc(newArr[i].userId).update({
+          [`${itemId}.usersArr`]: firebase.firestore.FieldValue.arrayRemove(userObj[0])
+        });
+      }
+    }
     return true;
   }
   catch (e) {
@@ -183,32 +179,6 @@ export const joinConvo = async (user0, user1) => {
     coordinates: user1.coordinates
   }
 
-  let promises = [];
-
-  // Step 2: Add userChat to new user (user0)
-  promises.push(firebase.firestore().collection("userChats").doc(user0._id).set({
-    [`${user1.id}`]: userChat
-  }, { merge: true }));
-
-
-  // Step 3: Update usersArr for existing users in chat
-  for (let i = 0; i < userObjects.length; i++) {
-    promises.push(firebase.firestore().collection("userChats").doc(userObjects[i]._id).update({
-      [`${user1.id}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1),
-      [`${user1.id}.lastMessageText`]: user0.name + " has joined",
-      [`${user1.id}.lastMessageCreatedAt`]: new Date(),
-      [`${user1.id}.readByReceiver`]: false,
-      [`${user1.id}.lastMessageFromName`]: user0.name,
-      [`${user1.id}.lastMessageFromId`]: user0._id
-    }))
-  }
-
-  // Step 4: Update userObjects array for the conversation
-  promises.push(firebase.firestore().collection("conversations").doc(user1.id).update({
-    userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
-  }));
-
-
   try {
 
     // First check if the document still exists. Since areaConversations are not on a listener, it could have been deleted but still be on another user's screen.
@@ -216,8 +186,32 @@ export const joinConvo = async (user0, user1) => {
 
     if (!res0.exists) {
       return false;
-    } else {
-      const res1 = await Promise.all(promises);
+    }
+    else {
+
+      // Step 2: Add userChat to new user (user0)
+      const res1 = await firebase.firestore().collection("userChats").doc(user0._id).set({
+        [`${user1.id}`]: userChat
+      }, { merge: true });
+
+
+      // Step 3: Update usersArr for existing users in chat
+      for (let i = 0; i < userObjects.length; i++) {
+        const res2 = await firebase.firestore().collection("userChats").doc(userObjects[i]._id).update({
+          [`${user1.id}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1),
+          [`${user1.id}.lastMessageText`]: user0.name + " has joined",
+          [`${user1.id}.lastMessageCreatedAt`]: new Date(),
+          [`${user1.id}.readByReceiver`]: false,
+          [`${user1.id}.lastMessageFromName`]: user0.name,
+          [`${user1.id}.lastMessageFromId`]: user0._id
+        });
+      }
+
+      // Step 4: Update userObjects array for the conversation
+      const res3 = await firebase.firestore().collection("conversations").doc(user1.id).update({
+        userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
+      });
+
       return user1.id;
     }
   }
@@ -402,23 +396,21 @@ export const getUserChatsAndRequests = async (userId) => { // NOTE: Removed requ
 
 
 export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => {
-  // set up updates to all userChats arr (would be more than 2 if there is a group chat)
-  const promises = usersArr.map((item, i) => {
-    return firebase.firestore().collection("userChats").doc(item.userId).update({
-      [`${chatId}.lastMessageCreatedAt`]: new Date(),
-      [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
-      [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
-      [`${chatId}.lastMessageText`]: userChatUpdate.lastMessageText,
-      [`${chatId}.readByReceiver`]: false
-    })
-  });
 
   try {
     // Add message to convo messagesArr
     const res = await firebase.firestore().collection("conversations").doc(chatId).update({ messages: firebase.firestore.FieldValue.arrayUnion(message), lastMessageTime: new Date() });
   
-    // Add message to BOTH (ALL?) userChats arrs
-    const res2 = await Promise.all(promises);
+    // update all userChats arr (would be more than 2 if there is a group chat)
+    for (let i = 0; i < usersArr.length; i++) {
+      const res2 = await firebase.firestore().collection("userChats").doc(item.userId).update({
+        [`${chatId}.lastMessageCreatedAt`]: new Date(),
+        [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
+        [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
+        [`${chatId}.lastMessageText`]: userChatUpdate.lastMessageText,
+        [`${chatId}.readByReceiver`]: false
+      })
+    }
 
     return true;
   }
@@ -430,23 +422,21 @@ export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => 
 }
 
 export const sendMessageAndOverwrite = async (chatId, newMessagesArr, userChatUpdate, usersArr) => {
-  // set up updates to all userChats arr (would be more than 2 if there is a group chat)
-  const promises = usersArr.map((item, i) => {
-    return firebase.firestore().collection("userChats").doc(item.userId).update({
-      [`${chatId}.lastMessageCreatedAt`]: new Date(),
-      [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
-      [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
-      [`${chatId}.lastMessageText`]: userChatUpdate.lastMessageText,
-      [`${chatId}.readByReceiver`]: false
-    })
-  });
 
   try {
     // Overwrite messagesArr to in convo
     const res = await firebase.firestore().collection("conversations").doc(chatId).update({ messages: newMessagesArr, lastMessageTime: new Date() });
   
-    // Add message to BOTH (ALL?) userChats arrs
-    const res2 = await Promise.all(promises);
+    // update all userChats arr (would be more than 2 if there is a group chat)
+    for (let i = 0; i < usersArr.length; i++) {
+      const res2 = await firebase.firestore().collection("userChats").doc(item.userId).update({
+        [`${chatId}.lastMessageCreatedAt`]: new Date(),
+        [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
+        [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
+        [`${chatId}.lastMessageText`]: userChatUpdate.lastMessageText,
+        [`${chatId}.readByReceiver`]: false
+      })
+    }
 
     return true;
   }
@@ -477,17 +467,17 @@ export const blockUser = async (user0, user1) => {
     userId: user1._id
   }
 
-  let promises = [];
-  promises.push(firebase.firestore().collection("users").doc(user0._id).update({
-    blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj1)
-  }))
-
-  promises.push(firebase.firestore().collection("users").doc(user1._id).update({
-    blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj0)
-  }))
-
   try {
-    const res1 = await Promise.all(promises);
+
+    const res1 = await firebase.firestore().collection("users").doc(user0._id).update({
+      blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj1)
+    })
+  
+    const res2 = await firebase.firestore().collection("users").doc(user1._id).update({
+      blockedUsers: firebase.firestore.FieldValue.arrayUnion(userObj0)
+    });
+
+    
     fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
       headers: {
         'Accept': 'application/json',
