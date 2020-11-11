@@ -32,7 +32,6 @@ const Map = (props) => {
   const areaConversations = areaConversations0.filter((item, pos, self) => {
     return self.indexOf(item) == pos;
   });
-  // console.log("areaConversations : ", areaConversations);
 
   let _12HoursAgo = new Date();
   _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
@@ -314,8 +313,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    width: width,
-    paddingTop: 20
+    width: width
   },
   flexOne: {
     flex: 1,

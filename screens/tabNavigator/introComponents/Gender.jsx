@@ -44,7 +44,7 @@ const Gender = (props) => {
       fontSize: 19,
       fontWeight: "600",
       width: "100%",
-      padding: 20,
+      padding: 10,
       textAlign: "center",
       borderRadius: 30,
       overflow: "hidden"

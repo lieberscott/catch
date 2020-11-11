@@ -19,7 +19,7 @@ const AreaConversationRow = ({ users, distance, hours, activeSport, skillLevel }
         <View style={ styles.namesWrapper }>
           <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
         </View>
-       <Text style={ styles.distanceText }>{ distance <= 1 ? "Less than a mile away" : distance + " miles away" }</Text>
+       <Text style={ styles.distanceText }>{ distance <= 1 ? "< 1 mi." : distance + " mi." }</Text>
        <View style={ styles.flexDirRow }>
           <View style={ styles.hoursAgoText } />
           <Text style={ styles.active }> { hours } hours ago</Text>

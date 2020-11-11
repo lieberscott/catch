@@ -54,8 +54,8 @@ const ActiveUsersEmpty = (props) => {
         <RefreshControl refreshing={refreshing} onRefresh={ () => props.onRefresh() } />
       }
     >
-      <Animated.View style={ animatedPulseStyles } />
         <View style={ styles.imageWrapper }>
+          <Animated.View style={ animatedPulseStyles } />
           <Image
             resizeMode="contain"
             source={require('../../../assets/ball-and-glove.png')}
@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   imageWrapper: {
-    height: 200,
-    width: 200,
+    flex: 1,
     borderRadius: 100,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    alignSelf: "center"
   },
   image: {
     height: 125,
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   title: {
-    position: "absolute",
-    top: 20
+    flex: 1,
+    justifyContent: "flex-end"
   }
 });
 

@@ -17,7 +17,7 @@ const Sports = (props) => {
 
   return (
     <KeyboardAvoidingView style={[ styles.container, { width: props.width } ]}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={ false } >
       <View style={ styles.top }>
         <Text style={ styles.subhead }>Pick your games</Text>
         <Text style={ styles.middleText }>( Please be honest about your skill level )</Text>
@@ -101,7 +101,6 @@ const Sports = (props) => {
         <TouchableOpacity activeOpacity={ 0.6 } onPress={ () => props.goBack() } style={ styles.button }>
           <Text style={ styles.white }>Go Back</Text>
         </TouchableOpacity>
-        <Text style={ styles.small }>Please be honest about your skill level.</Text>
       </View>
       </ScrollView>
     </KeyboardAvoidingView>

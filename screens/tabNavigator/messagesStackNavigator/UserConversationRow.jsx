@@ -76,8 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     height: imageDimensions,
     width: imageDimensions,
-    marginRight: imageMarginR,
-    flex: 1
+    marginRight: imageMarginR
   },
   image2: {
     position: "absolute",

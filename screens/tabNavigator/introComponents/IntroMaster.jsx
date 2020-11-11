@@ -19,7 +19,7 @@ import Sports from './Sports';
 import Photo from './Photo';
 
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const IntroMaster = ({ navigation }) => {
 
@@ -208,18 +208,21 @@ const IntroMaster = ({ navigation }) => {
             showSkip={ false }
             showNext={ true }
             bottomBarHighlight={ false }
-            allowFontScaling={ false }
+            allowFontScaling={ true }
+            imageContainerStyles={{ marginBottom: -50 }}
+            // titleStyles={{ borderWidth: 1 }}
+            // subTitleStyles={{ borderWidth: 1 }}
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/new-logo.png')} style={ styles.image } /></View>,
+                image: <Image resizeMode="center" source={require('../../../assets/new-logo.png')} />,
                 title: 'Welcome to Pick Up',
                 subtitle: 'The best place for find a pickup game',
                 // imageContainerStyle: styles.imageWrapper
               },
               {
                 backgroundColor: '#fff',
-                image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/man-throwing-football.png')} style={ styles.image } /></View>,
+                image: <Image resizeMode="center" source={require('../../../assets/man-throwing-football.png')} />,
                 title: "What's your game?",
                 subtitle: 'At Pick Up, we connect people who want to play pick up sports. Personalize your profile and connect with people in your area.',
               },
@@ -326,8 +329,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   imageWrapper: {
-    height: 400,
-    width: 300,
+    height: height * 0.5,
+    width: width * 0.5,
     alignSelf: "center"
   },
   setupTitle: {

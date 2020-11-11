@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Alert, Animated, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Facebook from 'expo-facebook';
@@ -79,22 +79,20 @@ const LandingPage = ({ navigation }) => {
   }
 
   return (
-    <View style={ styles.container }>
+    <SafeAreaView style={ styles.container }>
       <StatusBar barStyle="dark-content" backgroundColor={ turquoise } />
-      <View style={ styles.bottomLinks }>
-        <TouchableOpacity onPress={ openTerms }>
-          <Text style={ styles.bottomLinksText }>Terms of Service</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ openPrivacy }>
-          <Text style={ styles.bottomLinksText }>Privacy Policy</Text>
-        </TouchableOpacity>
+      <View style={ styles.imageWrapper }>
+        <Image
+          style={ styles.image }
+          resizeMode="contain"
+          source={require('../../assets/new-logo.png')}
+        />
       </View>
-      <Text style={ styles.agreementText }>By tapping Continue, you agree to our Terms</Text>
-
+      <View style={{ alignItems: "flex-end", justifyContent: "flex-end", width: "80%" }}>
       <Animated.View style={[ styles.buttonsWrapper, buttonsAnimatedStyles ]}>
         <TouchableOpacity onPress={ handleFacebook } style={ styles.facebook }>
           <Ionicons name="logo-facebook" size={32} color={ turquoise } />
-          <Text style={ styles.facebookText }>Continue with Facebookk</Text>
+          <Text style={ styles.facebookText }>Continue with Facebook</Text>
         </TouchableOpacity>
         <View style={ styles.orWrapper }>
           <View style={ styles.line } />
@@ -105,14 +103,17 @@ const LandingPage = ({ navigation }) => {
           <Text>Use cell phone number</Text>
         </TouchableOpacity>
       </Animated.View>
-      <View style={ styles.imageWrapper }>
-        <Image
-          style={ styles.image }
-          resizeMode="contain"
-          source={require('../../assets/new-logo.png')}
-        />
+      <View style={ styles.bottomLinks }>
+        <TouchableOpacity onPress={ openTerms }>
+          <Text style={ styles.bottomLinksText }>Terms of Service</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={ openPrivacy }>
+          <Text style={ styles.bottomLinksText }>Privacy Policy</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+      <Text style={ styles.agreementText }>By tapping Continue, you agree to our Terms</Text>
+      </View>
+    </SafeAreaView>
   )
 }
 
@@ -141,29 +142,29 @@ const styles = StyleSheet.create({
   },
   bottomLinks: {
     flexDirection: "row",
-    justifyContent: "space-around"
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 10
   },
   bottomLinksText: {
     opacity: 0.5
   },
   buttonsWrapper: {
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "center"
   },
   cell: {
     backgroundColor: turquoise,
     alignItems: "center",
     alignSelf: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 17,
-    borderRadius: 20,
-    marginBottom: 40
+    borderRadius: 20
   },
   container: {
     flex: 1,
-    alignItems: "stretch",
+    alignItems: "center",
     backgroundColor: turquoise,
-    flexDirection: "column-reverse",
-    paddingVertical: 40,
+    paddingTop: 40,
+    paddingBottom: 10,
     paddingHorizontal: 40
   },
   facebook: {
@@ -173,8 +174,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     // alignSelf: "center",
     paddingVertical: 7,
+    paddingHorizontal: 15,
     // paddingHorizontal: 27,
-    width: "80%",
+    // width: "80%",
     borderRadius: 40,
     marginBottom: 10
   },
@@ -191,8 +193,8 @@ const styles = StyleSheet.create({
     marginTop: -290
   },
   imageWrapper: {
-    height: 300,
-    width: 300,
+    height: 200,
+    width: 200,
     alignSelf: "center",
     flexGrow: 4
   },

@@ -75,6 +75,7 @@ const DateOfBirth = (props) => {
     },
     middle: {
       flex: 1,
+      marginTop: 20,
       width: "100%"
     },
     pickDate: {
@@ -120,15 +121,6 @@ const DateOfBirth = (props) => {
 
   return (
     <View style={[ styles.container, { width: props.width }] }>
-      <View style={ styles.topWrapper }>
-        <View style={ styles.imageWrapper }>
-          <Image
-            resizeMode="contain"
-            source={require('../../../assets/man-throwing-baseball.png')}
-            style={ styles.image }
-          />
-        </View>
-      </View>
       <View style={ styles.middle }>
         <Text style={ styles.subhead }>Next, when is your birthday?</Text>
         <Text style={ styles.warning }>You must be 18 to participate</Text>

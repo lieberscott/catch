@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/ball-and-glove-5.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/ball-and-glove-5.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,7 +22,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "userInterfaceStyle": "light",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717",

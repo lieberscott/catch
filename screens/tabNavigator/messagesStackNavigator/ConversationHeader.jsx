@@ -22,7 +22,6 @@ const ConversationHeader = (props) => {
           <Image source={{ uri: otherPersonArray[0].userAvatar }} style={ styles.image } />
           { len > 1 ? <View style={ styles.groupChatAvatar }><Text style={ styles.groupChatText }>+{ len - 1 }</Text></View> : [] }
         </View>
-        <Text style={ styles.userName }> { otherPersonArray[0].userName }{ len > 1 ? " +" + (len - 1).toString() : "" }</Text>
       </TouchableOpacity>
       <MaterialIcons name="menu" color={ turquoise } size={ 34 } style={ styles.icon } onPress={ props.handleMenu } />
     </View>
