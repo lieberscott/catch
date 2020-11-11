@@ -4,7 +4,7 @@
     "slug": "PickUp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ball-and-glove-5.png",
+    "icon": "./assets/ball-and-glove-6.png",
     "splash": {
       "image": "./assets/ball-and-glove-5.png",
       "resizeMode": "contain",
@@ -29,7 +29,11 @@
         "googleMapsApiKey": "AIzaSyBH2dIP4kUuvhJn3llUOeT5aXiuF_dJ4Mo"
       },
       "bundleIdentifier": "com.readoutconsult.pickup",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Pick Up uses your location to show you games in your area",
+        "NSPhotoLibraryUsageDescription": "Allow Pick Up to access your photos"
+      }
     },
     "userInterfaceStyle": "automatic",
     "android": {
@@ -42,6 +46,7 @@
         }
       },
       "package": "com.readoutconsult.pickup",
+      "permissions": [ "ACCESS_FINE_LOCATION" ],
       "versionCode": 1
     },
     "web": {
