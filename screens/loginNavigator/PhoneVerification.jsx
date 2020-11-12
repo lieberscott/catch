@@ -132,7 +132,7 @@ const PhoneVerification = ({ navigation }) => {
         <Image
           style={ styles.image }
           resizeMode="contain"
-          source={require('../../assets/ball-and-glove.png')}
+          source={require('../../assets/basketball.png')}
         />
 
         

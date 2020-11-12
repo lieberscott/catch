@@ -58,7 +58,7 @@ const ActiveUsersEmpty = (props) => {
           <Animated.View style={ animatedPulseStyles } />
           <Image
             resizeMode="contain"
-            source={require('../../../assets/ball-and-glove.png')}
+            source={require('../../../assets/basketball.png')}
             style={ styles.image }
           />
         </View>

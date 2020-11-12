@@ -4,14 +4,14 @@
     "slug": "PickUp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ball-and-glove-6.png",
+    "icon": "./assets/basketball-2.png",
     "splash": {
-      "image": "./assets/ball-and-glove-splash.png",
+      "image": "./assets/basketball-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "notification": {
-      "icon": "./assets/ball-and-glove-5.png",
+      "icon": "./assets/basketball.png",
       "color": "#fff",
       "androidMode": "default"
     },
