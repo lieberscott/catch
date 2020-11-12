@@ -29,26 +29,18 @@ const IntroMaster = ({ navigation }) => {
   const userId = user._id;
 
   const [name, setName] = useState("");
-  const [dob, setDob] = useState(new Date());
-  const [gender, setGender] = useState(-1);
+  const [dob, setDob] = useState(undefined);
+  const [gender, setGender] = useState(undefined);
   const [loc, setLoc] = useState([37.0902, -95.7129]);
-  const [baseball, setBaseball] = useState(true);
-  const [baseballLevel, setBaseballLevel] = useState(1);
-  const [football, setFootball] = useState(true);
-  const [footballLevel, setFootballLevel] = useState(1);
-  const [frisbee, setFrisbee] = useState(true);
-  const [frisbeeLevel, setFrisbeeLevel] = useState(1);
-  const [basketball, setBasketball] = useState(true);
-  const [basketballLevel, setBasketballLevel] = useState(1);
+  const [baseball, setBaseball] = useState(false);
+  const [football, setFootball] = useState(false);
+  const [frisbee, setFrisbee] = useState(false);
+  const [basketball, setBasketball] = useState(false);
   const [photo, setPhoto] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoUrl, setPhotoUrl] = useState(undefined);
   
   const [page, setPage] = useState(0);
   const [firstPartDone, setFirstPartDone] = useState(false);
-
-  {/* Set Errors */}
-  const [nameError, setNameError] = useState(false);
-  const [dateGood, setDateGood] = useState(false)
 
   const scrollViewRef = useRef();
 
@@ -63,13 +55,9 @@ const IntroMaster = ({ navigation }) => {
   const goRight = async () => {
     if (page === 0 && name.length >= 1) { // can always scroll to page 0
       Keyboard.dismiss();
-      setNameError(false);
       setPage(1);
     }
-    else if (page === 0 && name.length < 1) {
-      setNameError(true);
-    }
-    else if (page === 1 && dateGood) {
+    else if (page === 1) {
       setPage(2);
     }
     else if (page === 2) {
@@ -87,7 +75,7 @@ const IntroMaster = ({ navigation }) => {
     else if (page === 3) {
       setPage(4)
     }
-    else if (page === 4 && photo) {
+    else if (page === 4) {
       setPage(prevState => prevState + 1);
     }
     else if (page === 5) {
@@ -102,37 +90,29 @@ const IntroMaster = ({ navigation }) => {
   }
 
   const handleDone = async () => {
-
-    const baseballText = baseballLevel === 0 ? "Absolute beginner" : baseballLevel === 1 ? "Played Little League" : baseballLevel === 2 ? "Pretty good HS Player" : "";
-    const footballText = footballLevel === 0 ? "Absolute beginner" : footballLevel === 1 ? "Can throw a spiral" : footballLevel === 2 ? "Pretty good HS Player" : "";
-    const frisbeeText = frisbeeLevel === 0 ? "Absolute beginner" : frisbeeLevel === 1 ? "Good backhand thrower" : frisbeeLevel === 2 ? "Play in a league" : "";
-    const basketballText = basketballLevel === 0 ? "Absolute beginner" : basketballLevel === 1 ? "Can dribble with both hands" : basketballLevel === 3 ? "Played HS ball" : "";
+    
+    let update = {};
 
     // everything but loc, which needs to be specially formatted with geocollection (loc is passed separately and handled in firebase.js function)
-    const update = {
-      name,
-      dateOfBirth: dob,
-      gender,
-      photo: photoUrl,
-      sports: {
-        Baseball: {
-          interested: baseball,
-          skill_level: baseballText
-        },
-        Football: {
-          interested: football,
-          skill_level: footballText
-        },
-        Frisbee: {
-          interested: frisbee,
-          skill_level: frisbeeText
-        },
-        Basketball: {
-          interested: basketball,
-          skill_level: basketballText
-        }
-      },
-      onboardingDone: true
+    update.name = name;
+    update.sports = {
+      Baseball: baseball,
+      Football: football,
+      Frisbee: frisbee,
+      Basketball: basketball
+    };
+    update.onboardingDone = true;
+
+    if (photoUrl) {
+      update.photo = photoUrl;
+    }
+
+    if (dob) {
+      update.dateOfBirth = dob;
+    }
+
+    if (gender) {
+      update.gender = gender;
     }
 
     try {
@@ -256,7 +236,6 @@ const IntroMaster = ({ navigation }) => {
               dob={ dob }
               setDob={ setDob }
               width={ width }
-              setDateGood={ setDateGood } // don't get confused. dateGood and setDateGood are states in BOTH the Master component and DateOfBirth Component
               goRight={ goRight }
               goBack={ goBack }
             />
@@ -291,20 +270,12 @@ const IntroMaster = ({ navigation }) => {
               handleDone={ handleDone }
               baseball={ baseball }
               setBaseball={ setBaseball }
-              baseballLevel={ baseballLevel }
-              setBaseballLevel={ setBaseballLevel }
               football={ football }
               setFootball={ setFootball }
-              footballLevel={ footballLevel }
-              setFootballLevel={ setFootballLevel }
               frisbee={ frisbee }
               setFrisbee={ setFrisbee }
-              frisbeeLevel={ frisbeeLevel }
-              setFrisbeeLevel={ setFrisbeeLevel }
               basketball={ basketball }
               setBasketball={ setBasketball }
-              basketballLevel={ basketballLevel }
-              setBasketballLevel={ setBasketballLevel }
             />
 
             {/* Upload Profile Image Component */}

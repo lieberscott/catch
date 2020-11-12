@@ -55,6 +55,9 @@ export const removeFromConversation = async (item, newArr, userObj) => {
           [`${itemId}.usersArr`]: firebase.firestore.FieldValue.arrayRemove(userObj[0])
         });
       }
+      const res5 = await firebase.firestore().collection("conversations").doc(item.id).update({
+        ["userObjects." + uid]: firebase.firestore.FieldValue.delete()
+      });
     }
     return true;
   }
@@ -64,7 +67,7 @@ export const removeFromConversation = async (item, newArr, userObj) => {
   }
 }
 
-export const createConvo = async (user0, sport, loc, skillLevel) => {
+export const createConvo = async (user0, sport, loc, beginnerFriendly) => {
 
   // loc should be an obj: { latitude: 41, longitude -87 }
 
@@ -72,7 +75,23 @@ export const createConvo = async (user0, sport, loc, skillLevel) => {
   const geofirestore = new GeoFirestore(firebase.firestore());
   const geocollection = geofirestore.collection('conversations');
 
-  const user0Dob = user0.dateOfBirth.seconds ? new Date(user0.dateOfBirth.seconds * 1000) : new Date(user0.dateOfBirth);
+  const user0Dob = !user0.dateOfBirth ? undefined : user0.dateOfBirth.seconds ? new Date(user0.dateOfBirth.seconds * 1000) : new Date(user0.dateOfBirth);
+
+  const obj = {
+    _id: user0._id,
+    name: user0.name,
+    dateOfBirth: user0Dob,
+    coordinates: user0.coordinates,
+    sports: user0.sports,
+    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    getsNotifications: user0.getsNotifications,
+    notificationToken: user0.notificationToken,
+    profileText: user0.profileText ? user0.profileText : ""
+  }
+
+  if (user0.gender) {
+    obj.gender = user0.gender;
+  }
 
   let newConvo = {
     coordinates: new firebase.firestore.GeoPoint(loc[0], loc[1]),
@@ -80,21 +99,10 @@ export const createConvo = async (user0, sport, loc, skillLevel) => {
     messages: [],
     lastMessageTime: new Date(),
     activeSport: sport,
-    skillLevel: skillLevel,
-    userObjects: [
-      {
-        _id: user0._id,
-        name: user0.name,
-        dateOfBirth: user0Dob,
-        gender: user0.gender,
-        coordinates: user0.coordinates,
-        sports: user0.sports,
-        photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c",
-        getsNotifications: user0.getsNotifications,
-        notificationToken: user0.notificationToken,
-        profileText: user0.profileText ? user0.profileText : ""
-      }
-    ]
+    beginnerFriendly: beginnerFriendly,
+    userObjects: {
+      [user0._id]: obj
+    }
   }
 
   let userChat = {
@@ -105,10 +113,10 @@ export const createConvo = async (user0, sport, loc, skillLevel) => {
     coordinates: loc,
     readByReceiver: false,
     activeSport: sport,
-    skillLevel: skillLevel,
+    beginnerFriendly: beginnerFriendly,
     usersArr: [
       {
-        userAvatar: user0.photo,
+        userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
         userName: user0.name,
         userId: user0._id
       }
@@ -136,17 +144,22 @@ export const joinConvo = async (user0, user1) => {
   let usersArr2 = [];
 
   // create the usersArr for the new user's userChat
-  for (let i = 0; i < userObjects.length; i++) {
+  const _ids = Object.keys(userObjects);
+
+  for (let i = 0; i < _ids.length; i++) {
+
+    const user = userObjects[_ids[i]];
+
     const obj = {
-      userAvatar: userObjects[i].photo,
-      userName: userObjects[i].name,
-      userId: userObjects[i]._id
+      userAvatar: user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+      userName: user.name,
+      userId: user._id
     }
     usersArr2.push(obj);
   }
 
   const userObj1 = { // for userChats usersArr
-    userAvatar: user0.photo,
+    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
     userName: user0.name,
     userId: user0._id
   }
@@ -157,13 +170,16 @@ export const joinConvo = async (user0, user1) => {
     _id: user0._id,
     coordinates: user0.coordinates,
     dateOfBirth: user0.dateOfBirth,
-    gender: user0.gender,
     getsNotifications: user0.getsNotifications,
     name: user0.name,
     notificationToken: user0.notificationToken,
-    photo: user0.photo,
+    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
     profileText: user0.profileText ? user0.profileText : "",
     sports: user0.sports
+  }
+
+  if (user0.gender) {
+    userObj2.gender = user0.gender
   }
 
   const userChat = {
@@ -175,7 +191,7 @@ export const joinConvo = async (user0, user1) => {
     readByReceiver: false,
     usersArr: usersArr2, // <-- here is where usersArr2 is used, all that code above for just one little value in the userChat object
     activeSport: user1.activeSport,
-    skillLevel: user1.skillLevel,
+    beginnerFriendly: user1.beginnerFriendly,
     coordinates: user1.coordinates
   }
 
@@ -196,8 +212,13 @@ export const joinConvo = async (user0, user1) => {
 
 
       // Step 3: Update usersArr for existing users in chat
-      for (let i = 0; i < userObjects.length; i++) {
-        const res2 = await firebase.firestore().collection("userChats").doc(userObjects[i]._id).update({
+
+      // get _ids for each user in userObjects (they are the "key" for each object)
+      const _ids = Object.keys(userObjects);
+
+      // cycle through the _ids array just created and update each user in the userChats database
+      for (let i = 0; i < _ids.length; i++) {
+        const res2 = await firebase.firestore().collection("userChats").doc(_ids[i]).update({
           [`${user1.id}.usersArr`]: firebase.firestore.FieldValue.arrayUnion(userObj1),
           [`${user1.id}.lastMessageText`]: user0.name + " has joined",
           [`${user1.id}.lastMessageCreatedAt`]: new Date(),
@@ -207,9 +228,9 @@ export const joinConvo = async (user0, user1) => {
         });
       }
 
-      // Step 4: Update userObjects array for the conversation
+      // Step 4: Update userObjects map ("object") for the conversation by adding the new user as an object within it
       const res3 = await firebase.firestore().collection("conversations").doc(user1.id).update({
-        userObjects: firebase.firestore.FieldValue.arrayUnion(userObj2)
+        ["userObjects." + user0._id]: userObj2
       });
 
       return user1.id;
@@ -347,7 +368,9 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
       d.id = doc.id;
 
       // area conversations - only push if conversation does not include user
-      if (d.userObjects.findIndex((item, i) => item._id === userId) === -1) {
+      const _ids = Object.keys(d.userObjects);
+
+      if (_ids.findIndex((item, i) => item === userId) === -1) {
         areaConversations0.push(d);
       }
     });
@@ -403,7 +426,7 @@ export const sendMessage = async (chatId, message, userChatUpdate, usersArr) => 
   
     // update all userChats arr (would be more than 2 if there is a group chat)
     for (let i = 0; i < usersArr.length; i++) {
-      const res2 = await firebase.firestore().collection("userChats").doc(item.userId).update({
+      const res2 = await firebase.firestore().collection("userChats").doc(usersArr[i].userId).update({
         [`${chatId}.lastMessageCreatedAt`]: new Date(),
         [`${chatId}.lastMessageFromId`]: userChatUpdate.lastMessageFromId,
         [`${chatId}.lastMessageFromName`]: userChatUpdate.lastMessageFromName,
@@ -456,13 +479,13 @@ export const blockUser = async (user0, user1) => {
 
 
   const userObj0 = {
-    userAvatar: user0.photo,
+    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
     userName: user0.name,
     userId: user0._id
   }
 
   const userObj1 = {
-    userAvatar: user1.photo,
+    userAvatar: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
     userName: user1.name,
     userId: user1._id
   }

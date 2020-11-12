@@ -12,12 +12,18 @@ const MapPage = (props) => {
   const mapViewRef = useRef();
 
   const [deltas, setDeltas] = useState([0.05, 0.05]);
+  const [loc0, setLoc0] = useState([ props.loc[0], props.loc[1] ]);
 
   useEffect(() => {
     if (props.loc[0] !== 37.09019985390777 && props.loc[1] !== -95.71290001273155) {
       mapViewRef.current.animateToRegion({ latitude: props.loc[0], longitude: props.loc[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }, 500);
     }
-  }, [props.loc])
+  }, [props.loc]);
+
+  const handleRight = () => {
+    props.setLoc(loc0);
+    props.goRight();
+  }
 
   {/* Add the showsUserLocation prop to MapView to get user location after custom build. See the documentation. See how the prop behaves. You may be able to delete the getLocation() call in IntroMaster */}
   return (
@@ -32,14 +38,14 @@ const MapPage = (props) => {
             style={ styles.mapStyle }
             // showsUserLocation={ true }
             // followsUserLocation={ true }
-            initialRegion={{ latitude: props.loc[0], longitude: props.loc[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
+            initialRegion={{ latitude: loc0.latitude, longitude: loc0.longitude, latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
             // maxZoomLevel={ 17 }
             // minZoomLevel={ 6 }
             // provider={PROVIDER_GOOGLE}
             // onUserLocationChange={() => changeLocation() }
             onRegionChangeComplete={(data) => {
               setDeltas([data.latitudeDelta, data.longitudeDelta]);
-              props.setLoc([data.latitude, data.longitude])}}
+              setLoc0([data.latitude, data.longitude])}}
           />
           <View style={ styles.imageWrapper }>
             <Image
@@ -53,7 +59,7 @@ const MapPage = (props) => {
           <TouchableOpacity activeOpacity={ 1 } onPress={ props.goBack } style={ styles.button }>
             <Text style={ styles.text }>Go Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={ 1 } onPress={ props.goRight } style={ styles.button }>
+          <TouchableOpacity activeOpacity={ 1 } onPress={ handleRight } style={ styles.button }>
             <Text style={ styles.text }>Continue</Text>
           </TouchableOpacity>
         </View>

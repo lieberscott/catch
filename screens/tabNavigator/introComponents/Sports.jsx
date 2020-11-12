@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+const { width, height } = Dimensions.get("window");
+
 const turquoise = "#4ECDC4";
+const paddingH = 20;
+const marginH = 7;
+const numOfImgsPerRow = 2;
+const imageW = (width - (paddingH * 2) - (marginH * 2) - 20) / numOfImgsPerRow;
+console.log('imageW  : ', imageW);
 
 const Sports = (props) => {
 
@@ -18,79 +25,40 @@ const Sports = (props) => {
   return (
     <KeyboardAvoidingView style={[ styles.container, { width: props.width } ]}>
       <ScrollView showsVerticalScrollIndicator={ false } >
-      <View style={ styles.top }>
-        <Text style={ styles.subhead }>Pick your games</Text>
-        <Text style={ styles.middleText }>( Please be honest about your skill level )</Text>
-      </View>
-      <View style={ styles.middle }>
-        <View style={ styles.choiceWrapper}>
-          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => props.setBaseball(prevState => !prevState) } style={ props.baseball ? styles.choiceButton : styles.choiceButtonDisabled }>
-            <Ionicons name="ios-baseball" size={ 20 } color={ "white" } />
-            <Text style={ styles.white }>   Baseball</Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 20 }}>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.baseball } onPress={ () => props.setBaseballLevel(0) } style={ props.baseball && props.baseballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Absolute beginner</Text>
+        <View style={ styles.top }>
+          <Text style={ styles.subhead }>Pick your games</Text>
+        </View>
+        <View style={ styles.middle }>
+          <View style={ styles.buttonsWrapper }>
+            <TouchableOpacity activeOpacity={ 1 } onPress={ () => props.setBasketball(prevState => !prevState) } style={ props.basketball ? styles.imageWrapperSelected: styles.imageWrapper }>
+              <Image
+                resizeMode="contain"
+                source={require('../../../assets/basketball.png')}
+                style={ styles.image }
+              />
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.baseball } onPress={ () => props.setBaseballLevel(1) } style={ props.baseball && props.baseballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Played Little League</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.baseball } onPress={ () => props.setBaseballLevel(2) } style={ props.baseball && props.baseballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Pretty good HS Player</Text>
+            <TouchableOpacity activeOpacity={ 1 } onPress={ () => props.setFootball(prevState => !prevState) } style={ props.football ? styles.imageWrapperSelected: styles.imageWrapper }>
+              <Image
+                resizeMode="contain"
+                source={require('../../../assets/football.png')}
+                style={ styles.image }
+              />
             </TouchableOpacity>
           </View>
-        </View>
-        <View style={ styles.line } />
-        <View style={ styles.choiceWrapper}>
-          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => props.setFootball(prevState => !prevState) } style={ props.football ? styles.choiceButton : styles.choiceButtonDisabled }>
-            <Ionicons name="ios-american-football" size={ 20 } color={ "white" } />
-            <Text style={ styles.white }>   Football</Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 20 }}>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.football } onPress={ () => props.setFootballLevel(0) } style={ props.football && props.footballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Absolute beginner</Text>
+          <View style={ styles.buttonsWrapper }>
+            <TouchableOpacity activeOpacity={ 1 } onPress={ () => props.setFrisbee(prevState => !prevState) } style={ props.frisbee ? styles.imageWrapperSelected: styles.imageWrapper }>
+              <Image
+                resizeMode="contain"
+                source={require('../../../assets/frisbee.png')}
+                style={ styles.image }
+              />
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.football } onPress={ () => props.setFootballLevel(1) } style={ props.football && props.footballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Can throw a spiral</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.football } onPress={ () => props.setFootballLevel(2) } style={ props.football && props.footballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Pretty good HS Player</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={ styles.line } />
-        <View style={ styles.choiceWrapper}>
-          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => props.setFrisbee(prevState => !prevState) } style={ props.frisbee ? styles.choiceButton : styles.choiceButtonDisabled }>
-            <Ionicons name="ios-disc" size={ 20 } color={ "white" } />
-            <Text style={ styles.white }>   Frisbee</Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 20 }}>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.frisbee } onPress={ () => props.setFrisbeeLevel(0) } style={ props.frisbee && props.frisbeeLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Absolute beginner</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.frisbee } onPress={ () => props.setFrisbeeLevel(1) } style={ props.frisbee && props.frisbeeLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Good backhand thrower</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.frisbee } onPress={ () => props.setFrisbeeLevel(2) } style={ props.frisbee && props.frisbeeLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Play in a league</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={ styles.line } />
-        <View style={ styles.choiceWrapper}>
-          <TouchableOpacity activeOpacity={ 0.92 } onPress={ () => props.setBasketball(prevState => !prevState) } style={ props.basketball ? styles.choiceButton : styles.choiceButtonDisabled }>
-            <Ionicons name="ios-basketball" size={ 20 } color={ "white" } />
-            <Text style={ styles.white }>   Basketball</Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 20 }}>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(0) } style={ props.basketball && props.basketballLevel === 0 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Absolute beginner</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(1) } style={ props.basketball && props.basketballLevel === 1 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Can dribble with both hands</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ 0.92 } disabled={ !props.basketball } onPress={ () => props.setBasketballLevel(2) } style={ props.basketball && props.basketballLevel === 2 ? styles.abilityLevel : styles.abilityLevelDisabled }>
-              <Text style={ styles.white }>Played HS ball</Text>
+            <TouchableOpacity activeOpacity={ 1 } onPress={ () => props.setBaseball(prevState => !prevState) } style={ props.baseball ? styles.imageWrapperSelected: styles.imageWrapper }>
+              <Image
+                resizeMode="contain"
+                source={require('../../../assets/ball-and-glove-5.png')}
+                style={ styles.image }
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -101,7 +69,6 @@ const Sports = (props) => {
         <TouchableOpacity activeOpacity={ 0.6 } onPress={ () => props.goBack() } style={ styles.button }>
           <Text style={ styles.white }>Go Back</Text>
         </TouchableOpacity>
-      </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -123,6 +90,29 @@ const styles = StyleSheet.create({
     marginVertical: 3,
     alignItems:"center",
     justifyContent: "center"
+  },
+  buttonsWrapper: {
+    flexDirection: "row",
+    alignSelf: "center",
+    justifyContent: "space-around",
+    marginVertical: 6,
+    width: "100%"
+  },
+  button2: {
+    flex: 1,
+    marginHorizontal: 5,
+    backgroundColor: turquoise,
+    borderRadius: 30
+  },
+  button3: {
+    flex: 1,
+    marginHorizontal: 5,
+    color: "white",
+    borderRadius: 30,
+    borderColor: turquoise,
+    borderWidth: 0.5,
+    justifyContent: "center",
+    alignItems: "center"
   },
   button: {
     marginVertical: 5,
@@ -155,18 +145,36 @@ const styles = StyleSheet.create({
     paddingVertical: 10
   },
   container: {
-    paddingHorizontal: 20,
+    paddingHorizontal: paddingH,
     justifyContent: "center",
     // flex: 1
+  },
+  image: {
+    height: 180,
+    width: imageW * 0.5
+  },
+  imageWrapper: {
+    borderWidth: 0.5,
+    borderColor: "#999",
+    borderRadius: 10,
+    width: imageW,
+    height: 180,
+    alignItems: "center"
+    // alignSelf: "center"
+  },
+  imageWrapperSelected: {
+    borderWidth: 1,
+    borderColor: "red",
+    borderRadius: 10,
+    width: imageW,
+    height: 180,
+    alignItems: "center"
   },
   line: {
     width: "90%",
     borderBottomWidth: 0.5,
     borderColor: "#777",
     alignSelf: "center"
-  },
-  middle: {
-    flex: 6
   },
   middleText: {
     alignSelf: "center",
@@ -192,6 +200,6 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center"
   }
-})
+});
 
 export default Sports;

@@ -5,15 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 const imageMarginR = 16;
 const imageDimensions = 80;
 
-const AreaConversationRow = ({ users, distance, hours, activeSport, skillLevel }) => {
+const AreaConversationRow = ({ users, distance, hours, activeSport, beginnerFriendly }) => {
   const len = users.length;
 
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users })}>
-      <Image style={ styles.image } source={{ uri: users[0].photo }} />
-      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text style={ styles.plusText }>+{ len - 1 }</Text></View> }
+      <Image style={ styles.image } source={{ uri: users[0].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} />
+      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} /> : <View style={ styles.groupChatAvatar }><Text style={ styles.plusText }>+{ len - 1 }</Text></View> }
 
       <View style={ styles.textWrapper }>
         <View style={ styles.namesWrapper }>
@@ -27,7 +27,7 @@ const AreaConversationRow = ({ users, distance, hours, activeSport, skillLevel }
       </View>
       <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
         <Image resizeMode="contain" style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') :require('../../../assets/favicon.png') } />
-        <Text style={{ fontWeight: "600" }}>{ skillLevel === 1 ? "Intermediate" : "Advanced" }</Text>
+        <Text style={{ fontWeight: "600" }}>{ beginnerFriendly === true ? "Beginner Friendly" : "" }</Text>
       </View>
     </TouchableOpacity>
   )

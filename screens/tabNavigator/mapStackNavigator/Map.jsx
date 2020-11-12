@@ -3,6 +3,8 @@ import { Alert, Image, RefreshControl, SafeAreaView, StatusBar, StyleSheet, Text
 import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { FontAwesome5 } from '@expo/vector-icons';
+
 
 import { joinConvo, addPushNotification, getAreaUsersAndConversations } from "../../../firebase.js";
 
@@ -29,12 +31,11 @@ const Map = (props) => {
   const areaConversations0 = store.areaConversations || [];
   areaConversations0.unshift(user);
 
-  const areaConversations = areaConversations0.filter((item, pos, self) => {
+  const areaConversations1 = areaConversations0.filter((item, pos, self) => {
     return self.indexOf(item) == pos;
   });
 
-  let _12HoursAgo = new Date();
-  _12HoursAgo.setHours(_12HoursAgo.getHours() - 12);
+  const areaConversations = areaConversations1.filter((v,i,a)=>a.findIndex(t=>(t._id === v._id))===i);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,7 +53,7 @@ const Map = (props) => {
         const res1 = await addPushNotification(user._id, token);
       }
 
-      if (item.userObjects.length < 200) {
+      if (Object.keys(item.userObjects).length < 200) {
         const res2 = await joinConvo(user, item);
 
         if (res2) {
@@ -86,7 +87,8 @@ const Map = (props) => {
       let arr1 = arr.filter((item) => {
         let blocked = false;
         for (let i = 0; i < blockedUsers.length; i++) {
-          const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+          const _ids = Object.keys(item.userObjects);
+          const index = _ids.findIndex(_id => _id === blockedUsers[i].userId);
           if (index !== -1) {
             blocked = true;
           }
@@ -117,6 +119,7 @@ const Map = (props) => {
       />
       <View style={ styles.container }>
         <StatusBar barStyle="dark-content" />
+        <Text>Showing games within 20 miles</Text>
         { /* FlatList of Conversations */ }
         <View style={ styles.top }>
           { areaConversations.length === 1 ? <ActiveUsersEmpty onRefresh={ onRefresh } /> : <SwipeListView
@@ -177,19 +180,19 @@ const Map = (props) => {
               }
 
               if (item.userObjects) {
-                const conversation = item.userObjects.length > 1 ? true : false;
-                return <AreaConversationRow key={ item.id } users={ item.userObjects } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } skillLevel={ item.skillLevel } />
+                const usersArr = Object.keys(item.userObjects).map(_id => item.userObjects[_id]);
+                return <AreaConversationRow key={ item.id } users={ usersArr } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } beginnerFriendly={ item.beginnerFriendly } />
               }
               else if (item === true || item === false) {
                 return <View key={ Math.random().toString() } />;
               }
               else {
                 // this will always only be one user, but in an array [{ }] so you can reuse the AreaConversationRow component
-                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } skillLevel={ item.skillLevel } />
+                return <AreaConversationRow key={ item.id } users={ [item] } distance={ item.distance } hours={ hours } activeSport={ item.activeSport } beginnerFriendly={ item.beginnerFriendly } />
               }
             }}
             ListFooterComponent={() => areaConversations.length ?  <View style={ styles.body }>
-            <Image style={ styles.calloutImage } source={require('../../../assets/ex1.png')} />
+            <FontAwesome5 name="camera-retro" style={ styles.calloutImage } size={ 40 } color="#00008b" />
             <View style={ styles.textWrapper }>
               <Text style={ styles.message }>That's it for now. Pull down to check for new users.</Text>
             </View>
@@ -238,7 +241,14 @@ const Map = (props) => {
             userLoc = { latitude: convo.coordinates[0], longitude: convo.coordinates[1] }
           }
 
-          const users = convo.userObjects ? convo.userObjects : [convo];
+          let users = [];
+          if (convo.userObjects) {
+            // convert userObjects from an object where each value is itself an object to an array of objects
+            users = Object.keys(convo.userObjects).map(_id => convo.userObjects[_id]);
+          }
+          else {
+            users = [convo];
+          }
           const len = users.length;
 
           return (
@@ -251,8 +261,8 @@ const Map = (props) => {
               // onCalloutPress={ () => navigation.navigate("ProfileFull", { user: pin }) }
             >
               <Callout onPress={ i === 0 ? undefined : () => props.navigation.navigate("UsersList", { users }) }>
-                <Image style={ styles.image } source={{ uri: users[0].photo }} />
-                { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
+                <Image style={ styles.image } source={{ uri: users[0].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} />
+                { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} /> : <View style={ styles.groupChatAvatar }><Text>+{ len }</Text></View> }
                 { i === 0 ? [] : <Fragment><View style={ styles.centerText }>
                   <Text style={ styles.name }>{ users[0].name } { len > 1 ? "+ " + (len - 1) : "" }</Text>
                 </View>
@@ -295,13 +305,16 @@ const styles = StyleSheet.create({
   },
   body: {
     flexDirection: "row",
-    marginVertical: 8
+    marginVertical: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center"
   },
   calloutImage: {
     borderRadius: 50,
-    height: imageDimensions,
     width: imageDimensions,
-    marginRight: imageMarginR
+    marginRight: imageMarginR,
+    textAlign: "center",
   },
   centerText: {
     flexDirection: "row",
@@ -356,6 +369,7 @@ const styles = StyleSheet.create({
   },
   textWrapper: {
     justifyContent: "center",
+    height: imageDimensions,
     flex: 1
   },
   top: {

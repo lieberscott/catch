@@ -141,7 +141,8 @@ function MyStack() {
           let arr1 = arr.filter((item) => {
             let blocked = false;
             for (let i = 0; i < blockedUsers.length; i++) {
-              const index = item.userObjects.findIndex((u) => u._id === blockedUsers[i].userId)
+              const _ids = Object.keys(item.userObjects);
+              const index = _ids.findIndex(_id => _id === blockedUsers[i].userId)
               if (index !== -1) {
                 blocked = true;
               }

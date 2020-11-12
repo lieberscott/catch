@@ -37,7 +37,7 @@ const UserConversationRow = (props) => {
         { dot ? <View style={ styles.newMessage } /> : [] }
         <Image
           style={ styles.image }
-          source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c" }}
+          source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }}
         />
         { usersLen <= 2 ? [] : usersLen >= 3 ? <Image style={ styles.image2 } source={{ uri: usersArr[lastOtherUserIndex].userAvatar }} /> : <View style={ styles.groupChatAvatar }><Text>+{ usersLen }</Text></View> }
 
@@ -48,7 +48,7 @@ const UserConversationRow = (props) => {
         <View style={{ justifyContent: "center", alignItems: "center", flexGrow: 1 }}>
           <Image resizeMode="contain" style={ styles.image3 } source={ activeSport === 0 ? require('../../../assets/ball-and-glove-5.png') : activeSport === 1 ? require('../../../assets/football.png') : activeSport === 2 ? require('../../../assets/frisbee.png') : activeSport === 3 ? require('../../../assets/basketball.png') : require('../../../assets/favicon.png') } />
           <Text>{ convo.distance === 0 ? "< 0.1 mi." : convo.distance === 1 ? "1 mi." : convo.distance + " mi." }</Text>
-          <Text style={{ fontWeight: "600" }}>{ convo.skillLevel === 1 ? "Intermediate" : "Advanced" }</Text>
+          <Text style={{ fontWeight: "600" }}>{ convo.beginnerFriendly ? "Beginner Friendly" : "" }</Text>
         </View>
       </TouchableOpacity>
   )

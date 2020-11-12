@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Alert, Animated, Dimensions, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
-import MapView from 'react-native-maps';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import { createConvo, updateUser, uploadImage, signOut } from '../../../firebase.js';
@@ -33,7 +32,7 @@ const Profile = (props) => {
 
   const user = store.user;
   const userId = user._id;
-  const userPhoto = user.photo ? user.photo : "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c";
+  const userPhoto = user.photo ? user.photo : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467';
   const userName = user.name;
 
 
@@ -74,13 +73,16 @@ const Profile = (props) => {
 
   {/* Get age */}
   const today = new Date();
-  const userDOB = user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth);
-  const milliseconds = userDOB.getTime();
-  const birthday = new Date(milliseconds);
-  let userAge = today.getFullYear() - birthday.getFullYear();
-  if (today.getMonth() < birthday.getMonth() || 
-  today.getMonth() == birthday.getMonth() && today.getDate() < birthday.getDate()) {
-    userAge--;
+  const userDOB = !user.dateOfBirth ? undefined : user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : new Date(user.dateOfBirth);
+  let userAge = "";
+  if (userDOB) {
+    const milliseconds = userDOB.getTime();
+    const birthday = new Date(milliseconds);
+    userAge = today.getFullYear() - birthday.getFullYear();
+    if (today.getMonth() < birthday.getMonth() || 
+    today.getMonth() == birthday.getMonth() && today.getDate() < birthday.getDate()) {
+      userAge--;
+    }
   }
 
   const choosePhoto = async () => {
@@ -146,9 +148,9 @@ const Profile = (props) => {
     ])
   }
 
-  const create = async (gameCoords, skillLevel) => {
+  const create = async (gameCoords, beginnerFriendly) => {
     try {
-      const res1 = await createConvo(user, activeSport, gameCoords, skillLevel);
+      const res1 = await createConvo(user, activeSport, gameCoords, beginnerFriendly);
       Alert.alert("", "Your game was created!", [
         { text: "OK", onPress: () => setLocationModal(false) }
       ]);
@@ -176,13 +178,15 @@ const Profile = (props) => {
         <View style={ styles.top }>
           <View>
             <TouchableOpacity style={ styles.imageWrapper } onPress={ () => props.navigation.navigate("ProfileFull", { users: [user] })}>
-              <Image source={{ uri: userPhoto }} style={ styles.image } />
+              <Image source={{ uri: userPhoto || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} style={ styles.image } />
             </TouchableOpacity>
             <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
-              <MaterialIcons name="add-a-photo" color="gray" size={ 33 } style={ styles.imageIcon } />
+              <View style={ styles.imageIconWrapper2 }>
+                <MaterialIcons name="add-a-photo" color="gray" size={ 33 } style={ styles.imageIcon } />
+              </View>
             </AnimatedTouchableOpacity>
           </View>
-          <Text style={ styles.nameAndAge }>{ userName }, { userAge }</Text>
+          <Text style={ styles.nameAndAge }>{ userName }{ userAge ? ", " + userAge : "" }</Text>
           <View style={ styles.locationWrapper }>
             <Text style={ styles.location }>{ user.location }</Text>
           </View>
@@ -195,29 +199,8 @@ const Profile = (props) => {
 
         <View style={ styles.oneSection}>
           <View style={ styles.headerWrapper }>
-            <MaterialIcons name="person-outline" size={ 23 } color="gray" />
+            <MaterialIcons name="edit-location" size={ 23 } color="gray" />
             <Text style={ styles.header }>Location</Text>
-          </View>
-          <View style={ styles.mapContainer }>
-            <MapView
-              style={ styles.mapStyle }
-              // showsUserLocation={ true }
-              // followsUserLocation={ true }
-              region={{ latitude: user.coordinates.latitude, longitude: user.coordinates.longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
-              // maxZoomLevel={ 17 }
-              // minZoomLevel={ 6 }
-              // provider={PROVIDER_GOOGLE}
-              zoomEnabled={ false }
-              scrollEnabled={ false }
-              // onUserLocationChange={() => changeLocation() }
-            />
-            <View style={ styles.imageWrapper2 }>
-              <Image
-                source={require('../../../assets/pin.png')}
-                style={ styles.image }
-                resizeMode="contain"
-              />
-            </View>
           </View>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Map", { coordinates: user.coordinates, updateProfile })}>
@@ -227,16 +210,6 @@ const Profile = (props) => {
           </View>
         </View>
 
-
-
-        <View style={ styles.oneSection}>
-          <View style={ styles.buttonWrapper }>
-            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
-              <Text>Profile Text</Text>
-              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
-            </TouchableOpacity>
-          </View>
-        </View>
         <View style={ styles.oneSection}>
           <View style={ styles.headerWrapper }>
             <MaterialIcons name="person-outline" size={ 23 } color="gray" />
@@ -249,14 +222,20 @@ const Profile = (props) => {
             </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
-            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : user.dateOfBirth, updateProfile })}>
-              <Text>{ userAge || "Age" }</Text>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: !user.dateOfBirth ? undefined : user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : user.dateOfBirth, updateProfile })}>
+              <Text>Age</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Gender", { gender: user.gender, updateProfile })}>
-              <Text>{ user.gender ? "Female" : "Male" }</Text>
+              <Text>{ user.gender === true ? "Female" : user.gender === false ? "Male" : "Gender" }</Text>
+              <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
+            </TouchableOpacity>
+          </View>
+          <View style={ styles.buttonWrapper }>
+            <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("ProfileText", { profileText: user.profileText, updateProfile })}>
+              <Text>Profile Text</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
@@ -384,13 +363,20 @@ const styles = StyleSheet.create({
   },
   imageIconWrapper: {
     position: "absolute",
-    borderRadius: 20,
+    borderRadius: 30,
     backgroundColor: "white",
+    borderColor: "white",
+    borderWidth: 3.5,
     right: -10,
     elevation: 1,
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 1
+  },
+  imageIconWrapper2: {
+    borderRadius: 20,
+    borderColor: "#ccc",
+    borderWidth: 1
   },
   location: {
     fontSize: 18,
@@ -400,17 +386,6 @@ const styles = StyleSheet.create({
   locationWrapper: {
     flexDirection: "row",
     alignItems: "center"
-  },
-  mapContainer: {
-    height: 300,
-    width: "100%",
-    borderRadius: 20,
-    alignSelf: "center"
-  },
-  mapStyle: {
-    flex: 1,
-    overflow: "hidden",
-    borderRadius: 20
   },
   nameAndAge: {
     fontSize: 28

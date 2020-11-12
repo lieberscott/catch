@@ -13,7 +13,7 @@ const ReportModal = (props) => {
   const show = props.purchaseReadReceiptsModal;
   const len = props.len;
 
-  const [animation, setAnimation] = useState(new Animated.ValueXY({ x: 0, y: -250 }));
+  const [animation, setAnimation] = useState(new Animated.ValueXY({ x: 0, y: -modalHeight }));
 
   useEffect(() => {
     if (props.reportModal === true) {
@@ -28,7 +28,7 @@ const ReportModal = (props) => {
   {/* Interpolation */}
 
   const backgroundOpacityInterpolation = animation.y.interpolate({
-    inputRange: [-250, 500],
+    inputRange: [-modalHeight, 500],
     outputRange: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"]
   });
 
@@ -46,7 +46,7 @@ const ReportModal = (props) => {
   {/* Close Modal */}
   const handleClose = () => {
     Animated.timing(animation.y, {
-      toValue: -250,
+      toValue: -modalHeight,
       duration: 140,
       useNativeDriver: false
     }).start(() => props.setReportModal(false));
@@ -56,7 +56,7 @@ const ReportModal = (props) => {
     Alert.alert("", "Are you sure you want to report these users?", [
       { text: "Report", onPress: () => {
         Animated.timing(animation.y, {
-          toValue: -250,
+          toValue: -modalHeight,
           duration: 140,
           useNativeDriver: false
         }).start();
@@ -70,7 +70,7 @@ const ReportModal = (props) => {
     Alert.alert("", "Are you sure you want to leave?", [
       { text: "Leave", onPress: () => {
         Animated.timing(animation.y, {
-          toValue: -250,
+          toValue: -modalHeight,
           duration: 140,
           useNativeDriver: false
         }).start()
@@ -82,7 +82,7 @@ const ReportModal = (props) => {
 
   const showOnMap = () => {
     Animated.timing(animation.y, {
-      toValue: -250,
+      toValue: -modalHeight,
       duration: 140,
       useNativeDriver: false
     }).start(() => {

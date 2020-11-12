@@ -18,12 +18,13 @@ const { height } = Dimensions.get("window");
 import ConversationHeader from './ConversationHeader';
 
 const Conversation = (props) => {
+  console.log("conversation");
 
   const store = useContext(StoreContext);
   const user = store.user;
   const userId = user._id;
   const userName = user.name;
-  const userAvatar = user.photo;
+  const userAvatar = user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467";
 
   const convo = props.route.params.convo; // userChat data
 
@@ -42,7 +43,8 @@ const Conversation = (props) => {
   const [loaded, setLoaded] = useState(false);
   const [messages, setMessages] = useState([]);
   const [reportModal, setReportModal] = useState(false);
-  const [usersArr, setUsersArr] = useState([]);
+  const [usersObj, setUsersObj] = useState({});
+  // const [usersArr, setUsersArr] = useState([]);
   const [gameLoc, setGameLoc] = useState({});
 
   {/* Set Header */}
@@ -62,7 +64,8 @@ const Conversation = (props) => {
         let messages0 = d.messages;
         messages0.reverse();
 
-        setUsersArr(d.userObjects);
+        setUsersObj(d.userObjects);
+        // setUsersArr(d.userObjects);
         setMessages(messages0);
         setGameLoc(d.coordinates);
         setLoaded(true);
@@ -139,9 +142,10 @@ const Conversation = (props) => {
   }
 
   const handleUnmatch2 = async () => {
+    console.log("handleunmatch");
     try {
       const res1 = await props.route.params.remove(convo);
-      // props.navigation.pop();
+      props.navigation.pop();
     }
     catch(e) {
       console.log("handleUnmatch error : ", e);
@@ -182,6 +186,7 @@ const Conversation = (props) => {
     }
 
     // Step 0.2: Compose array of notifications
+    const usersArr = Object.keys(usersObj).map(_id => usersObj[_id]); // create array from usersObj
     const newUsersArray = usersArr.filter((item, i) => item._id !== userId && item.notificationToken !== "-1");
     const tokensArr = newUsersArray.map((item, i) => item.notificationToken);
     const notificationsArr = tokensArr.map((item, i) => {
@@ -229,6 +234,7 @@ const Conversation = (props) => {
 
   const openUsersList = () => {
     if (otherPersonArray.length > 1) {
+      const usersArr = Object.keys(usersObj).map(_id => usersObj[_id]);
       let newUsersArray = usersArr.filter((item, i) => item._id !== userId);
       if (newUsersArray.length === 0) {
         newUsersArray = usersArr;
@@ -236,6 +242,7 @@ const Conversation = (props) => {
       props.navigation.navigate("UsersList", { users: newUsersArray });
     }
     else {
+      const usersArr = Object.keys(usersObj).map(_id => usersObj[_id]);
       let newUsersArray = usersArr.filter((item, i) => item._id !== userId);
       if (newUsersArray.length === 0) {
         newUsersArray = usersArr;

@@ -19,7 +19,7 @@ const Messages = (props) => {
   const user = store.user;
   const userId = user._id;
   const userName = user.name;
-  const userPhoto = user.image;
+  const userPhoto = user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467";
 
   const userConversations0 = store.userChats || [];
 
@@ -65,8 +65,10 @@ const Messages = (props) => {
 
       const newUserChatsArr2 = newUserChatsArr.filter((item, i) => item.id !== convo.id);
 
-
+      console.log("pop");
+      props.navigation.pop();
       store.setUserChats(newUserChatsArr2);
+
     }
     catch(e) {
       console.log("remove error : ", e);

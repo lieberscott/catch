@@ -8,37 +8,30 @@ const DateOfBirth = (props) => {
   const dob0 = props.route.params.dob;
 
   const ios = Platform.OS === "ios";
-  const d = new Date();
-  const todayMilliseconds = d.getTime();
+  const mode = 'date';
 
-  const [date, setDate] = useState(new Date(dob0));
-  const [dateGood, setDateGood] = useState(true);
-  const [mode, setMode] = useState('date');
+  const [date, setDate] = useState(dob0 ? new Date(dob0) : new Date());
+  const [didSelect, setDidSelect] = useState(false);
   const [show, setShow] = useState(ios);
   const [disabled, setDisabled] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const selectedDate2 = selectedDate || date;
-    const userMilliseconds = selectedDate2.getTime();
-    const _18years = 1000 * 60 * 60 * 24 * 365.25 * 18;
 
-    // check if user is over 18
-    if (userMilliseconds < todayMilliseconds - _18years) {
-      setShow(Platform.OS === 'ios');
-      setDateGood(true);
-      setDate(selectedDate2);
-    }
-    else {
-      setShow(Platform.OS === 'ios');
-      setDateGood(false);
-      setDate(selectedDate2);
-    }
+    setShow(Platform.OS === 'ios');
+    setDidSelect(true);
+    setDate(selectedDate2);
   };
 
   const update = () => {
     if (!disabled) {
       props.route.params.updateProfile({ dateOfBirth: date }, 3);
     }
+    setDisabled(true);
+  }
+
+  const cancel = () => {
+    props.navigation.pop();
     setDisabled(true);
   }
 
@@ -66,8 +59,8 @@ const DateOfBirth = (props) => {
         { !ios ? <TouchableOpacity activeOpacity={ 1 } onPress={() => setShow(true) } style={ styles.showSpinnerWrapper }>
           <Text style={ styles.pickDate }>Pick Date</Text>
         </TouchableOpacity> : [] }
-        <TouchableOpacity activeOpacity={ dateGood ? 0.7 : 1 } onPress={ dateGood ? update : undefined } style={ dateGood ? styles.update : styles.updateDisabled }>
-          <Text style={ dateGood ? styles.updateText : styles.updateTextDisabled }>Save</Text>
+        <TouchableOpacity disabled={ disabled && didSelect } activeOpacity={  0.7 } onPress={ didSelect ? update : cancel } style={didSelect ? styles.update : styles.cancel }>
+          <Text style={ didSelect ? styles.updateText : styles.cancelText }>{ didSelect ? "Save" : "Cancel" }</Text>
         </TouchableOpacity>
       </View>
       </View>
@@ -93,16 +86,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 10
   },
-  update: {
+  cancel: {
     borderWidth: 0.5,
-    borderColor: "red",
+    borderColor: "gold",
     borderRadius: 20,
     padding: 10,
     marginTop: 10
   },
-  updateDisabled: {
+  cancelText: {
+    fontSize: 17,
+    alignSelf: "center",
+    color: "gold"
+  },
+  update: {
     borderWidth: 0.5,
-    borderColor: "#ccc",
+    borderColor: "red",
     borderRadius: 20,
     padding: 10,
     marginTop: 10
@@ -111,11 +109,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     alignSelf: "center",
     color: "red"
-  },
-  updateTextDisabled: {
-    fontSize: 17,
-    alignSelf: "center",
-    color: "#444"
   },
   warning: {
     textAlign: "center"

@@ -11,7 +11,6 @@ const DateOfBirth = (props) => {
   const todayMilliseconds = d.getTime();
 
   const [date, setDate] = useState(new Date());
-  const [dateGood, setDateGood] = useState(false);
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(ios);
 
@@ -23,19 +22,20 @@ const DateOfBirth = (props) => {
     // check if user is over 18
     if (userMilliseconds < todayMilliseconds - _18years) {
       setShow(Platform.OS === 'ios');
-      setDateGood(true);
       setDate(selectedDate2);
     }
     else {
       setShow(Platform.OS === 'ios');
-      setDateGood(false);
       setDate(selectedDate2);
     }
   };
 
   const handleNext = () => {
     props.setDob(date);
-    props.setDateGood(true);
+    setTimeout(() => props.goRight(), 60);
+  }
+
+  const skip = () => {
     setTimeout(() => props.goRight(), 60);
   }
 
@@ -48,8 +48,8 @@ const DateOfBirth = (props) => {
     button: {
       flex: 1,
       marginHorizontal: 5,
-      backgroundColor: dateGood ? turquoise : "#eee",
-      color: dateGood ? "white" : "#ddd",
+      backgroundColor: turquoise,
+      color: "white",
       borderRadius: 30
     },
     button2: {
@@ -93,6 +93,21 @@ const DateOfBirth = (props) => {
       marginBottom: 10,
       width: "90%",
       alignSelf: "center"
+    },
+    skip: {
+      flex: 1,
+      marginHorizontal: 5,
+      backgroundColor: "white",
+      borderRadius: 30,
+      borderWidth: 1,
+      borderColor: "red"
+    },
+    skipText: {
+      width: "100%",
+      padding: 10,
+      textAlign: "center",
+      overflow: "hidden",
+      color: "red"
     },
     subhead: {
       alignSelf: "center",
@@ -143,8 +158,11 @@ const DateOfBirth = (props) => {
           <TouchableOpacity activeOpacity={ 1 } onPress={ props.goBack } style={ styles.button2 }>
             <Text style={ styles.text }>Go Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={ 1 } onPress={ dateGood ? handleNext : undefined } style={ styles.button }>
+          <TouchableOpacity activeOpacity={ 1 } onPress={ handleNext } style={ styles.button }>
             <Text style={ styles.text }>Continue</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={ 1 } onPress={ skip } style={ styles.skip }>
+            <Text style={ styles.skipText }>Skip</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -1,5 +1,5 @@
 // if drag touch starts in bottom half of card, angle should tilt upward instead of downward
-import React, {  useLayoutEffect, useEffect, useState, useContext } from 'react';
+import React, { Fragment, useLayoutEffect, useEffect, useState, useContext } from 'react';
 import { Alert, Dimensions, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import ReportModalProfile from './ReportModalProfile';
@@ -21,13 +21,16 @@ const ProfileFull = (props) => {
   const user1 = props.route.params.users[0]; // user being displayed in ProfileFull
 
   const today = new Date();
-  const birthDate = user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
-  let user1Age = today.getFullYear() - birthDate.getFullYear();
-  let m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    user1Age--;
-  }
+  const birthDate = !user1.dateOfBirth ? undefined : user1.dateOfBirth.seconds ? new Date(user1.dateOfBirth.seconds * 1000) : new Date(user1.dateOfBirth);
+  let user1Age;
 
+  if (birthDate) {
+    user1Age = today.getFullYear() - birthDate.getFullYear();
+    let m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      user1Age--;
+    }
+  }
   const distance0 = getDistance(user0.coordinates, user1.coordinates);
   const distance = Math.round(distance0 * 10) / 10;
 
@@ -59,7 +62,7 @@ const ProfileFull = (props) => {
   const handleBlock2 = async () => {
 
     const userObj1 = {
-      userAvatar: user1.photo,
+      userAvatar: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
       userName: user1.name,
       userId: user1._id
     }
@@ -109,12 +112,12 @@ const ProfileFull = (props) => {
         >
           <View style={ styles.scrollViewInner}>
             <Image
-              source={{ uri: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F2020910%2Fblank_user.png?alt=media&token=45db0019-77b8-46ef-b4fb-c78a4749484c" }}
+              source={{ uri: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }}
               style={ styles.image }
             />
           </View>
           <View style={ styles.nameAndAgeWrapper }>
-            <Text style={ styles.nameAndAgeText }>{ user1.name }, { user1Age }, { user1.gender ? "F" : "M" }</Text>
+            <Text style={ styles.nameAndAgeText }>{ user1.name }{ user1Age ? ", " + user1Age : "" }{ user1.gender === true ? ", F" : user1.gender === false ? ", M" : "" }</Text>
           </View>
           <View style={ styles.nameAndAgeWrapper }>
             <Text style={ styles.distanceText }>{ distance <= 1 ? "Less than a mile away" : distance + " miles away" }</Text>
@@ -122,16 +125,19 @@ const ProfileFull = (props) => {
           <View style={ styles.profileTextWrapper }>
             <Text>{ user1.profileText }</Text>
           </View>
+          <Text style={{ alignSelf: "center" }}>My games</Text>
           <View style={ styles.sportsWrapper }>
             { sportsKeys.map((item, i) => {
+              if (user1.sports[item] === false) {
+                return <View key={ user1.sports[item] }/>
+              }
               return (
                 <View key={ item } style={ styles.sport }>
-                  { item === "Football" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/football.png`)} style={ styles.sportsImage } />
-                  : item === "Baseball" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/ball-and-glove.png`)} style={ styles.sportsImage } />
-                  : item === "Frisbee" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } />
-                  : item === "Basketball" && user1.sports[item].interested ? <Image resizeMode="contain" source={require(`../../../assets/basketball.png`)} style={ styles.sportsImage } />
+                  { item === "Football" && user1.sports[item] ? <Image resizeMode="contain" source={require(`../../../assets/football.png`)} style={ styles.sportsImage } />
+                  : item === "Baseball" && user1.sports[item] ? <Image resizeMode="contain" source={require(`../../../assets/ball-and-glove.png`)} style={ styles.sportsImage } />
+                  : item === "Frisbee" && user1.sports[item] ? <Image resizeMode="contain" source={require(`../../../assets/frisbee.png`)} style={ styles.sportsImage } />
+                  : item === "Basketball" && user1.sports[item] ? <Image resizeMode="contain" source={require(`../../../assets/basketball.png`)} style={ styles.sportsImage } />
                   : [] }
-                  <Text style={ styles.skillLevel }>{ user1.sports[item].interested ? user1.sports[item].skill_level : "" }</Text>
                 </View>
               )
             })}
@@ -197,11 +203,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     height: height,
     width: width
-  },
-  skillLevel: {
-    fontWeight: "500",
-    textAlign: "center",
-    fontSize: 12
   },
   sport: {
     flex: 1,
