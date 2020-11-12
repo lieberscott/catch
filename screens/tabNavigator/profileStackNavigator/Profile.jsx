@@ -141,9 +141,9 @@ const Profile = (props) => {
   }
 
   const handleLoc = (coords) => {
-    Alert.alert("", "What is the skill level?", [
-      { text: "Intermediate", onPress: () => create(coords, 1) },
-      { text: "Advanced", onPress: () => create(coords, 2) },
+    Alert.alert("", "Is this game beginner friendly?", [
+      { text: "Yes", onPress: () => create(coords, true) },
+      { text: "No", onPress: () => create(coords, false) },
       { text: "Cancel", onPress: () => setLocationModal(coords, false) }
     ])
   }

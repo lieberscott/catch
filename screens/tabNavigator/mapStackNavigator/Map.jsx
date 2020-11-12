@@ -31,11 +31,17 @@ const Map = (props) => {
   const areaConversations0 = store.areaConversations || [];
   areaConversations0.unshift(user);
 
-  const areaConversations1 = areaConversations0.filter((item, pos, self) => {
-    return self.indexOf(item) == pos;
-  });
+  // const areaConversations1 = areaConversations0.filter((item, pos, self) => {
+  //   return self.indexOf(item) == pos;
+  // });
 
-  const areaConversations = areaConversations1.filter((v,i,a)=>a.findIndex(t=>(t._id === v._id))===i);
+  // remove duplicates
+  const areaConversations = areaConversations0.filter((obj1,i,a)=> {
+    return a.findIndex(obj2 => {
+      // because areawConversations combines both the user object (which has an _id), and the areaConversations (which have an id), you have to check which it is before removing the potential duplicate
+      return obj2.id ? (obj2.id === obj1.id) : (obj2._id === obj1._id)
+    })===i
+  });
 
   const [refreshing, setRefreshing] = useState(false);
 

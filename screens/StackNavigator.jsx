@@ -112,7 +112,7 @@ function MyStack() {
     }
 
     return () => {
-      if (unsubscribe != undefined) {
+      if (unsubscribe) {
         unsubscribe();
       }
     }
@@ -121,8 +121,6 @@ function MyStack() {
 
   useEffect(() => {
     // Step 5: Set up listener and get requests
-    let unsubscribe2;
-    let arr = [];
     if (gotUserChats && !gotRequests) {
       setGotRequests(true);
     }

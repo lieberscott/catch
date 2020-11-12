@@ -18,7 +18,6 @@ const { height } = Dimensions.get("window");
 import ConversationHeader from './ConversationHeader';
 
 const Conversation = (props) => {
-  console.log("conversation");
 
   const store = useContext(StoreContext);
   const user = store.user;
@@ -117,7 +116,7 @@ const Conversation = (props) => {
     // const convo = convo; // already defined above
 
     try {
-      const res1 = await props.route.params.remove(convo);
+      const res1 = await props.route.params.remove(convo, true);
       const res3 = fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
         headers: {
           'Accept': 'application/json',

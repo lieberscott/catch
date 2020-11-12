@@ -49,7 +49,7 @@ const Messages = (props) => {
 
 
   // remove user from conversation
-  const remove = async (convo) => {
+  const remove = async (convo, fromConvoPage) => {
 
     const newArr = convo.usersArr.filter((item, i) => item.userId !== userId);
     const userObj = convo.usersArr.filter((item, i) => item.userId === userId);
@@ -65,8 +65,9 @@ const Messages = (props) => {
 
       const newUserChatsArr2 = newUserChatsArr.filter((item, i) => item.id !== convo.id);
 
-      console.log("pop");
-      props.navigation.pop();
+      if (fromConvoPage) {
+        props.navigation.pop();
+      }
       store.setUserChats(newUserChatsArr2);
 
     }

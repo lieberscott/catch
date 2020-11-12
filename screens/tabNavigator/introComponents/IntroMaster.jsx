@@ -202,7 +202,7 @@ const IntroMaster = ({ navigation }) => {
               },
               {
                 backgroundColor: '#fff',
-                image: <Image resizeMode="center" source={require('../../../assets/man-throwing-football.png')} />,
+                image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/man-throwing-football.png')} style={ styles.image } /></View>,
                 title: "What's your game?",
                 subtitle: 'At Pick Up, we connect people who want to play pick up sports. Personalize your profile and connect with people in your area.',
               },

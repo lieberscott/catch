@@ -38,7 +38,7 @@ const MapPage = (props) => {
             style={ styles.mapStyle }
             // showsUserLocation={ true }
             // followsUserLocation={ true }
-            initialRegion={{ latitude: loc0.latitude, longitude: loc0.longitude, latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
+            initialRegion={{ latitude: loc0[0], longitude: loc0[1], latitudeDelta: deltas[0], longitudeDelta: deltas[1] }}
             // maxZoomLevel={ 17 }
             // minZoomLevel={ 6 }
             // provider={PROVIDER_GOOGLE}

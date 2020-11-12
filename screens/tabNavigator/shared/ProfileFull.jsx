@@ -125,7 +125,6 @@ const ProfileFull = (props) => {
           <View style={ styles.profileTextWrapper }>
             <Text>{ user1.profileText }</Text>
           </View>
-          <Text style={{ alignSelf: "center" }}>My games</Text>
           <View style={ styles.sportsWrapper }>
             { sportsKeys.map((item, i) => {
               if (user1.sports[item] === false) {

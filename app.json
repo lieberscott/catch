@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Pick Up",
+    "name": "The Pick Up App",
     "slug": "PickUp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
       "backgroundColor": "#ffffff"
     },
     "notification": {
-      "icon": "./assets/basketball.png",
+      "icon": "./assets/basketball-2.png",
       "color": "#fff",
       "androidMode": "default"
     },

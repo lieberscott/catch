@@ -41,7 +41,7 @@ export const removeFromConversation = async (item, newArr, userObj) => {
 
     // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
     if (newArr.length < 1) {
-      const res2 = await firebase.firestore().collection("userChats").doc(newArr[0].userId).update({
+      const res2 = await firebase.firestore().collection("userChats").doc(uid).update({
         [`${item.id}`]: firebase.firestore.FieldValue.delete()
       });
 
@@ -80,7 +80,6 @@ export const createConvo = async (user0, sport, loc, beginnerFriendly) => {
   const obj = {
     _id: user0._id,
     name: user0.name,
-    dateOfBirth: user0Dob,
     coordinates: user0.coordinates,
     sports: user0.sports,
     photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
@@ -91,6 +90,10 @@ export const createConvo = async (user0, sport, loc, beginnerFriendly) => {
 
   if (user0.gender) {
     obj.gender = user0.gender;
+  }
+
+  if (user0Dob) {
+    obj.dateOfBirth = user0Dob;
   }
 
   let newConvo = {
@@ -169,13 +172,16 @@ export const joinConvo = async (user0, user1) => {
   const userObj2 = { // for userObjects array in conversation
     _id: user0._id,
     coordinates: user0.coordinates,
-    dateOfBirth: user0.dateOfBirth,
     getsNotifications: user0.getsNotifications,
     name: user0.name,
     notificationToken: user0.notificationToken,
     photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
     profileText: user0.profileText ? user0.profileText : "",
     sports: user0.sports
+  }
+
+  if (user0.dateOfBirth) {
+    userObj2.dateOfBirth = user0.dateOfBirth;
   }
 
   if (user0.gender) {
@@ -386,7 +392,6 @@ export const getAreaUsersAndConversations = async (userId, userLoc) => {
 
     // sort conversations by distance
     areaConversations1.sort((a, b) => a.distance - b.distance);
-
 
     return areaConversations1;
   }
