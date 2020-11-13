@@ -39,16 +39,12 @@ export const removeFromConversation = async (item, newArr, userObj) => {
       [`${item.id}`]: firebase.firestore.FieldValue.delete()
     });
 
-    // Step 2: If only other user in convo is other person, delete them from convo too and delete conversation entirely
+    // Step 2: If you're the only user in the conversation, delete conversation entirely
     if (newArr.length < 1) {
-      const res2 = await firebase.firestore().collection("userChats").doc(uid).update({
-        [`${item.id}`]: firebase.firestore.FieldValue.delete()
-      });
-
       const res3 = await firebase.firestore().collection("conversations").doc(item.id).delete();
     }
 
-    // Step 3: Else, remove user from userChats array, and from conversation usersArray (actually they'll stay in conversation usersArray, too difficult to match a whole object to remove from an array in firestore)
+    // Step 3: Else, remove user from userChats array, and from conversation usersArray
     else {
       for (let i = 0; i < newArr.length; i++) {
         const res4 = await firebase.firestore().collection("userChats").doc(newArr[i].userId).update({

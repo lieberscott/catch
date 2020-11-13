@@ -147,6 +147,7 @@ const Reauthorization = (props) => {
         <Text style={ styles.white }>Show Keyboard</Text>
         <TextInput
           keyboardType="numeric"
+          caretHidden={true}
           value={ code }
           onChangeText={ (text) => {
             if (text.length <= 6) {
@@ -163,6 +164,7 @@ const Reauthorization = (props) => {
         ref={ inputRef }
         autoFocus={ true }
         keyboardType="numeric"
+        caretHidden={true}
         value={ code }
         onChangeText={ (text) => {
           if (text.length <= 6) {
@@ -220,8 +222,9 @@ const styles = StyleSheet.create({
     flexDirection: "row"
   },
   input: {
-    fontSize: 0,
-    width: "100%"
+    fontSize: 0.5,
+    width: "100%",
+    color: "green"
   },
   question: {
     fontSize: 23,

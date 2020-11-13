@@ -116,7 +116,7 @@ const Conversation = (props) => {
     // const convo = convo; // already defined above
 
     try {
-      const res1 = await props.route.params.remove(convo, true);
+      const res1 = await props.route.params.remove(convo);
       const res3 = fetch("https://us-central1-catchr-f539d.cloudfunctions.net/sendEmail", {
         headers: {
           'Accept': 'application/json',

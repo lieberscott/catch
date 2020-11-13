@@ -33,7 +33,7 @@ const Messages = (props) => {
     return item;
   });
 
-  userConversations.sort((a, b) => a.lastMessageCreatedAt.seconds + b.lastMessageCreatedAt.seconds);
+  userConversations.sort((a, b) => a.lastMessageCreatedAt.seconds - b.lastMessageCreatedAt.seconds);
 
 
   const [refreshing, setRefreshing] = useState(false);
