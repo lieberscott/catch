@@ -15,6 +15,7 @@ const DateOfBirth = (props) => {
   const [show, setShow] = useState(ios);
 
   const onChange = (event, selectedDate) => {
+    console.log("onchange");
     const selectedDate2 = selectedDate || date;
     const userMilliseconds = selectedDate2.getTime();
     const _18years = 1000 * 60 * 60 * 24 * 365.25 * 18;
@@ -139,7 +140,7 @@ const DateOfBirth = (props) => {
       <View style={ styles.middle }>
         <Text style={ styles.subhead }>Next, when is your birthday?</Text>
         <Text style={ styles.warning }>You must be 18 to participate</Text>
-        {show ? (
+        {/* {show ? ( */}
           <DateTimePicker
             display="spinner"
             testID="dateTimePicker"
@@ -150,7 +151,7 @@ const DateOfBirth = (props) => {
             minimumDate={new Date(1900, 0, 1)}
             textColor="#444"
           />
-        ) : [] }
+        {/* ) : [] } */}
         { !ios ? <TouchableOpacity activeOpacity={ 1 } onPress={() => setShow(true) } style={ styles.showSpinnerWrapper }>
           <Text style={ styles.pickDate }>Pick Date</Text>
         </TouchableOpacity> : [] }

@@ -300,6 +300,7 @@ export const uploadImage = async (blob, name, prevUrl) => {
 
 export const loginUser = async (credential) => {
   try {
+
     const result = await firebase.auth().signInWithCredential(credential);
     
     if (result.additionalUserInfo.isNewUser) {

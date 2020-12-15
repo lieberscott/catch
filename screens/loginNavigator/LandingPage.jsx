@@ -80,18 +80,18 @@ const LandingPage = ({ navigation }) => {
 
   return (
     <SafeAreaView style={ styles.container }>
-      <StatusBar barStyle="dark-content" backgroundColor={ turquoise } />
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       <View style={ styles.imageWrapper }>
         <Image
           style={ styles.image }
           resizeMode="contain"
-          source={require('../../assets/new-logo.png')}
+          source={require('../../assets/ball-and-glove-logo.png')}
         />
       </View>
       <View style={{ alignItems: "flex-end", justifyContent: "flex-end", width: "80%" }}>
       <Animated.View style={[ styles.buttonsWrapper, buttonsAnimatedStyles ]}>
         <TouchableOpacity onPress={ handleFacebook } style={ styles.facebook }>
-          <Ionicons name="logo-facebook" size={32} color={ turquoise } />
+          <Ionicons name="logo-facebook" size={32} color="white" />
           <Text style={ styles.facebookText }>Continue with Facebook</Text>
         </TouchableOpacity>
         <View style={ styles.orWrapper }>
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   cell: {
-    backgroundColor: turquoise,
+    backgroundColor: "white",
     alignItems: "center",
     alignSelf: "center",
     borderRadius: 20
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: turquoise,
+    backgroundColor: "white",
     paddingTop: 40,
     paddingBottom: 10,
     paddingHorizontal: 40

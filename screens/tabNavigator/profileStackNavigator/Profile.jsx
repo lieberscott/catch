@@ -221,12 +221,12 @@ const Profile = (props) => {
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
           </View>
-          <View style={ styles.buttonWrapper }>
+          {/* <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("DateOfBirth", { dob: !user.dateOfBirth ? undefined : user.dateOfBirth.seconds ? new Date(user.dateOfBirth.seconds * 1000) : user.dateOfBirth, updateProfile })}>
               <Text>Age</Text>
               <MaterialIcons name="chevron-right" color="gray" size={ 23 } />
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View style={ styles.buttonWrapper }>
             <TouchableOpacity style={ styles.touchable } onPress={() => props.navigation.navigate("Gender", { gender: user.gender, updateProfile })}>
               <Text>{ user.gender === true ? "Female" : user.gender === false ? "Male" : "Gender" }</Text>

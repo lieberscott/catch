@@ -57,11 +57,11 @@ const IntroMaster = ({ navigation }) => {
       Keyboard.dismiss();
       setPage(1);
     }
+    // else if (page === 1) {
+    //   setPage(2);
+    // }
     else if (page === 1) {
       setPage(2);
-    }
-    else if (page === 2) {
-      setPage(3);
       try {
         const l = await getLocation();
         if (l) {
@@ -72,10 +72,10 @@ const IntroMaster = ({ navigation }) => {
         console.log("getLocation error : ", e);
       }
     }
-    else if (page === 3) {
-      setPage(4)
+    else if (page === 2) {
+      setPage(3)
     }
-    else if (page === 4) {
+    else if (page === 3) {
       setPage(prevState => prevState + 1);
     }
     else if (page === 5) {
@@ -195,8 +195,8 @@ const IntroMaster = ({ navigation }) => {
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <Image resizeMode="center" source={require('../../../assets/new-logo.png')} />,
-                title: 'Welcome to Pick Up',
+                image: <Image resizeMode="center" source={require('../../../assets/ball-and-glove-logo.png')} />,
+                title: 'Welcome to Catch',
                 subtitle: 'The best place for find a pickup game',
                 // imageContainerStyle: styles.imageWrapper
               },
@@ -204,7 +204,7 @@ const IntroMaster = ({ navigation }) => {
                 backgroundColor: '#fff',
                 image: <View style={ styles.imageWrapper }><Image resizeMode="contain" source={require('../../../assets/man-throwing-football.png')} style={ styles.image } /></View>,
                 title: "What's your game?",
-                subtitle: 'At Pick Up, we connect people who want to play pick up sports. Personalize your profile and connect with people in your area.',
+                subtitle: 'At Catch, we connect people who want to play pick up sports. Personalize your profile and connect with people in your area.',
               },
               {
                 backgroundColor: '#fff',
@@ -232,13 +232,13 @@ const IntroMaster = ({ navigation }) => {
               width={ width }
               goRight={ goRight }
             />
-            <DateOfBirth
+            {/* <DateOfBirth
               dob={ dob }
               setDob={ setDob }
               width={ width }
               goRight={ goRight }
               goBack={ goBack }
-            />
+            /> */}
 
             <Gender
               width={ width }
