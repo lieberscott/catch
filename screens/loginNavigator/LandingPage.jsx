@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Animated, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Facebook from 'expo-facebook';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from "expo-crypto";
 import * as firebase from 'firebase';
 
 import { loginUser } from '../../firebase.js';
-import { StoreContext } from '../../contexts/storeContext';
 
 const turquoise = "#4ECDC4";
 
 const LandingPage = ({ navigation }) => {
 
-  const store = useContext(StoreContext);
   const [animation, setAnimation] = useState(new Animated.Value(0));
+  const [appleReady, setAppleReady] = useState(false);
 
   useEffect(() => {
     Animated.timing(animation, {
@@ -21,6 +22,14 @@ const LandingPage = ({ navigation }) => {
       duration: 250,
       useNativeDriver: false
     }).start();
+
+    (async () => {
+      const loginAvailable = await AppleAuthentication.isAvailableAsync();
+      console.log("loginAvailable : ", loginAvailable);
+      setAppleReady(loginAvailable);
+    })();
+
+
   }, []);
 
   const yValueAnimation = animation.interpolate({
@@ -57,11 +66,6 @@ const LandingPage = ({ navigation }) => {
       const { type, token } = await Facebook.logInWithReadPermissionsAsync(options);
 
       if (type === "success") {
-        // const response = await fetch("https://graph.facebook.com/me?fields=id,name,birthday,email&access_token=" + token);
-        // const json = await response.json();
-        // const facebookId = json.id;
-        // const u = await loginUser(facebookId);
-        // store.setAndSaveBasicUser(u); // only authId (FB ID or Phone number) and deviceToken
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         if (credential) {
           const bool = await loginUser(credential);
@@ -75,6 +79,49 @@ const LandingPage = ({ navigation }) => {
     catch (e) {
       console.log("e : ", e);
       Alert.alert("", e);
+    }
+  }
+
+  const handleApple = async () => {
+    try {
+      const csrf = Math.random().toString(36).substring(2, 15);
+      const nonce = Math.random().toString(36).substring(2, 10);
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256, nonce);
+      const appleCredential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+        state: csrf,
+        nonce: hashedNonce
+      });
+      // apple credential data
+      const { identityToken, email, state } = appleCredential;
+
+      // set up Firebase
+      if (identityToken) {
+        const provider = new firebase.auth.OAuthProvider('apple.com');
+        const authCredential = provider.credential({
+          idToken: identityToken,
+          rawNonce: nonce
+        });
+
+        if (authCredential) {
+          const bool = await loginUser(authCredential);
+        }
+
+        // const result = await firebase.auth().signInWithCredential(authCredential);
+      }
+
+    } catch (e) {
+      console.log(e);
+      if (e.code === 'ERR_CANCELED') {
+        // handle that the user canceled the sign-in flow
+      } else {
+        // handle other errors
+        Alert.alert("", "There was an error. Please try again");
+      }
     }
   }
 
@@ -94,6 +141,16 @@ const LandingPage = ({ navigation }) => {
           <Ionicons name="logo-facebook" size={32} color="white" />
           <Text style={ styles.facebookText }>Continue with Facebook</Text>
         </TouchableOpacity>
+
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+          style={ styles.apple }
+          cornerRadius={40}
+          onPress={ appleReady ? handleApple : undefined }
+        />
+
+
         <View style={ styles.orWrapper }>
           <View style={ styles.line } />
           <Text>or</Text>
@@ -125,16 +182,9 @@ const styles = StyleSheet.create({
     alignSelf: "center"
   },
   apple: {
-    flexDirection: "row",
-    backgroundColor: "black",
-    alignItems: "center",
-    justifyContent: "center",
-    // alignSelf: "center",
-    paddingVertical: 7,
-    // paddingHorizontal: 27,
-    width: "80%",
-    borderRadius: 40,
-    marginBottom: 10
+    marginBottom: 10,
+    width: 200,
+    height: 50
   },
   appleText: {
     color: "white",

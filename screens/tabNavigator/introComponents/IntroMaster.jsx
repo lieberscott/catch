@@ -215,9 +215,7 @@ const IntroMaster = ({ navigation }) => {
             ]}
           />
         : <View style={ styles.flexOne }>
-            <View style={ styles.setupTitle }>
-              <Text style={ styles.titleText }>Let's set up your profile</Text>
-            </View>
+            <View style={ styles.setupTitle } />
             <ScrollView
               horizontal
               pagingEnabled

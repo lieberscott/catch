@@ -23,6 +23,7 @@
     ],
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "userInterfaceStyle": "light",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-8262004996000143~8610177717",
@@ -32,7 +33,7 @@
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Catch uses your location to show you games in your area",
-        "NSPhotoLibraryUsageDescription": "Allow Catch to access your photos"
+        "NSPhotoLibraryUsageDescription": "We request access to your photos so you can choose a profile picture from your device"
       }
     },
     "userInterfaceStyle": "automatic",

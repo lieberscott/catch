@@ -6,7 +6,7 @@ import LoginStackNavigator from './screens/loginNavigator/loginStackNavigator.js
 import StackNavigator from './screens/StackNavigator';
 import LoadingScreen from './screens/LoadingScreen';
 
-const firebaseConfig = {
+const firebaseConfig = Object.freeze({
   apiKey: "AIzaSyDPRr5eNoIoOD4zEIS0UWksdrW1S3prgXU",
   authDomain: "catchr-f539d.firebaseapp.com",
   databaseURL: "https://catchr-f539d.firebaseio.com",
@@ -15,7 +15,7 @@ const firebaseConfig = {
   messagingSenderId: "524929245897",
   appId: "1:524929245897:web:d944ff91f56e3c3509a318",
   measurementId: "G-13LKM32VEW"
-};
+});
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }

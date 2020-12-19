@@ -3,6 +3,8 @@ import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import * as Facebook from 'expo-facebook';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from "expo-crypto";
 
 const turquoise = "#4ECDC4";
 
@@ -39,12 +41,68 @@ const Reauthorization = (props) => {
       const providerId = user.providerData[0].providerId;
 
       Alert.alert("", "You must reauthenticate to delete your profile", [
-        { text: "OK", onPress: providerId === "phone" ? () => handlePhone() : () => handleFacebook() }
+        { text: "OK", onPress: providerId === "phone" ? () => handlePhone() : providerId === "facebook.com" ? () => handleFacebook() : () => handleApple() }
       ])
       return;
 
     })()
   }, []);
+
+  const handleApple = async () => {
+    try {
+      const csrf = Math.random().toString(36).substring(2, 15);
+      const nonce = Math.random().toString(36).substring(2, 10);
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256, nonce);
+      const appleCredential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+        state: csrf,
+        nonce: hashedNonce
+      });
+      // apple credential data
+      const { identityToken, email, state } = appleCredential;
+
+      // set up Firebase
+      if (identityToken) {
+        const provider = new firebase.auth.OAuthProvider('apple.com');
+        const authCredential = provider.credential({
+          idToken: identityToken,
+          rawNonce: nonce
+        });
+
+        if (authCredential) {
+          const user = firebase.auth().currentUser;
+          const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
+          if (photoUrl) {
+            const deleteRef = firebase.storage().refFromURL(photoUrl);
+            const res01 = await deleteRef.delete();
+          }
+          const res2 = await user.delete();
+        }
+
+        else {
+          Alert.alert("", "There was an error. Please try again.")
+        }
+
+        // const result = await firebase.auth().signInWithCredential(authCredential);
+      }
+      else {
+        Alert.alert("", "There was an error. Please try again.")
+      }
+
+    } catch (e) {
+      console.log(e);
+      if (e.code === 'ERR_CANCELED') {
+        // handle that the user canceled the sign-in flow
+      } else {
+        // handle other errors
+        Alert.alert("", "There was an error. Please try again");
+      }
+    }
+  }
 
   const handlePhone = async () => {
     const user = firebase.auth().currentUser;

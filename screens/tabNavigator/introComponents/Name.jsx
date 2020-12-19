@@ -7,6 +7,9 @@ const Name = (props) => {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={[ styles.container, { width: props.width } ]}>
+      <View style={ styles.setupTitle }>
+        <Text style={ styles.titleText }>First, tell us your name</Text>
+      </View>
       <View style={ styles.imageWrapper }>
         <Image
           resizeMode="contain"
@@ -15,7 +18,6 @@ const Name = (props) => {
         />
       </View>
       <View style={ styles.middle }>
-        <Text style={ styles.question }>First, tell us your name</Text>
         <View style={ styles.inputWrapper }>
           <TextInput
             autoFocus={ true }
@@ -111,6 +113,10 @@ const styles = StyleSheet.create({
   small: {
     fontSize: 10,
     // textAlign: "center"
+  },
+  titleText: {
+    fontSize: 20,
+    fontWeight: "600"
   },
   white: {
     color: "white"

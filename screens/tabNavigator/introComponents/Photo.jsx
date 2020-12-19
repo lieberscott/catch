@@ -12,6 +12,7 @@ const Photo = (props) => {
     <KeyboardAvoidingView behavior="padding" style={[ styles.container, { width: props.width } ]}>
       <View style={ styles.middle }>
         <Text style={ styles.question }>Finally, upload a photo</Text>
+        <Text style={ styles.small }>Your photo will be displayed to other users in your area</Text>
         <TouchableOpacity style={ styles.imageWrapper } onPress={ props.addPhoto }>
           <Image
             // autoFocus={ true }
@@ -21,7 +22,6 @@ const Photo = (props) => {
           />
         </TouchableOpacity>
         <View style={ styles.bottomWrapper }>
-          <Text style={ styles.small }>Your photo will be displayed to other users in your area</Text>
           <TouchableOpacity activeOpacity={ 0.6 } onPress={ () => props.goRight() } style={ photo ? styles.button : styles.skip }>
             <Text style={ photo ? styles.white : styles.skipText }>{ photo ? "Continue" : "Skip" }</Text>
           </TouchableOpacity>
@@ -103,7 +103,8 @@ const styles = StyleSheet.create({
     color: "red"
   },
   small: {
-    fontSize: 10,
+    fontSize: 14,
+    marginTop: 10
     // textAlign: "center"
   },
   white: {
