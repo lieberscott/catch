@@ -37,22 +37,9 @@ exports.deleteOldConvosAndRequests = functions.pubsub.schedule('0 1 * * *')
 
         // Step 3: For each user involved in conversation, add a promise to delete that conversation from the user's userChats document
         promises.push(database.collection("userChats").doc(userId).update({
-          [conversationId]: database.FieldValue.delete()
+          [conversationId]: admin.firestore.FieldValue.delete()
         }));
       }
-    });
-
-    // Step 4: Get old requests to delete as well
-    return database.collection("requests").where("createdAt", "<", _72HoursAgo).get();
-  })
-  .then((oldRequests) => {
-    oldRequests.forEach((doc) => {
-      let d = doc.data();
-      const docId = doc.id;
-
-      // Step 5: Add a promise to delete the old request
-      promises.push(database.collection("requests").doc(docId).delete());
-
     });
 
     // Step 6: Delete everything

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/ball-and-glove-5.png",
     "splash": {
-      "image": "./assets/ball-and-glove-5.png",
+      "image": "./assets/ball-and-glove-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
