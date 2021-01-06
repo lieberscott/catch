@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useRef } from 'react';
-import { Dimensions, Image, KeyboardAvoidingView, SafeAreaView, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Dimensions, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
@@ -120,7 +120,7 @@ const PhoneVerification = ({ navigation }) => {
   return (
     <Fragment>
       <SafeAreaView style={ styles.flexZero } />
-      <SafeAreaView style={ styles.container }>
+      <ScrollView style={ styles.container }>
         <FirebaseRecaptchaVerifierModal
           ref={ recaptchaRef }
           firebaseConfig={ firebaseConfig }
@@ -172,7 +172,7 @@ const PhoneVerification = ({ navigation }) => {
             />
         </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </ScrollView>
     </Fragment>
   )
 }
