@@ -195,7 +195,7 @@ const IntroMaster = ({ navigation }) => {
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <View style={ styles.imageWrapper}><Image resizeMode="center" source={require('../../../assets/ball-and-glove-logo.png')} /></View>,
+                image: <View style={ styles.imageWrapper}><Image style={ styles.image } resizeMode="center" source={require('../../../assets/ball-and-glove-logo.png')} /></View>,
                 title: 'Welcome to Catch',
                 subtitle: 'The best place for find a pickup game',
                 // imageContainerStyle: styles.imageWrapper

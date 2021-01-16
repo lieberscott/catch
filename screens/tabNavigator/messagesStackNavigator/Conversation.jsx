@@ -23,7 +23,7 @@ const Conversation = (props) => {
   const user = store.user;
   const userId = user._id;
   const userName = user.name;
-  const userAvatar = user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467";
+  const userAvatar = user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4";
 
   const convo = props.route.params.convo; // userChat data
 
@@ -246,7 +246,10 @@ const Conversation = (props) => {
       if (newUsersArray.length === 0) {
         newUsersArray = usersArr;
       }
-      props.navigation.navigate("ProfileFull", { users: newUsersArray });
+      console.log("newUsersArray : ", newUsersArray);
+      if (newUsersArray.length !== 0) {
+        props.navigation.navigate("ProfileFull", { users: newUsersArray });
+      }
     }
   }
 

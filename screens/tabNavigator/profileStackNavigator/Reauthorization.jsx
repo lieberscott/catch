@@ -75,6 +75,16 @@ const Reauthorization = (props) => {
 
         if (authCredential) {
           const user = firebase.auth().currentUser;
+          const res001 = await firebase.firestore().collection("userChats").doc(user.uid).get();
+          const data = res001.data();
+          const convos = Object.keys(data);
+          const len = convos.length;
+          for (let i = 0; i < len; i++) {
+            const res002 = await firebase.firestore().collection("conversations").doc(convos[i]).update({
+              ["userObjects." + user.uid]: firebase.firestore.FieldValue.delete()
+            });
+          }
+          const res0 = await firebase.firestore().collection("userChats").doc(user.uid).delete();
           const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
           if (photoUrl) {
             const deleteRef = firebase.storage().refFromURL(photoUrl);
@@ -129,6 +139,16 @@ const Reauthorization = (props) => {
         const credential = firebase.auth.FacebookAuthProvider.credential(token);
         if (credential) {
           const user = firebase.auth().currentUser;
+          const res001 = await firebase.firestore().collection("userChats").doc(user.uid).get();
+          const data = res001.data();
+          const convos = Object.keys(data);
+          const len = convos.length;
+          for (let i = 0; i < len; i++) {
+            const res002 = await firebase.firestore().collection("conversations").doc(convos[i]).update({
+              ["userObjects." + user.uid]: firebase.firestore.FieldValue.delete()
+            });
+          }
+          const res0 = await firebase.firestore().collection("userChats").doc(user.uid).delete();
           const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
           if (photoUrl) {
             const deleteRef = firebase.storage().refFromURL(photoUrl);
@@ -155,6 +175,16 @@ const Reauthorization = (props) => {
     try {
       const userCredential = await verificationId.confirm(code);
       const user = firebase.auth().currentUser;
+      const res001 = await firebase.firestore().collection("userChats").doc(user.uid).get();
+      const data = res001.data();
+      const convos = Object.keys(data);
+      const len = convos.length;
+      for (let i = 0; i < len; i++) {
+        const res002 = await firebase.firestore().collection("conversations").doc(convos[i]).update({
+          ["userObjects." + user.uid]: firebase.firestore.FieldValue.delete()
+        });
+      }
+      const res0 = await firebase.firestore().collection("userChats").doc(user.uid).delete();
       const res1 = await firebase.firestore().collection("users").doc(user.uid).delete();
       if (photoUrl) {
         const deleteRef = firebase.storage().refFromURL(photoUrl);

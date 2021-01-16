@@ -12,7 +12,7 @@ const UsersList = (props) => {
     <View style={ styles.container }>
       { users.map((user, i) => (
         <TouchableOpacity key={ user._id } style={ styles.body } onPress={() => props.navigation.navigate("ProfileFull", { users: [users[i]] })}>
-          <Image style={ styles.image } source={{ uri: user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} />
+          <Image style={ styles.image } source={{ uri: user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4" }} />
           <View style={ styles.textWrapper }>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Text style={ styles.name }>{ user.name }</Text>

@@ -37,7 +37,7 @@ const UserConversationRow = (props) => {
         { dot ? <View style={ styles.newMessage } /> : [] }
         <Image
           style={ styles.image }
-          source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }}
+          source={{ uri: usersArr[firstOtherUserIndex].userAvatar || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4" }}
         />
         { usersLen <= 2 ? [] : usersLen >= 3 ? <Image style={ styles.image2 } source={{ uri: usersArr[lastOtherUserIndex].userAvatar }} /> : <View style={ styles.groupChatAvatar }><Text>+{ usersLen }</Text></View> }
 

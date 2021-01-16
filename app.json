@@ -2,7 +2,7 @@
   "expo": {
     "name": "Catch",
     "slug": "Catch",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/ball-and-glove-5.png",
     "splash": {
@@ -30,7 +30,7 @@
         "googleMapsApiKey": "AIzaSyBH2dIP4kUuvhJn3llUOeT5aXiuF_dJ4Mo"
       },
       "bundleIdentifier": "com.readoutconsult.catch",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.0.3",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Catch uses your location to show you games in your area",
         "NSPhotoLibraryUsageDescription": "We request access to your photos so you can choose a profile picture from your device"
@@ -48,7 +48,7 @@
       },
       "package": "com.readoutconsult.catch",
       "permissions": [ "ACCESS_FINE_LOCATION" ],
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"

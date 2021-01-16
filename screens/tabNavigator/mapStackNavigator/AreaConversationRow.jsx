@@ -12,8 +12,8 @@ const AreaConversationRow = ({ users, distance, hours, activeSport, beginnerFrie
 
   return (
     <TouchableOpacity activeOpacity={ 1 } style={ styles.body } onPress={() => navigation.navigate("UsersList", { users })}>
-      <Image style={ styles.image } source={{ uri: users[0].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} />
-      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} /> : <View style={ styles.groupChatAvatar }><Text style={ styles.plusText }>+{ len - 1 }</Text></View> }
+      <Image style={ styles.image } source={{ uri: users[0].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4" }} />
+      { len === 1 ? [] : len === 2 ? <Image style={ styles.image2 } source={{ uri: users[1].photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4" }} /> : <View style={ styles.groupChatAvatar }><Text style={ styles.plusText }>+{ len - 1 }</Text></View> }
 
       <View style={ styles.textWrapper }>
         <View style={ styles.namesWrapper }>
