@@ -78,7 +78,7 @@ export const createConvo = async (user0, sport, loc, beginnerFriendly) => {
     name: user0.name,
     coordinates: user0.coordinates,
     sports: user0.sports,
-    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
     getsNotifications: user0.getsNotifications,
     notificationToken: user0.notificationToken,
     profileText: user0.profileText ? user0.profileText : ""
@@ -115,7 +115,7 @@ export const createConvo = async (user0, sport, loc, beginnerFriendly) => {
     beginnerFriendly: beginnerFriendly,
     usersArr: [
       {
-        userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+        userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
         userName: user0.name,
         userId: user0._id
       }
@@ -150,7 +150,7 @@ export const joinConvo = async (user0, user1) => {
     const user = userObjects[_ids[i]];
 
     const obj = {
-      userAvatar: user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+      userAvatar: user.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
       userName: user.name,
       userId: user._id
     }
@@ -158,7 +158,7 @@ export const joinConvo = async (user0, user1) => {
   }
 
   const userObj1 = { // for userChats usersArr
-    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
     userName: user0.name,
     userId: user0._id
   }
@@ -171,7 +171,7 @@ export const joinConvo = async (user0, user1) => {
     getsNotifications: user0.getsNotifications,
     name: user0.name,
     notificationToken: user0.notificationToken,
-    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    photo: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
     profileText: user0.profileText ? user0.profileText : "",
     sports: user0.sports
   }
@@ -481,13 +481,13 @@ export const blockUser = async (user0, user1) => {
 
 
   const userObj0 = {
-    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    userAvatar: user0.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
     userName: user0.name,
     userId: user0._id
   }
 
   const userObj1 = {
-    userAvatar: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467",
+    userAvatar: user1.photo || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4",
     userName: user1.name,
     userId: user1._id
   }

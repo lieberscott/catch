@@ -32,7 +32,7 @@ const Profile = (props) => {
 
   const user = store.user;
   const userId = user._id;
-  const userPhoto = user.photo ? user.photo : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467';
+  const userPhoto = user.photo ? user.photo : 'https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4';
   const userName = user.name;
 
 
@@ -178,7 +178,7 @@ const Profile = (props) => {
         <View style={ styles.top }>
           <View>
             <TouchableOpacity style={ styles.imageWrapper } onPress={ () => props.navigation.navigate("ProfileFull", { users: [user] })}>
-              <Image source={{ uri: userPhoto || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/images%2F101120%2Fblank_user.png?alt=media&token=05a1f71c-7377-43a8-9724-8d0d1d068467" }} style={ styles.image } />
+              <Image source={{ uri: userPhoto || "https://firebasestorage.googleapis.com/v0/b/catchr-f539d.appspot.com/o/blank_user.png?alt=media&token=d2d86ba5-e69a-46a9-9af2-a86a9b49baa4" }} style={ styles.image } />
             </TouchableOpacity>
             <AnimatedTouchableOpacity style={ styles.imageIconWrapper } onPress={ () => choosePhoto() }>
               <View style={ styles.imageIconWrapper2 }>
